@@ -1,0 +1,4 @@
+<resources>
+    <string name="render_complete">완료 · %1$d × %2$d</string>
+    <string name="video_range">%1$s  —  %2$s  ·  %3$d초</string>
+</resources>

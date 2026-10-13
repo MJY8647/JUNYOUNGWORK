@@ -1,0 +1,15 @@
+PASS: Home screen opens
+PASS: Sample preview renders
+PASS: All photo tool tabs open
+PASS: Photo export creates exactly one gallery file
+PASS: Rotated JPEG has expected dimensions
+PASS: Reset and undo render successfully
+PASS: System-picker result imports and decodes a real JPEG
+PASS: Two-photo collage renders at documented resolution
+PASS: Collage exports one gallery JPEG
+PASS: Exported collage dimensions match preview
+PASS: Video editor opens a real H.264 fixture
+PASS: Video export creates one MP4
+PASS: MP4 export preserves fixture duration
+PASS: MP4 export preserves video resolution
+PASS: 14 Android functional checks
