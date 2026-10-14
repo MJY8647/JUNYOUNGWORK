@@ -28,7 +28,9 @@ for file in files:
     visit(tree.root_node)
     assert not problems, f"{file}: {problems}"
 
-project = OpenStepDecoder.ParseFromString((root / "Lumi.xcodeproj/project.pbxproj").read_text())
+project_text = (root / "Lumi.xcodeproj/project.pbxproj").read_text()
+assert project_text.rstrip().endswith("}") and not project_text.rstrip().endswith("};"), "Trailing tokens after Xcode project root"
+project = OpenStepDecoder.ParseFromString(project_text)
 objects = project["objects"]
 main = objects[project["rootObject"]]
 assert main["isa"] == "PBXProject"
