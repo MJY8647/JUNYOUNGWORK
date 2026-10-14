@@ -1,10 +1,13 @@
-# LUMI — Android photo studio
+# LUMI — Android & iOS photo studio
 
 안드로이드 사진·영상 편집 앱의 개발 중인 첫 버전입니다. 메이투를 참고한 독립 구현이며, 메이투의 코드·브랜드·유료 기능 잠금 해제를 사용하지 않습니다. 구현된 기능에는 결제, 광고, 워터마크, 계정이 없습니다. 인터넷 권한도 요청하지 않습니다.
+
+**iOS 프로젝트를 추가했습니다.** 같은 화면 구성과 구현된 편집 기능을 Swift로 옮겼습니다. [iPhone용 프로젝트와 Mac 설치 안내](ios/README.md)를 확인하세요. Swift 픽셀 엔진은 Linux에서 테스트했고, Apple SDK 빌드와 실제 아이폰 설치는 아직 검증하지 않았습니다.
 
 ## 모바일에서 확인하기
 
 - [안드로이드 설치 APK 다운로드](https://github.com/MJY8647/JUNYOUNGWORK/raw/refs/heads/main/downloads/LUMI-debug.apk)
+- [iOS 소스 프로젝트 다운로드](https://github.com/MJY8647/JUNYOUNGWORK/raw/refs/heads/main/downloads/LUMI-iOS-source.zip) · [Mac에서 아이폰에 설치하는 방법](ios/README.md)
 - [전체 코드 보기](app/src/main/java/com/junyoung/lumi)
 - [구현 및 미구현 기능](FEATURES.md) · [검증 기록](VALIDATION.md)
 - [Android 10 실행 검증 결과](docs/android-29-results.txt) · [Android 15 실행 검증 결과](docs/android-35-results.txt)

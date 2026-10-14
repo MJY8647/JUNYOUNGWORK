@@ -4,3 +4,9 @@ app/build/
 local.properties
 *.jks
 *.keystore
+ios/.build/
+ios/.swiftpm/
+**/xcuserdata/
+*.ipa
+*.mobileprovision
+*.p12

@@ -1,0 +1,57 @@
+Building for debugging...
+[0/13] Write sources
+[2/13] Write swift-version-24593BA9C3E375BF.txt
+[4/15] Emitting module LumiPixels
+[5/15] Compiling LumiPixels PixelEngine.swift
+[6/16] Wrapping AST for LumiPixels for debugging
+[8/18] Emitting module LumiPixelsTests
+[9/18] Compiling LumiPixelsTests PixelEngineTests.swift
+[10/19] /tmp/lumi-swift-test/x86_64-unknown-linux-gnu/debug/LumiPixelsPackageDiscoveredTests.derived/all-discovered-tests.swift
+[11/19] Write sources
+[12/19] Wrapping AST for LumiPixelsTests for debugging
+[14/22] Emitting module LumiPixelsPackageDiscoveredTests
+[15/22] Compiling LumiPixelsPackageDiscoveredTests all-discovered-tests.swift
+[16/22] Compiling LumiPixelsPackageDiscoveredTests LumiPixelsTests.swift
+[17/23] /tmp/lumi-swift-test/x86_64-unknown-linux-gnu/debug/LumiPixelsPackageTests.derived/runner.swift
+[18/23] Write sources
+[19/23] Wrapping AST for LumiPixelsPackageDiscoveredTests for debugging
+[21/25] Emitting module LumiPixelsPackageTests
+[22/25] Compiling LumiPixelsPackageTests runner.swift
+[23/26] Wrapping AST for LumiPixelsPackageTests for debugging
+[24/26] Write Objects.LinkFileList
+[25/26] Linking LumiPixelsPackageTests.xctest
+Build complete! (11.86s)
+Test Suite 'All tests' started at 2026-10-14 09:06:53.304
+Test Suite 'debug.xctest' started at 2026-10-14 09:06:53.306
+Test Suite 'PixelEngineTests' started at 2026-10-14 09:06:53.306
+Test Case 'PixelEngineTests.testCancellationAndInvalidInput' started at 2026-10-14 09:06:53.306
+Test Case 'PixelEngineTests.testCancellationAndInvalidInput' passed (0.001 seconds)
+Test Case 'PixelEngineTests.testExposureBrightensMidtones' started at 2026-10-14 09:06:53.307
+Test Case 'PixelEngineTests.testExposureBrightensMidtones' passed (0.101 seconds)
+Test Case 'PixelEngineTests.testLocalWarpKeepsBoundary' started at 2026-10-14 09:06:53.408
+Test Case 'PixelEngineTests.testLocalWarpKeepsBoundary' passed (0.0 seconds)
+Test Case 'PixelEngineTests.testMonoChannelsMatch' started at 2026-10-14 09:06:53.408
+Test Case 'PixelEngineTests.testMonoChannelsMatch' passed (0.0 seconds)
+Test Case 'PixelEngineTests.testNeutralPreservesOriginalAndAlpha' started at 2026-10-14 09:06:53.408
+Test Case 'PixelEngineTests.testNeutralPreservesOriginalAndAlpha' passed (0.0 seconds)
+Test Case 'PixelEngineTests.testNonSkinBlueStaysUnchanged' started at 2026-10-14 09:06:53.408
+Test Case 'PixelEngineTests.testNonSkinBlueStaysUnchanged' passed (0.001 seconds)
+Test Case 'PixelEngineTests.testSkinSmoothingReducesNoise' started at 2026-10-14 09:06:53.409
+Test Case 'PixelEngineTests.testSkinSmoothingReducesNoise' passed (0.006 seconds)
+Test Case 'PixelEngineTests.testSpotHealingAndImmutableOriginal' started at 2026-10-14 09:06:53.415
+Test Case 'PixelEngineTests.testSpotHealingAndImmutableOriginal' passed (0.0 seconds)
+Test Case 'PixelEngineTests.testStrongEdgesArePreserved' started at 2026-10-14 09:06:53.415
+Test Case 'PixelEngineTests.testStrongEdgesArePreserved' passed (0.003 seconds)
+Test Case 'PixelEngineTests.testZeroDisplacementIsIdentity' started at 2026-10-14 09:06:53.418
+Test Case 'PixelEngineTests.testZeroDisplacementIsIdentity' passed (0.0 seconds)
+Test Case 'PixelEngineTests.testZeroFilterIntensityIsIdentity' started at 2026-10-14 09:06:53.419
+Test Case 'PixelEngineTests.testZeroFilterIntensityIsIdentity' passed (0.0 seconds)
+Test Suite 'PixelEngineTests' passed at 2026-10-14 09:06:53.419
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.113 (0.113) seconds
+Test Suite 'debug.xctest' passed at 2026-10-14 09:06:53.419
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.113 (0.113) seconds
+Test Suite 'All tests' passed at 2026-10-14 09:06:53.419
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.113 (0.113) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.0.3 (18c42c19cac3faf)
+✔ Test run with 0 tests passed after 0.001 seconds.

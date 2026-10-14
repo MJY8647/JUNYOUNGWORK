@@ -1,0 +1,22 @@
+name: iOS build and tests
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build app and execute iOS unit tests
+        run: bash scripts/test-ios-mac.sh
+      - name: Upload simulator app and test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lumi-iOS-simulator-results
+          path: |
+            build/ios/run.*/LumiTests.xcresult
+            build/ios/DerivedData/Build/Products/Debug-iphonesimulator/Lumi.app
+          if-no-files-found: ignore
