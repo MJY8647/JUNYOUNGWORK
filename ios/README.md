@@ -19,7 +19,7 @@
 | 영상 미리보기·자르기·음소거 | AVPlayer와 AVMutableComposition, MP4 내보내기 |
 | 갤러리 저장 | 사진 앱에 새 JPEG(품질 97) 또는 MP4 저장 |
 
-위 표는 **코드 구현 범위**입니다. Apple SDK 전체 빌드, 시뮬레이터 실행, 실제 iPhone 설치·사진/영상 저장은 아직 검증하지 않았습니다. 현재 Linux 환경에서는 Xcode를 실행할 수 없습니다.
+위 표는 **코드 구현 범위**입니다. [GitHub macOS/Xcode 검사](https://github.com/MJY8647/JUNYOUNGWORK/actions/runs/38543214330)에서 앱 빌드와 iOS 시뮬레이터 단위 테스트가 통과했습니다. 실제 iPhone 설치·사진 선택/저장·영상 내보내기는 추가 확인이 필요합니다.
 
 ## Mac에서 열고 본인 아이폰에 설치하기
 
@@ -61,7 +61,8 @@ GitHub Actions의 **iOS build and tests → Run workflow**로도 실행할 수 �
 - Swift 6.0.3 Linux 컴파일러: 픽셀 엔진 실제 빌드 및 XCTest **11개 통과**, 실패 0.
 - 실제 Swift 컴파일러의 Swift 5 문법 검사: iOS 앱·테스트 소스 검사.
 - Xcode 프로젝트의 대상·소스 참조·공유 Scheme 및 아이콘 자산 구조 검사.
-- Xcode UIKit/SwiftUI 타입 검사, 시뮬레이터 실행, 사진/영상 권한 및 출력 파일 확인: **미실행**.
+- [macOS GitHub Actions](https://github.com/MJY8647/JUNYOUNGWORK/actions/runs/38543214330): Xcode 앱 빌드와 시뮬레이터 XCTest 대상(15개 테스트) **통과**.
+- iPhone 사진/영상 권한 및 실제 출력 파일 확인: **미실행**.
 - Apple 서명, 본인 아이폰 설치, 주변 사람에게 배포: **미실행**.
 
 실행 로그와 아이폰 확인 순서는 [검증 기록](VALIDATION.md)에 있습니다.

@@ -1,0 +1,33 @@
+{
+  "run_url": "https://github.com/MJY8647/JUNYOUNGWORK/actions/runs/38543214330",
+  "source_commit": "02c691f",
+  "runner": "macos-15",
+  "checked_at_utc": "2026-10-14 09:40:53 UTC",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build app and execute iOS unit tests",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upload simulator app and test results",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "note": "Public GitHub job step status. Full Xcode logs and xcresult are in the workflow artifact. Physical iPhone checks are pending."
+}

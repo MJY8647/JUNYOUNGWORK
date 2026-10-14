@@ -8,11 +8,13 @@
 | Swift 컴파일러 `-frontend -parse -swift-version 5` | 앱·테스트 소스 문법 검사 통과 |
 | Swift 문법 트리 및 Xcode 프로젝트 구조 검사 | Swift 파일 9개, 프로젝트 객체 43개·소스 참조·공유 Scheme·아이콘 자산 확인 |
 | Mac 테스트 실행 스크립트 | Bash 구문 확인 |
-| Xcode Apple SDK 빌드 | **미실행 — 현재 실행 환경은 Linux** |
-| iOS XCTest 전체 15개 | **미실행 — Mac/Xcode 필요** |
+| Xcode Apple SDK 빌드 | **통과 — [macOS GitHub Actions](https://github.com/MJY8647/JUNYOUNGWORK/actions/runs/38543214330)** |
+| iOS XCTest 대상(15개 테스트) | **시뮬레이터 test 단계 통과** |
 | 사진 선택·저장 권한 및 실제 JPEG 출력 | **iOS에서 미실행** |
 | 영상 재생·구간 자르기·음소거 및 MP4 출력 | **iOS에서 미실행** |
 | 실제 iPhone 설치, 서명, TestFlight | **미실행 — 사용자 Mac/Apple 계정 필요** |
+
+macOS 검사 소스 커밋은 `02c691f`이며, Build app and execute iOS unit tests 단계와 결과 업로드 단계가 성공했습니다. 공개 작업 상태 기록은 [macos-ci-result.json](macos-ci-result.json)에 있습니다. 전체 로그와 XCTest 결과 번들은 위 Actions 실행에서 확인할 수 있습니다.
 
 Linux 결과 로그는 [pixel-tests-linux.txt](pixel-tests-linux.txt)입니다. XCTest의 `Executed 11 tests, with 0 failures`가 검증 결과입니다. 끝에 표시되는 별도 Swift Testing 러너의 0개 테스트는 추가 테스트가 없다는 뜻이며, 검증 수로 계산하지 않습니다.
 
@@ -35,4 +37,4 @@ Mac에서 저장소 루트의 `bash scripts/test-ios-mac.sh`를 실행하면 App
 5. 짧은 MP4/MOV 영상의 시작·끝을 조절해 저장하고, 음소거 버전에서 소리가 없는지 확인합니다.
 6. 사진 저장 권한을 거절한 경우 안내가 나오는지, 설정에서 허용한 뒤 저장이 되는지 확인합니다.
 
-Apple SDK 타입 검사와 실기기 검증 전에는 iOS 버전을 완성·설치 검증된 앱이라고 판단하지 않습니다. 상세 설치 방법은 [README.md](README.md)를 확인하세요.
+Apple SDK 빌드와 단위 테스트는 통과했지만 실기기 전체 동작이 검증된 앱은 아닙니다. 상세 설치 방법은 [README.md](README.md)를 확인하세요.
