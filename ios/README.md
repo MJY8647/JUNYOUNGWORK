@@ -54,7 +54,7 @@ xcodebuild -project ios/Lumi.xcodeproj -scheme Lumi \
   -derivedDataPath build/ios/DerivedData CODE_SIGNING_ALLOWED=NO build
 ```
 
-GitHub Actions의 **iOS build and tests → Run workflow**도 선택적으로 사용할 수 있도록 워크플로를 포함했습니다. 자동 실행은 켜지 않았으며, GitHub 러너 사용 정책·할당량을 따릅니다. 시뮬레이터 앱과 테스트 결과를 만들며, 아이폰 설치용으로 서명한 IPA를 만들지는 않습니다.
+GitHub Actions의 **iOS build and tests → Run workflow**로도 실행할 수 있습니다. `main`의 iOS 코드 또는 검증 스크립트가 바뀌면 자동으로 실행하며, GitHub 러너 사용 정책·할당량을 따릅니다. 시뮬레이터 앱과 테스트 결과를 만들며, 아이폰 설치용으로 서명한 IPA를 만들지는 않습니다.
 
 ## 여기서 확인한 것과 남은 검증
 

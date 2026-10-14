@@ -1,5 +1,11 @@
 name: iOS build and tests
-on:
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'scripts/test-ios-mac.sh'
+      - '.github/workflows/ios-check.yml'
   workflow_dispatch:
 permissions:
   contents: read
