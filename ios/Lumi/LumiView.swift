@@ -201,33 +201,53 @@ struct PhotoCanvas: View {
     var body: some View {
         GeometryReader { geometry in
             if let image = image {
-                let fit = min(geometry.size.width / image.size.width, geometry.size.height / image.size.height) * 0.94
-                let size = CGSize(width: image.size.width * fit, height: image.size.height * fit)
-                ZStack {
-                    Image(uiImage: image).resizable().frame(width: size.width, height: size.height)
-                        .scaleEffect(zoom).offset(offset)
-                }.frame(width: geometry.size.width, height: geometry.size.height).contentShape(Rectangle()).clipped()
-                    .gesture(DragGesture(minimumDistance: brushMode == 0 ? 1 : 0)
-                        .onChanged { value in
-                            if brushMode == 0 && !pinching {
-                                let x = offsetBase.width + value.translation.width, y = offsetBase.height + value.translation.height
-                                offset = CGSize(width: max(-size.width * (zoom - 1) / 2, min(size.width * (zoom - 1) / 2, x)),
-                                                height: max(-size.height * (zoom - 1) / 2, min(size.height * (zoom - 1) / 2, y)))
-                            }
-                        }.onEnded { value in
-                            if brushMode == 0 { offsetBase = offset }
-                            else if enabled && !pinching,
-                                    let a = point(value.startLocation, container: geometry.size, image: size),
-                                    let b = point(value.location, container: geometry.size, image: size) { onStroke(a, b) }
-                        })
-                    .simultaneousGesture(MagnificationGesture().onChanged { value in
-                        pinching = true; zoom = max(1, min(4, zoomBase * value))
-                    }.onEnded { _ in
-                        zoomBase = zoom; if zoom == 1 { offset = .zero; offsetBase = .zero }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { pinching = false }
-                    })
-                    .accessibilityLabel("사진 미리보기. 두 손가락으로 확대하고 이동할 수 있습니다.")
+                canvas(image, container: geometry.size)
             }
+        }
+    }
+
+    private func canvas(_ image: UIImage, container: CGSize) -> some View {
+        let fit = min(container.width / image.size.width, container.height / image.size.height) * 0.94
+        let size = CGSize(width: image.size.width * fit, height: image.size.height * fit)
+        return ZStack {
+            Image(uiImage: image).resizable().frame(width: size.width, height: size.height)
+                .scaleEffect(zoom).offset(offset)
+        }
+        .frame(width: container.width, height: container.height)
+        .contentShape(Rectangle()).clipped()
+        .gesture(dragGesture(container: container, size: size))
+        .simultaneousGesture(magnificationGesture)
+        .accessibilityLabel("사진 미리보기. 두 손가락으로 확대하고 이동할 수 있습니다.")
+    }
+
+    private func dragGesture(container: CGSize, size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: brushMode == 0 ? 1 : 0)
+            .onChanged { value in
+                if brushMode == 0 && !pinching {
+                    let x = offsetBase.width + value.translation.width
+                    let y = offsetBase.height + value.translation.height
+                    let limitX = size.width * (zoom - 1) / 2
+                    let limitY = size.height * (zoom - 1) / 2
+                    offset = CGSize(width: max(-limitX, min(limitX, x)),
+                                    height: max(-limitY, min(limitY, y)))
+                }
+            }
+            .onEnded { value in
+                if brushMode == 0 { offsetBase = offset }
+                else if enabled && !pinching,
+                        let a = point(value.startLocation, container: container, image: size),
+                        let b = point(value.location, container: container, image: size) { onStroke(a, b) }
+            }
+    }
+
+    private var magnificationGesture: some Gesture {
+        MagnificationGesture().onChanged { value in
+            pinching = true
+            zoom = max(1, min(4, zoomBase * value))
+        }.onEnded { _ in
+            zoomBase = zoom
+            if zoom == 1 { offset = .zero; offsetBase = .zero }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { pinching = false }
         }
     }
     private func point(_ p: CGPoint, container: CGSize, image: CGSize) -> CGPoint? {
