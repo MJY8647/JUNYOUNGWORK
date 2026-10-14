@@ -3,7 +3,10 @@ name: iOS build and tests
   push:
     branches: [main]
     paths:
-      - 'ios/**'
+      - 'ios/Lumi/**'
+      - 'ios/LumiTests/**'
+      - 'ios/Lumi.xcodeproj/**'
+      - 'ios/Package.swift'
       - 'scripts/test-ios-mac.sh'
       - '.github/workflows/ios-check.yml'
   workflow_dispatch:
@@ -24,5 +27,6 @@ jobs:
           name: Lumi-iOS-simulator-results
           path: |
             build/ios/run.*/LumiTests.xcresult
+            build/ios/run.*/xcodebuild.log
             build/ios/DerivedData/Build/Products/Debug-iphonesimulator/Lumi.app
           if-no-files-found: ignore
