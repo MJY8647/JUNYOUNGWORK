@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>블로그 — Skyline</title>
+  <meta name="description" content="카테고리·태그 필터와 페이지네이션이 있는 블로그 목록.">
+  <script>
+    try { const t = localStorage.getItem('theme');
+      const dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', dark); } catch (_) {}
+  </script>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header data-site-header></header>
+<main class="container" style="max-width:1080px">
+  <div class="page-head">
+    <h1 data-blog-title>블로그</h1>
+    <p>역설계·디자인 시스템·정적 사이트에 관한 글</p>
+  </div>
+  <nav class="filters" data-blog-filters aria-label="Categories and tags"></nav>
+  <ul class="post-list" data-blog-list></ul>
+  <nav class="pagination" data-pagination aria-label="Pagination"></nav>
+</main>
+<footer data-site-footer></footer>
+<script src="assets/posts.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

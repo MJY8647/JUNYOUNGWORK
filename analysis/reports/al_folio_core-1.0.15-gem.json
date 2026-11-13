@@ -1,0 +1,378 @@
+{
+  "name": "core",
+  "file_count": 106,
+  "stack": {
+    "framework": "Static HTML/CSS/JS",
+    "generator": "none (no build step)",
+    "styling": [
+      "Tailwind CSS",
+      "Sass/SCSS"
+    ],
+    "notes": [],
+    "npm_dependencies": {},
+    "npm_scripts": {},
+    "ruby_gems": [],
+    "hosting_hints": [],
+    "license": "MIT"
+  },
+  "languages": {
+    "files": {
+      "Liquid": 60,
+      "JavaScript": 16,
+      "SCSS": 14,
+      "CSS": 9,
+      "Markdown": 2,
+      "YAML": 2,
+      "Ruby": 2
+    },
+    "lines": {
+      "CSS": 9252,
+      "JavaScript": 3125,
+      "Liquid": 2943,
+      "SCSS": 2563,
+      "Ruby": 324,
+      "Markdown": 140,
+      "YAML": 43
+    },
+    "raster_images": 0
+  },
+  "dirs": {
+    "top": {
+      "_includes/": 47,
+      "assets/": 25,
+      "_sass/": 13,
+      "_layouts/": 13,
+      "(root files)": 3,
+      "migrations/": 2,
+      "lib/": 2,
+      "_scripts/": 1
+    },
+    "second": {
+      "assets": {
+        "js/": 15,
+        "css/": 7,
+        "tailwind/": 3
+      },
+      "_includes": {
+        "plugins/": 21,
+        "repository/": 3
+      },
+      "lib": {
+        "al_folio_core/": 1
+      }
+    }
+  },
+  "routes": [],
+  "components": {
+    "_includes": [
+      "al_analytics_scripts",
+      "al_charts_scripts",
+      "al_comments",
+      "al_cookie_scripts",
+      "al_cookie_styles",
+      "al_email_protect_scripts",
+      "al_email_protect_styles",
+      "al_icons_styles",
+      "al_img_tools_scripts",
+      "al_img_tools_styles",
+      "al_marimo_scripts",
+      "al_marimo_styles",
+      "al_math_scripts",
+      "al_math_styles",
+      "al_newsletter_form_center",
+      "al_newsletter_form_center_margin",
+      "al_newsletter_form_left",
+      "al_newsletter_scripts",
+      "al_rtl_html_attrs",
+      "al_rtl_styles",
+      "al_search_assets",
+      "audio",
+      "bib_search",
+      "calendar",
+      "citation",
+      "course_schedule",
+      "courses",
+      "disqus",
+      "figure",
+      "footer",
+      "giscus",
+      "head",
+      "header",
+      "latest_posts",
+      "metadata",
+      "news",
+      "newsletter",
+      "pagination",
+      "projects",
+      "projects_horizontal",
+      "related_posts",
+      "repo",
+      "repo_trophies",
+      "repo_user",
+      "scripts",
+      "selected_papers",
+      "video"
+    ],
+    "_layouts": [
+      "about",
+      "archive",
+      "bib",
+      "book-review",
+      "book-shelf",
+      "course",
+      "cv",
+      "default",
+      "distill",
+      "none",
+      "page",
+      "post",
+      "profiles"
+    ]
+  },
+  "tokens": {
+    "custom_properties": {
+      "color": {
+        "--swiper-navigation-color": "var(--global-theme-color)",
+        "--swiper-pagination-color": "var(--global-theme-color)",
+        "--swiper-pagination-bullet-inactive-color": "var(--global-text-color)",
+        "--ninja-accent-color": "var(--global-theme-color)",
+        "--global-divider-color": "rgba(0, 0, 0, 0.1)",
+        "--global-tip-block": "#42b983",
+        "--global-tip-block-bg": "#e2f5ec",
+        "--global-tip-block-text": "#215d42",
+        "--global-tip-block-title": "#359469",
+        "--global-warning-block": "#e7c000",
+        "--global-warning-block-bg": "#fff8d8",
+        "--global-warning-block-text": "#6b5900",
+        "--global-warning-block-title": "#b29400",
+        "--global-danger-block": "#c00",
+        "--global-danger-block-bg": "#ffe0e0",
+        "--global-danger-block-text": "#600",
+        "--global-danger-block-title": "#c00",
+        "--color-red-700": "oklch(50.5% .213 27.518)",
+        "--color-orange-50": "oklch(98% .016 73.684)",
+        "--color-orange-700": "oklch(55.3% .195 38.402)",
+        "--color-amber-50": "oklch(98.7% .022 95.277)",
+        "--color-lime-400": "oklch(84.1% .238 128.85)",
+        "--color-green-700": "oklch(52.7% .154 150.069)",
+        "--color-teal-600": "oklch(60% .118 184.704)",
+        "--color-cyan-500": "oklch(71.5% .143 215.221)",
+        "--color-blue-200": "oklch(88.2% .059 254.128)",
+        "--color-blue-900": "oklch(37.9% .146 265.522)",
+        "--color-pink-700": "oklch(52.5% .223 3.958)",
+        "--color-pink-800": "oklch(45.9% .187 3.815)",
+        "--color-gray-50": "oklch(98.5% .002 247.839)",
+        "--color-gray-100": "oklch(96.7% .003 264.542)",
+        "--color-gray-200": "oklch(92.8% .006 264.531)",
+        "--color-gray-300": "oklch(87.2% .01 258.338)",
+        "--color-gray-400": "oklch(70.7% .022 261.325)",
+        "--color-gray-500": "oklch(55.1% .027 264.364)",
+        "--color-gray-600": "oklch(44.6% .03 256.802)",
+        "--color-gray-700": "oklch(37.3% .034 259.733)",
+        "--color-gray-800": "oklch(27.8% .033 256.848)",
+        "--color-gray-900": "oklch(21% .034 264.665)",
+        "--color-white": "#fff",
+        "--text-3xl": "1.875rem",
+        "--text-3xl--line-height": "calc(2.25/1.875)",
+        "--jp-border-color0": "var(--md-grey-400)",
+        "--jp-border-color1": "var(--md-grey-400)",
+        "--jp-border-color2": "var(--md-grey-300)",
+        "--jp-border-color3": "var(--md-grey-200)",
+        "--jp-content-link-color": "var(--md-blue-700)",
+        "--jp-layout-color0": "white",
+        "--jp-layout-color1": "white",
+        "--jp-layout-color2": "var(--md-grey-200)",
+        "--jp-layout-color3": "var(--md-grey-400)",
+        "--jp-inverse-layout-color0": "#111111",
+        "--jp-inverse-layout-color1": "var(--md-grey-900)",
+        "--jp-inverse-layout-color2": "var(--md-grey-800)",
+        "--jp-inverse-layout-color3": "var(--md-grey-700)",
+        "--jp-brand-color0": "var(--md-blue-900)",
+        "--jp-brand-color1": "var(--md-blue-700)",
+        "--jp-accent-color0": "var(--md-green-900)",
+        "--jp-accent-color1": "var(--md-green-700)",
+        "--jp-warn-color0": "var(--md-orange-900)",
+        "--jp-warn-color1": "var(--md-orange-700)",
+        "--jp-error-color0": "var(--md-red-900)",
+        "--jp-error-color1": "var(--md-red-700)",
+        "--jp-success-color0": "var(--md-green-900)",
+        "--jp-success-color1": "var(--md-green-700)",
+        "--jp-info-color0": "var(--md-cyan-900)",
+        "--jp-info-color1": "var(--md-cyan-700)",
+        "--jp-cell-editor-border-color": "var(--md-grey-300)",
+        "--jp-notebook-multiselected-color": "var(--md-blue-50)",
+        "--jp-rendermime-error-background": "#fdd",
+        "--jp-dialog-background": "rgba(0, 0, 0, 0.25)",
+        "--jp-toolbar-border-color": "var(--jp-border-color1)",
+        "--jp-editor-selected-background": "#d9d9d9",
+        "--jp-editor-selected-focused-background": "#d7d4f0",
+        "--jp-mirror-editor-keyword-color": "#008000",
+        "--jp-mirror-editor-atom-color": "#88f",
+        "--jp-mirror-editor-number-color": "#080",
+        "--jp-mirror-editor-def-color": "#00f",
+        "--jp-mirror-editor-variable-color": "var(--md-grey-900)",
+        "--jp-mirror-editor-variable-2-color": "#05a",
+        "--jp-mirror-editor-variable-3-color": "#085",
+        "--jp-mirror-editor-punctuation-color": "#05a",
+        "--jp-mirror-editor-property-color": "#05a",
+        "--jp-mirror-editor-string-color": "#ba2121",
+        "--jp-mirror-editor-string-2-color": "#708",
+        "--jp-mirror-editor-builtin-color": "#008000",
+        "--jp-mirror-editor-tag-color": "#170",
+        "--jp-mirror-editor-attribute-color": "#00c",
+        "--jp-mirror-editor-header-color": "blue",
+        "--jp-mirror-editor-quote-color": "#090",
+        "--jp-mirror-editor-link-color": "#00c",
+        "--jp-collaborator-color1": "#ffad8e",
+        "--jp-collaborator-color2": "#dac83d",
+        "--jp-collaborator-color3": "#72dd76",
+        "--jp-collaborator-color4": "#00e4d0",
+        "--jp-collaborator-color5": "#45d4ff",
+        "--jp-collaborator-color6": "#e2b1ff",
+        "--jp-collaborator-color7": "#ff9de6",
+        "--jp-search-selected-match-background-color": "rgb(245, 200, 0)",
+        "--jp-json-icon-color": "var(--md-orange-700)",
+        "--jp-console-icon-background-color": "var(--md-blue-700)",
+        "--jp-terminal-icon-background-color": "var(--md-grey-800)",
+        "--jp-terminal-icon-color": "var(--md-grey-200)",
+        "--jp-text-editor-icon-color": "var(--md-grey-700)",
+        "--jp-inspector-icon-color": "var(--md-grey-700)",
+        "--jp-switch-true-position-color": "var(--md-orange-900)",
+        "--jp-scrollbar-background-color": "#3f4244",
+        "--jp-scrollbar-thumb-color": "88, 96, 97"
+      },
+      "font-family": {
+        "--fa-font": "var(--fa-font-solid)",
+        "--jp-ui-font-color0": "rgba(0, 0, 0, 1)",
+        "--jp-ui-font-color1": "rgba(0, 0, 0, 0.87)",
+        "--jp-ui-font-color2": "rgba(0, 0, 0, 0.54)",
+        "--jp-ui-font-color3": "rgba(0, 0, 0, 0.38)",
+        "--jp-ui-inverse-font-color0": "rgba(255, 255, 255, 1)",
+        "--jp-ui-inverse-font-color1": "rgba(255, 255, 255, 1)",
+        "--jp-ui-inverse-font-color2": "rgba(255, 255, 255, 0.7)",
+        "--jp-ui-inverse-font-color3": "rgba(255, 255, 255, 0.5)",
+        "--jp-content-font-color0": "rgba(0, 0, 0, 1)",
+        "--jp-content-font-color1": "rgba(0, 0, 0, 0.87)",
+        "--jp-content-font-color2": "rgba(0, 0, 0, 0.54)",
+        "--jp-content-font-color3": "rgba(0, 0, 0, 0.38)",
+        "--jp-cell-prompt-not-active-font-color": "var(--md-grey-700)",
+        "--jp-search-toggle-off-opacity": "0.5"
+      },
+      "font-weight": {
+        "--font-weight-light": "300",
+        "--font-weight-medium": "500",
+        "--font-weight-semibold": "600",
+        "--font-weight-bold": "700"
+      },
+      "motion": {
+        "--ease-in": "cubic-bezier(.4,0,1,1)",
+        "--ease-out": "cubic-bezier(0,0,.2,1)",
+        "--default-transition-duration": ".15s"
+      },
+      "other": {
+        "--ninja-modal-background": "var(--global-bg-color)",
+        "--ninja-z-index": "1031",
+        "--jp-cell-editor-background": "var(--md-grey-100)",
+        "--jp-cell-prompt-not-active-opacity": "0.5",
+        "--jp-rendermime-table-row-background": "var(--md-grey-100)",
+        "--jp-rendermime-table-row-hover-background": "var(--md-light-blue-50)",
+        "--jp-toolbar-active-background": "var(--md-grey-300)",
+        "--jp-input-active-background": "var(--jp-layout-color1)",
+        "--jp-input-hover-background": "var(--jp-layout-color1)",
+        "--jp-input-background": "var(--md-grey-100)",
+        "--jp-vega-background": "white"
+      },
+      "radius": {
+        "--radius-sm": ".25rem",
+        "--radius-md": ".375rem",
+        "--radius-lg": ".5rem",
+        "--jp-scrollbar-thumb-radius": "9px"
+      },
+      "shadow": {
+        "--jp-shadow-base-lightness": "0",
+        "--jp-toolbar-box-shadow": "0px 0px 2px 0px rgba(0, 0, 0, 0.24)"
+      },
+      "spacing/size": {
+        "--ninja-icon-size": "0px",
+        "--max-content-width": "930px",
+        "--spacing": ".25rem",
+        "--breakpoint-sm": "40rem",
+        "--breakpoint-md": "48rem",
+        "--breakpoint-lg": "64rem",
+        "--breakpoint-xl": "80rem",
+        "--jp-scrollbar-endpad": "3px",
+        "--jp-scrollbar-thumb-margin": "3.5px"
+      }
+    },
+    "google_fonts": [],
+    "font_families_in_css": [
+      "Consolas",
+      "FontAwesome",
+      "Iosevka Fixed",
+      "Proxima Nova",
+      "Roboto"
+    ],
+    "tailwind_theme_files": [],
+    "dark_mode_files": [
+      "_includes/head.liquid",
+      "_sass/_themes.scss"
+    ]
+  },
+  "interactions": {
+    "dom_events": {
+      "click": 12,
+      "DOMContentLoaded": 10,
+      "load": 4,
+      "input": 3,
+      "mouseenter": 2,
+      "focus": 2,
+      "mouseleave": 2,
+      "blur": 2,
+      "change": 2,
+      "scroll": 2,
+      "resize": 2,
+      "keydown": 1,
+      "readystatechange": 1,
+      "hashchange": 1
+    },
+    "data_attribute_hooks": {
+      "[data-nav-toggle]": 1,
+      "[data-nav-dropdown-toggle]": 1
+    },
+    "browser_apis": {
+      "clipboard": 2,
+      "localStorage": 2,
+      "matchMedia (theme/breakpoints)": 2,
+      "fetch()": 1,
+      "scroll handling": 1
+    }
+  },
+  "external": {
+    "script_hosts": {
+      "d1bxh8uas1mnw7.cloudfront.net": 1,
+      "badge.dimensions.ai": 1
+    },
+    "link_hosts": {}
+  },
+  "seo": {
+    "in_templates": {
+      "Open Graph": 2,
+      "canonical URL": 1,
+      "meta description": 1,
+      "Twitter card": 1,
+      "JSON-LD structured data": 1
+    },
+    "generated": []
+  },
+  "content": {
+    "markdown_collections": {},
+    "data_files": []
+  },
+  "blueprint": [
+    "Single HTML document; replicate as-is with semantic sections and one CSS + one JS file.",
+    "Recreate the design system first: 156 CSS custom properties → one `tokens.css` (:root).",
+    "Dark mode exists: implement `prefers-color-scheme` + a persisted toggle (localStorage) on <html>.",
+    "Interactions are bound through data-* hooks: [data-nav-toggle], [data-nav-dropdown-toggle] → keep the same hook pattern.",
+    "Verify with headless browser screenshots at desktop (1440px) and phone (390px) widths."
+  ]
+}

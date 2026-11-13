@@ -78,3 +78,9 @@ cd /workspace/JUNYOUNGWORK
 ## 개인정보
 
 사진과 영상은 기기 안에서 처리됩니다. 서버 전송, 분석 SDK, 로그인, 결제 SDK가 없습니다. 선택한 파일만 읽고 결과를 `Pictures/LUMI` 또는 `Movies/LUMI`에 새 파일로 저장합니다. 원본을 수정하지 않습니다.
+
+## Website reverse-engineering
+
+- [`tools/site-analyzer/`](tools/site-analyzer/) — repository analyzer (framework, routes, components, design tokens, interactions, SEO, rebuild blueprint).
+- [`analysis/reports/`](analysis/reports/) — reports for vcard-personal-portfolio, AstroWind, al-folio and its `al_folio_core` theme gem.
+- [`clones/`](clones/) — dependency-free rebuilds of those three sites with Playwright behaviour tests.

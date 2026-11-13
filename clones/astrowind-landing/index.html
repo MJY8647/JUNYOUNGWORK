@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skyline — 정적 랜딩 페이지 템플릿 데모</title>
+  <meta name="description" content="AstroWind 구조를 역설계해 빌드 도구 없이 다시 구현한 랜딩 페이지와 블로그.">
+  <meta property="og:title" content="Skyline — 정적 랜딩 페이지 템플릿 데모">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>
+    // ApplyColorMode equivalent: runs before first paint to avoid a theme flash
+    try { const t = localStorage.getItem('theme');
+      const dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', dark); } catch (_) {}
+  </script>
+  <link rel="stylesheet" href="assets/site.css">
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","name":"Skyline demo","inLanguage":"ko"}
+  </script>
+</head>
+<body>
+<header data-site-header></header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero section">
+    <div class="container">
+      <div class="headline">
+        <p class="tagline">Free &amp; open structure</p>
+        <h1>빌드 도구 없이 만드는 <span class="text-accent">빠른 랜딩</span> + 블로그</h1>
+        <p class="lead">Astro 컴포넌트 37종 위젯 구조를 분석해 HTML·CSS·작은 JS만으로 재구성했습니다. 다크 모드, 반응형 내비게이션, 블로그 목록·태그·페이지네이션까지 그대로 동작합니다.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="blog.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg>블로그 둘러보기</a>
+          <a class="btn" href="#features">더 알아보기</a>
+        </div>
+      </div>
+      <div class="hero-visual reveal" role="img" aria-label="Browser window illustration">
+        <div class="mock-window"><div class="mock-dots"><i></i><i></i><i></i></div><div class="mock-body"><span></span><span></span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note"><strong>Philosophy:</strong> 단순함, 최고의 성능, 그리고 쾌적한 개발 경험.</div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="headline">
+        <p class="tagline">Features</p>
+        <h2>이 템플릿에 담긴 것</h2>
+        <p>원본의 Features 위젯처럼, 아이콘 + 제목 + 설명 카드 6개를 반응형 3열 그리드로 배치했습니다.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+          <div><h3>위젯 기반 구성</h3><p>Hero, Steps, Stats, FAQ 등 섹션을 독립적인 블록으로 조합합니다.</p></div></div>
+        <div class="feature reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></div>
+          <div><h3>다크 모드</h3><p>시스템 설정을 따르고, 사용자가 고른 테마는 저장됩니다.</p></div></div>
+        <div class="feature reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/></svg></div>
+          <div><h3>모바일 내비게이션</h3><p>900px 미만에서는 햄버거 메뉴로 전환되어 그룹별 링크를 보여줍니다.</p></div></div>
+        <div class="feature reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+          <div><h3>빌드 없음</h3><p>정적 파일 그대로 배포합니다. 번들러, 프레임워크, 패키지가 필요 없습니다.</p></div></div>
+        <div class="feature reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4zM4 9h16M9 20V9"/></svg></div>
+          <div><h3>블로그 컬렉션</h3><p>카테고리·태그 필터와 페이지네이션, 관련 글, 읽기 시간 계산을 지원합니다.</p></div></div>
+        <div class="feature reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div>
+          <div><h3>SEO 기본기</h3><p>메타 설명, Open Graph, JSON-LD 구조화 데이터를 포함합니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="section" id="content">
+    <div class="section-bg"></div>
+    <div class="container content-row">
+      <div class="reveal">
+        <p class="tagline">Inside template</p>
+        <h2>재미와 기능을 함께 담은 설계도</h2>
+        <p class="muted">원본 Content 위젯은 텍스트와 이미지를 좌우로 배치하고, 체크 아이콘 목록으로 장점을 나열합니다. 같은 구성을 CSS Grid 두 열로 옮겼습니다.</p>
+        <ul class="check-list">
+          <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg></div><div><h3>디자인 토큰</h3><p class="muted">색·폰트를 CSS 변수로 정의해 테마를 한 곳에서 바꿉니다.</p></div></li>
+          <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg></div><div><h3>접근성</h3><p class="muted">키보드로 드롭다운을 열 수 있고, 모션 감소 설정을 존중합니다.</p></div></li>
+          <li><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg></div><div><h3>데이터 분리</h3><p class="muted">글 목록은 posts.js 한 파일에서 관리합니다.</p></div></li>
+        </ul>
+      </div>
+      <div class="content-visual reveal" role="img" aria-label="Abstract illustration"></div>
+    </div>
+  </section>
+
+  <!-- Steps -->
+  <section class="section" id="steps">
+    <div class="container steps">
+      <div class="reveal">
+        <h2>몇 단계면 나만의 사이트가 완성됩니다</h2>
+        <ol class="timeline">
+          <li><span class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v12M6 10l6 6 6-6"/></svg></span><div><h3>Step 1 — 내려받기</h3><p class="muted">폴더를 그대로 복사합니다. 설치할 것이 없습니다.</p></div></li>
+          <li><span class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></span><div><h3>Step 2 — 수정하기</h3><p class="muted">site.css의 토큰과 posts.js의 글을 바꿉니다.</p></div></li>
+          <li><span class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11l18-8-8 18-2-8z"/></svg></span><div><h3>Step 3 — 배포하기</h3><p class="muted">GitHub Pages, Netlify 등 정적 호스팅에 올립니다.</p></div></li>
+          <li><span class="step-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg></span><div><h3>Ready!</h3></div></li>
+        </ol>
+      </div>
+      <div class="content-visual reveal" role="img" aria-label="Abstract illustration" style="aspect-ratio:1"></div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="section" id="stats">
+    <div class="section-bg"></div>
+    <div class="container">
+      <div class="stats">
+        <div class="stat reveal"><strong data-count="132000">132,000</strong><span>Downloads</span></div>
+        <div class="stat reveal"><strong data-count="24800">24,800</strong><span>Stars</span></div>
+        <div class="stat reveal"><strong data-count="10800">10,800</strong><span>Forks</span></div>
+        <div class="stat reveal"><strong data-count="48">48</strong><span>Users</span></div>
+      </div>
+      <p class="muted" style="text-align:center;margin-top:24px;font-size:13px">* 데모용 가상 수치입니다.</p>
+    </div>
+  </section>
+
+  <!-- Latest posts -->
+  <section class="section">
+    <div class="container">
+      <div class="row-head"><h2>최근 블로그 글</h2><a class="link-arrow" href="blog.html">모든 글 보기 →</a></div>
+      <div class="card-grid" data-latest-posts></div>
+    </div>
+  </section>
+
+  <!-- FAQs -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="headline"><p class="tagline">FAQs</p><h2>자주 묻는 질문</h2></div>
+      <div class="faq-grid">
+        <details class="reveal"><summary>원본 코드를 복사했나요?</summary><p>아닙니다. 공개 저장소의 구조(라우트, 위젯 구성, 디자인 토큰, 상호작용)를 분석한 뒤 새로 작성했습니다. 이미지·로고·문구는 사용하지 않았습니다.</p></details>
+        <details class="reveal"><summary>왜 빌드 도구를 쓰지 않았나요?</summary><p>역설계 결과를 가장 투명하게 보여주기 위해서입니다. 각 기능이 어떤 HTML·CSS·JS로 환원되는지 한눈에 볼 수 있습니다.</p></details>
+        <details class="reveal"><summary>다크 모드 설정은 어디에 저장되나요?</summary><p>브라우저 localStorage의 <code>theme</code> 키에 저장되며, 값이 없으면 운영체제 설정을 따릅니다.</p></details>
+        <details class="reveal"><summary>새 글은 어떻게 추가하나요?</summary><p><code>assets/posts.js</code> 배열에 항목을 추가하면 목록·태그·페이지네이션·관련 글에 자동 반영됩니다.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to action -->
+  <section class="section">
+    <div class="section-bg"></div>
+    <div class="container">
+      <div class="cta-card reveal">
+        <h2>지금 바로 <span class="text-accent">시작</span>하세요</h2>
+        <p>폴더 하나만 복사하면 됩니다. 토큰을 바꾸고, 글을 쓰고, 배포하세요.</p>
+        <a class="btn btn-primary" href="blog.html">블로그 보기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer data-site-footer></footer>
+<script src="assets/posts.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>
