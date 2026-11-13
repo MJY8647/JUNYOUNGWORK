@@ -33,3 +33,10 @@ python3 -m unittest tools/site-analyzer/test_analyze.py    # 분석기 테스트
 - 접근성 보완: vCard 모달 Esc 닫기·포커스 복귀, 내비게이션을 `innerHTML` 비교 대신 `data-nav-link` 값으로 매칭, 드롭다운 `:focus-within`, `prefers-reduced-motion` 지원.
 - AstroWind의 Astro 라우트(`[...blog]/[tag]/[...page]`)는 `blog.html?tag=&page=` 쿼리스트링으로 대체했습니다.
 - 스크롤 등장 효과는 JS가 실행될 때만 요소를 숨기도록(progressive enhancement) 했습니다.
+
+## GitHub Pages 배포
+
+`.github/workflows/clones-pages.yml`이 `main`에 `clones/**`가 바뀔 때(또는 Actions 탭에서 수동 실행) 테스트를 돌린 뒤, `clones/index.html`과 클론 3개만 묶어 Pages에 배포합니다.
+
+처음 한 번만: 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 바꿔 주세요.
+배포 주소: `https://mjy8647.github.io/junyoungwork/`
