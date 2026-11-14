@@ -36,7 +36,10 @@ python3 -m unittest tools/site-analyzer/test_analyze.py    # 분석기 테스트
 
 ## GitHub Pages 배포
 
-`.github/workflows/clones-pages.yml`이 `main`에 `clones/**`가 바뀔 때(또는 Actions 탭에서 수동 실행) 테스트를 돌린 뒤, `clones/index.html`과 클론 3개만 묶어 Pages에 배포합니다.
+`.github/workflows/clones-pages.yml`이 `main`에 사이트 파일이 바뀔 때(또는 Actions 탭에서 수동 실행) 모든 테스트를 돌린 뒤 배포합니다.
+- `/` — `book-site/` (『너무 성실한 시스템』)
+- `/studio/` — `studio-site/` 템플릿
+- `/clones/` — 클론 3개
 
 처음 한 번만: 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 바꿔 주세요.
 배포 주소: `https://mjy8647.github.io/junyoungwork/`
