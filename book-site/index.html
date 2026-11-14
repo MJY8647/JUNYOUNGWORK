@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ko" data-theme="light" data-theme-mode="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>너무 성실한 시스템 — 이산 | 괴로움의 구조와 출구에 관하여</title>
+  <meta name="description" content="괴로움은 고장이 아니다. 너무 성실한 정상 작동이다. 이산의 『너무 성실한 시스템』 — 생존-안전 시스템 이론.">
+  <meta property="og:title" content="너무 성실한 시스템 — 이산">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#f9f9f9">
+  <script>
+    // Apply theme before first paint (System / Light / Dark)
+    (function () {
+      var mode = 'system';
+      try { mode = localStorage.getItem('theme-mode') || 'system'; } catch (e) {}
+      var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      var h = document.documentElement;
+      h.dataset.themeMode = mode; h.dataset.theme = dark ? 'dark' : 'light';
+      h.classList.add('is-loading');
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter+Tight:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@300;400;500&display=swap">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+
+  <!-- Loader (gate) -->
+  <div class="gate" data-gate aria-hidden="true">
+    <span class="gate__count mono" data-gate-count>0</span>
+    <span class="gate__logo" data-logo></span>
+    <span class="gate__label mono">LOADING</span>
+  </div>
+
+  <!-- Floating pill navigation -->
+  <header class="site-nav">
+    <nav class="nav-pill" aria-label="주 메뉴">
+      <button class="nav-pill__btn nav-toggle mono" data-menu-open aria-expanded="false" aria-controls="menu">
+        <span class="burger" aria-hidden="true"><i></i><i></i></span><span data-scramble>MENU</span>
+      </button>
+      <a class="nav-pill__logo" href="#top" aria-label="홈" data-logo></a>
+      <button class="nav-pill__btn mono" data-buy-open><span data-scramble>BUY THE BOOK</span></button>
+    </nav>
+  </header>
+
+  <!-- Menu overlay -->
+  <div class="menu" id="menu" data-menu hidden>
+    <div class="menu__scrim" data-menu-close></div>
+    <div class="menu__card" role="dialog" aria-modal="true" aria-label="메뉴">
+      <div class="menu__top">
+        <button class="chip-btn mono" data-menu-close><span aria-hidden="true">✕</span> CLOSE</button>
+        <span class="menu__logo" data-logo></span>
+        <button class="chip-btn mono" data-buy-open>BUY THE BOOK</button>
+      </div>
+      <div class="menu__grid">
+        <nav class="menu__col" aria-label="페이지">
+          <p class="eyebrow mono">PAGES</p>
+          <ul class="menu__pages" data-menu-pages></ul>
+          <ul class="socials" data-socials></ul>
+        </nav>
+        <div class="menu__col">
+          <p class="eyebrow mono" data-menu-services-label>SERVICES</p>
+          <ul class="menu__services" data-menu-services></ul>
+          <a class="menu__more mono" href="#work" data-menu-link>VIEW ALL CHAPTERS</a>
+        </div>
+        <div class="menu__cta">
+          <p class="eyebrow mono" data-menu-cta-eyebrow></p>
+          <p class="menu__cta-title" data-menu-cta-title></p>
+          <span class="menu__star" aria-hidden="true">✦</span>
+          <button class="btn btn--solid" data-program-open data-menu-cta-button></button>
+          <button class="btn btn--soft menu__ask" data-enquiry-open>문의하기</button>
+        </div>
+      </div>
+      <div class="menu__foot">
+        <span class="mono">THEME:</span>
+        <div class="theme-switch" role="radiogroup" aria-label="테마">
+          <button class="mono" role="radio" data-theme-set="system">System</button>
+          <button class="mono" role="radio" data-theme-set="light">Light</button>
+          <button class="mono" role="radio" data-theme-set="dark">Dark</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" id="top" data-hero>
+      <div class="hero__sky" aria-hidden="true"><i class="hero__ray"></i><i class="hero__ray hero__ray--2"></i></div>
+      <canvas class="hero__mountain" data-mountain aria-hidden="true"></canvas>
+      <div class="hero__stage" aria-hidden="true">
+        <div class="hero__cover" data-hero-cover></div>
+        <svg class="hero__orbit" viewBox="0 0 800 300" preserveAspectRatio="none">
+          <ellipse cx="400" cy="150" rx="390" ry="140" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <span class="hero__orbit-star" data-orbit-star>✦</span>
+      </div>
+      <p class="hero__eyebrow mono" data-hero-eyebrow></p>
+      <h1 class="hero__title" data-hero-title></h1>
+      <span class="scroll-hint mono" aria-hidden="true"><i></i>SCROLL</span>
+    </section>
+
+    <!-- MANIFESTO + point cloud -->
+    <section class="manifesto" id="manifesto" data-manifesto aria-labelledby="manifesto-title">
+      <canvas class="manifesto__cloud" data-cloud aria-hidden="true"></canvas>
+      <div class="manifesto__inner">
+        <h2 id="manifesto-title" class="manifesto__text" data-manifesto-text></h2>
+        <div class="logowall" data-logowall aria-label="함께한 브랜드"></div>
+      </div>
+    </section>
+
+    <!-- WORK: curved gallery -->
+    <section class="work" id="work" aria-labelledby="work-title">
+      <h2 class="work__heading" id="work-title" data-work-title></h2>
+      <div class="work__room" aria-hidden="true"></div>
+      <div class="gallery" data-gallery tabindex="0" role="listbox" aria-roledescription="carousel" aria-label="작업 갤러리 — 좌우 화살표로 이동">
+        <div class="gallery__ring" data-ring></div>
+      </div>
+      <div class="drag-bubble" data-drag-bubble aria-hidden="true">드래그</div>
+      <div class="work__bar">
+        <p class="work__side mono" data-work-side-l></p>
+        <p class="work__count mono" data-work-count>01 / 10</p>
+        <button class="btn btn--solid btn--sm" data-project-open></button>
+        <p class="work__year mono" data-work-year>2026</p>
+        <p class="work__side work__side--r mono" data-work-side-r></p>
+      </div>
+    </section>
+
+    <!-- ABOUT portals -->
+    <section class="about" id="about" aria-labelledby="about-title">
+      <h2 class="eyebrow mono" id="about-title">ABOUT THE BOOK</h2>
+      <div class="portals" data-portals></div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <h2 class="contact__title" id="contact-title" data-contact-title></h2>
+      <div class="contact__actions">
+        <button class="btn btn--solid btn--lg" data-buy-open data-contact-cta></button>
+        <a class="btn btn--soft btn--lg" href="#newsletter" data-contact-secondary></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="ticker" aria-label="소식"><div class="ticker__track" data-ticker></div></div>
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <span class="footer__logo" data-logo></span>
+        <p class="footer__tagline" data-footer-tagline></p>
+      </div>
+      <form class="newsletter" id="newsletter" data-newsletter novalidate>
+        <label for="nl-email" data-newsletter-label></label>
+        <div class="newsletter__field">
+          <input id="nl-email" type="email" placeholder="you@company.com" required autocomplete="email">
+          <button type="submit" aria-label="구독">→</button>
+        </div>
+        <p class="newsletter__msg mono" data-newsletter-msg role="status"></p>
+      </form>
+      <div class="footer__col">
+        <p class="eyebrow mono">FOLLOW</p>
+        <ul class="socials" data-socials></ul>
+      </div>
+      <nav class="footer__col" aria-label="사이트 색인">
+        <p class="eyebrow mono">PAGES</p>
+        <ul class="footer__links" data-footer-pages></ul>
+      </nav>
+    </div>
+    <div class="footer__bottom mono">
+      <span data-copyright></span>
+      <span data-city></span>
+      <span data-coords></span>
+      <a data-email></a>
+    </div>
+  </footer>
+
+  <!-- Project dialog -->
+  <dialog class="sheet" data-project-dialog aria-labelledby="project-title">
+    <button class="sheet__close chip-btn mono" data-dialog-close>✕ CLOSE</button>
+    <div class="sheet__cover" data-project-cover></div>
+    <p class="eyebrow mono" data-project-meta></p>
+    <h2 class="sheet__title" id="project-title" data-project-title></h2>
+    <p class="sheet__body sheet__lead" data-project-body></p>
+    <p class="sheet__note">『너무 성실한 시스템』 목차에서. 자세한 내용은 책에서 만나 보세요.</p>
+    <button class="btn btn--solid" data-buy-open>책 구매하기</button>
+  </dialog>
+
+  <!-- Enquiry (3 steps) -->
+  <dialog class="sheet sheet--form" data-enquiry aria-labelledby="enquiry-title">
+    <button class="sheet__close chip-btn mono" data-dialog-close>✕ CLOSE</button>
+    <h2 class="sheet__title" id="enquiry-title" data-enquiry-title></h2>
+    <p class="sheet__note" data-enquiry-note></p>
+    <form class="enquiry" data-enquiry-form novalidate>
+      <section class="enquiry__step is-open" data-step="1">
+        <h3 class="enquiry__head"><span class="mono">1</span> 연락처</h3>
+        <div class="enquiry__body">
+          <label>이름<input name="name" required autocomplete="name"></label>
+          <label>이메일<input name="email" type="email" required autocomplete="email"></label>
+          <label>회사 / 브랜드 <span class="muted">(선택)</span><input name="company" autocomplete="organization"></label>
+          <div class="enquiry__nav"><button type="button" class="btn btn--soft" data-dialog-close>취소</button><button type="button" class="btn btn--solid" data-next>다음</button></div>
+        </div>
+      </section>
+      <section class="enquiry__step" data-step="2">
+        <h3 class="enquiry__head"><span class="mono">2</span> 어떤 일인가요</h3>
+        <div class="enquiry__body">
+          <div class="intents" data-intents role="radiogroup" aria-label="문의 유형"></div>
+          <div class="enquiry__nav"><button type="button" class="btn btn--soft" data-back>이전</button><button type="button" class="btn btn--solid" data-next>다음</button></div>
+        </div>
+      </section>
+      <section class="enquiry__step" data-step="3">
+        <h3 class="enquiry__head"><span class="mono">3</span> 조금 더</h3>
+        <div class="enquiry__body">
+          <p class="enquiry__label" data-enquiry-services-label></p>
+          <div class="chips" data-service-chips></div>
+          <label>내용<textarea name="message" rows="4" required minlength="10"></textarea></label>
+          <div class="enquiry__nav"><button type="button" class="btn btn--soft" data-back>이전</button><button type="submit" class="btn btn--solid">보내기</button></div>
+        </div>
+      </section>
+      <p class="enquiry__error" data-enquiry-error role="alert"></p>
+    </form>
+    <div class="enquiry__done" data-enquiry-done hidden>
+      <p class="sheet__title">감사합니다.</p>
+      <p class="sheet__note">메일 앱에 내용이 채워졌어요. 보내기를 누르면 완료됩니다. <span class="mono" data-countdown>10</span>초 뒤 닫힙니다.</p>
+      <button class="btn btn--soft" data-dialog-close>지금 닫기</button>
+    </div>
+  </dialog>
+
+  <!-- Info dialog: quotes / author / program / buy -->
+  <dialog class="sheet" data-info-dialog aria-labelledby="info-title">
+    <button class="sheet__close chip-btn mono" data-dialog-close>✕ CLOSE</button>
+    <h2 class="sheet__title" id="info-title" data-info-title></h2>
+    <div class="sheet__content" data-info-body></div>
+  </dialog>
+
+  <script src="assets/content.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

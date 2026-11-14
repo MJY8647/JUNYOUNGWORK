@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>글 — Skyline</title>
+  <meta name="description" content="블로그 글 상세 페이지.">
+  <script>
+    try { const t = localStorage.getItem('theme');
+      const dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', dark); } catch (_) {}
+  </script>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header data-site-header></header>
+<main><article class="article" data-post></article></main>
+<footer data-site-footer></footer>
+<script src="assets/posts.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

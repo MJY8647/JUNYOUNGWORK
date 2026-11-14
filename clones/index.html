@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website Clones</title>
+  <meta name="description" content="GitHub 인기 웹사이트 3개를 역설계해 빌드 도구 없이 다시 구현한 데모 모음.">
+  <style>
+    :root { --bg: #f7f7f8; --card: #fff; --text: #16161a; --muted: #5f5f6b; --border: #e4e4e8; --accent: #0161ef; color-scheme: light; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0d0d10; --card: #17171c; --text: #ececf1; --muted: #a0a0ab; --border: #2a2a33; --accent: #5b9bff; color-scheme: dark; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6; }
+    main { max-width: 1040px; margin: 0 auto; padding: 56px 16px 72px; }
+    h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 8px; letter-spacing: -.02em; }
+    .lead { color: var(--muted); margin: 0 0 40px; max-width: 680px; }
+    .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+    @media (min-width: 760px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    .card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; text-decoration: none; color: inherit; transition: transform .2s, border-color .2s; }
+    .card:hover, .card:focus-visible { transform: translateY(-3px); border-color: var(--accent); }
+    .swatch { height: 120px; }
+    .body { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .body h2 { font-size: 19px; margin: 0; }
+    .body p { margin: 0; color: var(--muted); font-size: 14.5px; }
+    .meta { font-size: 13px; color: var(--muted); margin-top: auto; padding-top: 8px; }
+    .open { color: var(--accent); font-weight: 600; font-size: 14px; }
+    footer { margin-top: 48px; font-size: 13px; color: var(--muted); }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Website Clones</h1>
+  <p class="lead">GitHub 인기 웹사이트 저장소 3개를 소스 분석 도구로 역설계한 뒤, 프레임워크·빌드 도구 없이 HTML·CSS·JS만으로 다시 구현했습니다. 원본의 코드·이미지·문구는 사용하지 않았고 모든 콘텐츠는 가상입니다.</p>
+  <div class="grid">
+    <a class="card" href="vcard-portfolio/">
+      <div class="swatch" style="background:radial-gradient(circle at 30% 30%,hsl(45 100% 72%/.8),transparent 55%),hsl(240 2% 13%)"></div>
+      <div class="body"><h2>vCard 포트폴리오</h2>
+        <p>탭 5개 SPA, 후기 모달, 포트폴리오 필터, 폼 검증.</p>
+        <span class="meta">원본: codewithsadee/vcard-personal-portfolio · 정적 HTML</span>
+        <span class="open">열기 →</span></div>
+    </a>
+    <a class="card" href="astrowind-landing/">
+      <div class="swatch" style="background:radial-gradient(circle at 25% 35%,rgb(1 97 239/.7),transparent 50%),radial-gradient(circle at 80% 70%,rgb(109 40 217/.7),transparent 50%),#eef2f8"></div>
+      <div class="body"><h2>AstroWind 랜딩 + 블로그</h2>
+        <p>랜딩 섹션 7종, 다크 모드, 모바일 메뉴, 블로그 태그·페이지네이션.</p>
+        <span class="meta">원본: arthelokyo/astrowind · Astro + Tailwind</span>
+        <span class="open">열기 →</span></div>
+    </a>
+    <a class="card" href="al-folio-academic/">
+      <div class="swatch" style="background:linear-gradient(160deg,#d86fd2,#4a0446)"></div>
+      <div class="body"><h2>al-folio 학술 홈페이지</h2>
+        <p>BibTeX 논문 목록, 검색·하이라이트, 3단 테마 전환.</p>
+        <span class="meta">원본: alshedivat/al-folio · Jekyll</span>
+        <span class="open">열기 →</span></div>
+    </a>
+  </div>
+  <footer>분석 도구와 리포트: <a href="https://github.com/mjy8647/junyoungwork/tree/main/tools/site-analyzer">tools/site-analyzer</a> ·
+    <a href="https://github.com/mjy8647/junyoungwork/tree/main/analysis/reports">analysis/reports</a></footer>
+</main>
+</body>
+</html>
