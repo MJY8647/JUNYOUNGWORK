@@ -85,3 +85,4 @@ cd /workspace/JUNYOUNGWORK
 - [`analysis/reports/`](analysis/reports/) — reports for vcard-personal-portfolio, AstroWind, al-folio and its `al_folio_core` theme gem.
 - [`clones/`](clones/) — dependency-free rebuilds of those three sites with Playwright behaviour tests.
 - [`studio-site/`](studio-site/) — original one-page studio site built from the reverse-engineered structure of bunqlabs.com (no copied code or assets); analysis in [`analysis/reports/bunqlabs.com.md`](analysis/reports/bunqlabs.com.md).
+- [`book-site/`](book-site/) — the same structure applied to 이산's book 『너무 성실한 시스템』 (TOC, excerpts, author, purchase links; philosophy program slot reserved).
