@@ -84,3 +84,4 @@ cd /workspace/JUNYOUNGWORK
 - [`tools/site-analyzer/`](tools/site-analyzer/) — repository analyzer (framework, routes, components, design tokens, interactions, SEO, rebuild blueprint).
 - [`analysis/reports/`](analysis/reports/) — reports for vcard-personal-portfolio, AstroWind, al-folio and its `al_folio_core` theme gem.
 - [`clones/`](clones/) — dependency-free rebuilds of those three sites with Playwright behaviour tests.
+- [`studio-site/`](studio-site/) — original one-page studio site built from the reverse-engineered structure of bunqlabs.com (no copied code or assets); analysis in [`analysis/reports/bunqlabs.com.md`](analysis/reports/bunqlabs.com.md).
