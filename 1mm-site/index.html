@@ -261,6 +261,13 @@ h3{margin:0 0 6px;font-size:19px;letter-spacing:-.02em;line-height:1.35}
 .verdict small{display:block;font-size:13px;color:var(--on-navy-m);font-weight:500}
 .verdict b{display:block;font-size:clamp(26px,6vw,38px);font-weight:900;letter-spacing:-.03em;line-height:1.2;margin:4px 0 2px;color:var(--yellow)}
 .verdict span{font-size:14px;color:var(--on-navy)}
+.cal-more summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;font-size:14.5px;font-weight:700;color:var(--navy);background:var(--yellow-w);border-top:1px solid var(--line)}
+.cal-more summary::-webkit-details-marker{display:none}
+.cal-more summary::after{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.cal-more[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.cal-more .cl,.cal-more[open] .op{display:none}.cal-more[open] .cl{display:inline}
+.cal-more summary:hover{background:#ffeeb0}
+.cal-more[open] summary{border-bottom:1px solid var(--line)}
 .cand{list-style:none;margin:0;padding:0}
 .cand li{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:14px 20px;border-top:1px dashed var(--line);font-size:15px}
 .cand li:first-child{border-top:0}
@@ -560,8 +567,11 @@ footer .logo{font-size:20px}
         </form>
         <div class="cal-out insert" aria-live="polite">
           <div class="verdict"><small>요금제는 이날부터 바꾸세요</small><b id="calSafe">2026년 7월 3일</b><span id="calSafeSub">개통일부터 183일을 채운 날이에요</span></div>
-          <ul class="cand" id="calCand"></ul>
-          <div class="alerts"><h3>1mm가 보내는 알림</h3><ol id="calAlerts"></ol></div>
+          <details class="cal-more" id="calMore">
+            <summary><span class="op">상세보기</span><span class="cl">접기</span></summary>
+            <ul class="cand" id="calCand"></ul>
+            <div class="alerts"><h3>1mm가 보내는 알림</h3><ol id="calAlerts"></ol></div>
+          </details>
         </div>
       </div>
       <p class="cal-note">‘6개월 유지’는 달이 아니라 183일로 세는 경우가 많아서, 두 방법 중 늦은 날을 알려드려요. 판매점마다 조건이 다를 수 있으니 가입할 때 받은 약정서의 날짜가 우선이에요. 6개월이 지나도 너무 싼 요금제로 내리면 지원금 일부를 돌려내야 할 수 있어요(예: LG U+ 5G는 월 4만5천원 미만). 알림은 회원에게 보내는 기능이고, 지금 프로토타입에서는 실제로 발송되지 않아요.</p>
