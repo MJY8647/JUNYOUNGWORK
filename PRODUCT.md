@@ -32,7 +32,7 @@ delegated: static HTML/CSS/JS, one self-contained folder (`1mm-site/`), so it ca
 
 - Flow in the prototype: 개통 방법 → 브랜드/제품 → 조건 비교 → 주문서 → 실시간 배송 현황 → 완료.
 - Activation runs only in carrier activation hours (Mon–Sat; not on Sundays or holidays); requests outside hours are processed at the next activation window.
-- After purchase: data transfer guidance (빠른 시작 / Smart Switch), 쓰던 폰 1mm 매입 (picked up by quick), 7-day exchange/refund.
+- After purchase: data transfer guidance (빠른 시작 / Smart Switch), 쓰던 폰 1mm 모바일 매입 (customer sends the phone — delivery method TBD, likely parcel, quick pickup on hold; price is confirmed after 1mm inspects it on arrival), 7-day exchange/refund.
 
 ## Capabilities and Constraints
 
