@@ -21,6 +21,8 @@ delegated: static HTML/CSS/JS, one self-contained folder (`1mm-site/`), so it ca
 
 ## Positioning
 
+- Core promise (owner, latest): **원하는 폰을, 원하는 조건으로, 최저가로, 가장 빠르게 받는다.** Quick delivery is the speed half of that promise, not the whole story.
+
 - Compares all three buying routes (통신사 개통 / 자급제 / 중고폰) in one flow, cheapest condition first.
 - "1mm가 골라드려요": a few questions (current carrier, family/internet bundle, monthly budget, data use, brand) → phones that fit a monthly budget (phone + plan combined).
 - Same-day quick delivery; carrier activation happens only after the customer receives the phone (unactivated phone + new USIM), so the current phone never goes dead in transit.
