@@ -21,6 +21,7 @@ delegated: static HTML/CSS/JS, one self-contained folder (`1mm-site/`), so it ca
 
 ## Positioning
 
+- Core premise (owner): customers arrive having **already decided which phone to buy**. The whole service starts from that model (model → color/storage → cheapest route/plan → quick delivery); the budget-based recommender is only a fallback for the undecided.
 - Core promise (owner, latest): **원하는 폰을, 원하는 조건으로, 최저가로, 가장 빠르게 받는다.** Quick delivery is the speed half of that promise, not the whole story.
 
 - Compares all three buying routes (통신사 개통 / 자급제 / 중고폰) in one flow, cheapest condition first.
