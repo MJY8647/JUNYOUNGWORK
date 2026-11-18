@@ -1,0 +1,536 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T05:53:15+00:00",
+  "title": "Design System: 1mm",
+  "extensions": {
+    "scope": "Governs the 1mm web surfaces only (1mm-site/). The rest of the repository is LUMI, an unrelated Android/iOS photo app.",
+    "colorMeta": {
+      "navy": {
+        "role": "primary",
+        "displayName": "Box Board Navy",
+        "canonical": "oklch(30.3% 0.087 270)",
+        "tonalRamp": [
+          "#070a18",
+          "#1a223d",
+          "#313d67",
+          "#4a5a8f",
+          "#697bb2",
+          "#8b9cd1",
+          "#b6c3e9",
+          "#e6eeff"
+        ]
+      },
+      "navy-deep": {
+        "role": "primary",
+        "displayName": "Board Shadow Navy",
+        "canonical": "oklch(24.6% 0.071 270)",
+        "tonalRamp": [
+          "#070b15",
+          "#1c2338",
+          "#333e5f",
+          "#4e5b86",
+          "#6d7ba8",
+          "#8f9dc7",
+          "#b9c3e2",
+          "#e8eeff"
+        ]
+      },
+      "navy-lift": {
+        "role": "primary",
+        "displayName": "Board Highlight Navy",
+        "canonical": "oklch(36.9% 0.102 270)",
+        "tonalRamp": [
+          "#060a1a",
+          "#192241",
+          "#2e3c6d",
+          "#475997",
+          "#667aba",
+          "#889cd9",
+          "#b3c3ef",
+          "#e5eeff"
+        ]
+      },
+      "yellow": {
+        "role": "secondary",
+        "displayName": "Label Yellow",
+        "canonical": "oklch(87.9% 0.162 91)",
+        "tonalRamp": [
+          "#140900",
+          "#352000",
+          "#5a3900",
+          "#805600",
+          "#a17600",
+          "#c19900",
+          "#ddc273",
+          "#fceec5"
+        ]
+      },
+      "yellow-hover": {
+        "role": "secondary",
+        "displayName": "Label Yellow, pressed",
+        "canonical": "oklch(89.9% 0.143 93)",
+        "tonalRamp": [
+          "#120a00",
+          "#322100",
+          "#563b00",
+          "#7a5800",
+          "#9b7900",
+          "#bb9b2a",
+          "#d9c37f",
+          "#faeeca"
+        ]
+      },
+      "yellow-wash": {
+        "role": "secondary",
+        "displayName": "Stub Wash",
+        "canonical": "oklch(96.4% 0.052 93)",
+        "tonalRamp": [
+          "#0e0b04",
+          "#292412",
+          "#483f24",
+          "#685d3b",
+          "#887d5a",
+          "#a89e7d",
+          "#cbc4ac",
+          "#f2eee1"
+        ]
+      },
+      "tray": {
+        "role": "neutral",
+        "displayName": "Tray",
+        "canonical": "oklch(97.0% 0.006 265)",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#232426",
+          "#3e4042",
+          "#5c5e61",
+          "#7b7d81",
+          "#9d9ea2",
+          "#c3c4c6",
+          "#eeeef0"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(91.5% 0.012 265)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222427",
+          "#3d4045",
+          "#5a5e64",
+          "#7a7d84",
+          "#9b9ea5",
+          "#c2c4c9",
+          "#edeef1"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(20.1% 0.012 271)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232428",
+          "#3e4045",
+          "#5b5d65",
+          "#7a7d85",
+          "#9c9ea6",
+          "#c2c4c9",
+          "#edeef1"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "oklch(48.8% 0.035 264)",
+        "tonalRamp": [
+          "#090b10",
+          "#1f242e",
+          "#38404f",
+          "#545e72",
+          "#737d92",
+          "#959fb3",
+          "#bdc4d3",
+          "#eaeff7"
+        ]
+      },
+      "on-navy": {
+        "role": "neutral",
+        "displayName": "On-Navy",
+        "canonical": "oklch(94.3% 0.015 270)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222429",
+          "#3d4047",
+          "#5a5d67",
+          "#797d87",
+          "#9b9ea7",
+          "#c1c4cb",
+          "#edeef2"
+        ]
+      },
+      "on-navy-muted": {
+        "role": "neutral",
+        "displayName": "On-Navy Muted",
+        "canonical": "oklch(81.0% 0.042 272)",
+        "tonalRamp": [
+          "#090b11",
+          "#202330",
+          "#393f53",
+          "#555d76",
+          "#747c97",
+          "#969eb7",
+          "#bec4d6",
+          "#ebeef8"
+        ]
+      },
+      "good": {
+        "role": "status",
+        "displayName": "Pass Green",
+        "canonical": "oklch(51.2% 0.115 159)",
+        "tonalRamp": [
+          "#001006",
+          "#002d18",
+          "#004e2c",
+          "#007045",
+          "#309264",
+          "#5fb287",
+          "#9bd3b3",
+          "#d9f7e5"
+        ]
+      },
+      "bad": {
+        "role": "status",
+        "displayName": "Stamp Red",
+        "canonical": "oklch(54.0% 0.198 29)",
+        "tonalRamp": [
+          "#200000",
+          "#4e0000",
+          "#820000",
+          "#b30001",
+          "#da3b2e",
+          "#fa6a59",
+          "#ffa495",
+          "#ffded5"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline printed on the waybill; yellow highlighter band under the key word."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles; optional muted 700 subtitle directly under. Closing band uses clamp(32px,7vw,54px)."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "A single printed amount that is the point of a document row."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Item names inside documents and cards."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs and section intros; keep-all breaking, 36 to 52ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Tags, waybill captions, stub notes, footnotes."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "'1mm' with 'mm' in yellow on navy, navy on yellow/white. Pinned by the prototype."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Lone big characters: the 7-day '7', grade letters S/A/B (30px)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "waybill-lift",
+        "value": "0 30px 60px -24px rgba(0,0,0,.6), 0 2px 0 rgba(0,0,0,.05)",
+        "purpose": "The waybill on the box face."
+      },
+      {
+        "name": "receipt-rest",
+        "value": "0 24px 40px -28px rgba(20,29,66,.4)",
+        "purpose": "Loose paper document on the tray."
+      },
+      {
+        "name": "table-rest",
+        "value": "0 24px 50px -32px rgba(20,29,66,.35)",
+        "purpose": "Comparison table."
+      },
+      {
+        "name": "button-yellow",
+        "value": "0 6px 14px -6px rgba(10,14,32,.45)",
+        "purpose": "Yellow button."
+      },
+      {
+        "name": "button-navy",
+        "value": "0 8px 18px -8px rgba(30,42,90,.55)",
+        "purpose": "Navy button."
+      },
+      {
+        "name": "object-drop",
+        "value": "drop-shadow(0 22px 26px rgba(20,29,66,.35))",
+        "purpose": "Illustrated phone/USIM inside the open tray (filter)."
+      },
+      {
+        "name": "bar-edge",
+        "value": "0 1px 0 rgba(0,0,0,.25)",
+        "purpose": "Fixed top bar."
+      },
+      {
+        "name": "tray-rim",
+        "value": "inset 0 0 0 clamp(14px,3vw,28px) #1E2A5A, inset 0 0 0 calc(clamp(14px,3vw,28px) + 1px) #141d42, inset 0 30px 60px -10px rgba(20,29,66,.45)",
+        "purpose": "Navy rim and inner shade of the opened box tray."
+      }
+    ],
+    "materials": [
+      {
+        "name": "die-cut",
+        "value": "mask: radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat, (same at 100% 0, 0 100%, 100% 100%)",
+        "purpose": "Concave 15px corner notches on every insert card (--cut)."
+      },
+      {
+        "name": "torn-edge",
+        "value": "mask: linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat, radial-gradient(circle at 8px 10px,transparent 7px,#000 7.5px) bottom/16px 10px repeat-x",
+        "purpose": "Scalloped bottom edge of the receipt."
+      },
+      {
+        "name": "board",
+        "value": "repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 7px), radial-gradient(120% 90% at 50% 30%,#2b3a75,#1E2A5A 55%,#141d42)",
+        "purpose": "Corrugated navy box face and lid flaps."
+      },
+      {
+        "name": "tape",
+        "value": "linear-gradient(90deg,rgba(0,0,0,.08),transparent 18%,transparent 82%,rgba(0,0,0,.08)), #FFD23F at .92 opacity; width min(132px,22vw)",
+        "purpose": "Yellow packing tape down the seam and over the closing band."
+      },
+      {
+        "name": "highlighter",
+        "value": "linear-gradient(transparent 62%,#FFD23F 62% 92%,transparent 92%)",
+        "purpose": "Key word of the hero headline."
+      },
+      {
+        "name": "perforation",
+        "value": "2px dashed rgba(30,42,90,.35) with 18px navy half-circle notches",
+        "purpose": "Waybill tear-off stub."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "All state transitions."
+      },
+      {
+        "name": "state",
+        "value": "0.2s",
+        "purpose": "Button fill, row hover, press scale .97; arrow slides 3px in .25s."
+      },
+      {
+        "name": "check-draw",
+        "value": "stroke-dashoffset 0.5s, 0.12s stagger",
+        "purpose": "Inspection checks drawn when the sheet is 40% in view."
+      },
+      {
+        "name": "unbox",
+        "value": "210svh section, sticky 100svh stage; --slit 0-.16, --lift .1-.36 (translateY -115svh, rotate -9deg), --open .22-.78 (flaps rotateY ±82deg, perspective 1400px); cubic ease-out per phase",
+        "purpose": "Signature scroll-driven unboxing. Reduced motion or no JS: static closed box face."
+      },
+      {
+        "name": "nudge",
+        "value": "1.8s infinite, 5px",
+        "purpose": "Scroll cue chevron on the tape."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "max-width: 420px"
+      },
+      {
+        "name": "wide",
+        "value": "min-width: 760px"
+      }
+    ],
+    "layout": {
+      "container": "1080px",
+      "gutter": "max(16px, env(safe-area-inset-left))",
+      "topBar": "56px, 64px from 760px"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button (yellow)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main CTA on navy ground: top bar, pick panel, closing band.",
+      "html": "<div class=\"ds-navy-ground\"><a class=\"ds-btn ds-btn-y\" href=\"#\">내 견적 보기 <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></a></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-navy-ground{background:var(--navy);padding:24px}.ds-btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:14px;font:700 15px/1 var(--font);padding:13px 18px;text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),background-color .2s}.ds-btn svg{transition:transform .25s var(--ease)}.ds-btn:hover svg{transform:translateX(3px)}.ds-btn:active{transform:scale(.97)}.ds-btn-y{background:var(--yellow);color:var(--navy);box-shadow:0 6px 14px -6px rgba(10,14,32,.45)}.ds-btn-y:hover{background:#ffdb63}.ds-btn-y:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}"
+    },
+    {
+      "name": "Navy Button",
+      "kind": "button",
+      "refersTo": "button-navy",
+      "description": "CTA on yellow, yellow-wash or white ground, e.g. the waybill stub.",
+      "html": "<a class=\"ds-btn ds-btn-n\" href=\"#\">내 견적 보기 <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></a>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:14px;font:700 15px/1 var(--font);padding:13px 18px;text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),background-color .2s}.ds-btn svg{transition:transform .25s var(--ease)}.ds-btn:hover svg{transform:translateX(3px)}.ds-btn:active{transform:scale(.97)}.ds-btn-n{background:var(--navy);color:#fff;box-shadow:0 8px 18px -8px rgba(30,42,90,.55)}.ds-btn-n:hover{background:var(--navy-l)}.ds-btn-n:focus-visible{outline:3px solid var(--navy);outline-offset:3px}"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "top-bar",
+      "description": "Fixed navy bar: wordmark, tagline, small yellow CTA.",
+      "html": "<header class=\"ds-bar\"><a class=\"ds-logo\" href=\"#\">1<b>mm</b></a><span class=\"ds-tag\">퀵으로 받는 휴대폰</span><a class=\"ds-btn ds-btn-y ds-sm\" href=\"#\">내 견적 보기</a></header>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:14px;font:700 15px/1 var(--font);padding:13px 18px;text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),background-color .2s}.ds-btn svg{transition:transform .25s var(--ease)}.ds-btn:hover svg{transform:translateX(3px)}.ds-btn:active{transform:scale(.97)}.ds-bar{display:flex;align-items:center;gap:10px;height:56px;padding:0 16px;background:var(--navy);color:var(--on-navy);box-shadow:0 1px 0 rgba(0,0,0,.25);font-family:var(--font)}.ds-logo{font:900 24px/1 var(--logo);letter-spacing:-.02em;color:#fff;text-decoration:none}.ds-logo b{color:var(--yellow)}.ds-tag{font-size:12px;color:var(--on-navy-m)}.ds-btn-y{background:var(--yellow);color:var(--navy);margin-left:auto}.ds-btn-y:hover{background:#ffdb63}.ds-sm{padding:10px 14px;font-size:14px;border-radius:12px}"
+    },
+    {
+      "name": "Waybill",
+      "kind": "custom",
+      "refersTo": "waybill",
+      "description": "Signature hero object: yellow header with barcode, field rows, headline, tear-off stub with CTA.",
+      "html": "<div class=\"ds-board\"><article class=\"ds-wb\"><div class=\"ds-wb-top\"><span class=\"ds-logo\">1<b>mm</b></span><span class=\"ds-t\">퀵 송장</span><span class=\"ds-code\">||| ||  ||| | ||<small>TODAY · QUICK</small></span></div><dl class=\"ds-rows\"><dt>보내는 곳</dt><dd>1mm 출고지</dd><dt>받는 곳</dt><dd>고객님 문 앞</dd><dt>배송</dt><dd>오토바이 퀵 <em>· 퀵비 5만원까지 무료</em></dd></dl><div class=\"ds-main\"><h1>퀵으로 <b>오늘</b> 받는 휴대폰</h1></div><div class=\"ds-stub\"><a class=\"ds-btn ds-btn-n\" href=\"#\">내 견적 보기 <svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></a><p><b>질문 몇 개면 끝</b> · 가입 없이</p></div></article></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:14px;font:700 15px/1 var(--font);padding:13px 18px;text-decoration:none;cursor:pointer;transition:transform .2s var(--ease),background-color .2s}.ds-btn svg{transition:transform .25s var(--ease)}.ds-btn:hover svg{transform:translateX(3px)}.ds-btn:active{transform:scale(.97)}.ds-board{background:radial-gradient(120% 90% at 50% 30%,var(--navy-l),var(--navy) 55%,var(--navy-d));padding:32px 20px;font-family:var(--font)}.ds-wb{max-width:460px;margin:0 auto;background:var(--paper);color:var(--ink);border-radius:6px;box-shadow:0 30px 60px -24px rgba(0,0,0,.6)}.ds-wb-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--yellow);border-radius:6px 6px 0 0;color:var(--navy)}.ds-logo{font:900 22px/1 var(--logo)}.ds-t{font-size:12.5px;font-weight:700}.ds-code{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;font:900 18px/1 monospace;letter-spacing:-.1em}.ds-code small{font:400 10px var(--font);letter-spacing:.12em}.ds-rows{display:grid;grid-template-columns:auto 1fr;margin:0;border-bottom:1.5px solid var(--ink)}.ds-rows dt,.ds-rows dd{margin:0;padding:9px 18px;border-top:1px solid var(--line);font-size:13.5px}.ds-rows dt{color:var(--muted);font-weight:500;padding-right:8px}.ds-rows dd{font-weight:700;padding-left:4px}.ds-rows em{font-style:normal;font-weight:500;color:var(--muted)}.ds-main{padding:20px 18px}.ds-main h1{margin:0;font-size:36px;line-height:1.12;letter-spacing:-.035em;font-weight:900;color:var(--navy);word-break:keep-all}.ds-main h1 b{background:linear-gradient(transparent 62%,var(--yellow) 62% 92%,transparent 92%)}.ds-stub{position:relative;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 18px 18px;background:var(--yellow-w);border-radius:0 0 6px 6px}.ds-stub::before{content:'';position:absolute;left:10px;right:10px;top:-1px;border-top:2px dashed rgba(30,42,90,.35)}.ds-stub p{margin:0;font-size:12.5px;color:var(--muted)}.ds-stub p b{color:var(--navy)}.ds-btn-n{background:var(--navy);color:#fff}.ds-btn-n:hover{background:var(--navy-l)}"
+    },
+    {
+      "name": "Insert Card: Packing Slip",
+      "kind": "card",
+      "refersTo": "insert-card",
+      "description": "Die-cut white insert with header rule and numbered line items.",
+      "html": "<div class=\"ds-tray\"><div class=\"ds-slip\"><div class=\"ds-h\"><b>내용물 명세</b><span>1mm 출고지 → 고객님</span></div><a href=\"#\"><span class=\"ds-no\">1</span><span><b>휴대폰</b><small>가장 싼 조건으로</small></span><span class=\"ds-q\">1대</span></a><a href=\"#\"><span class=\"ds-no\">2</span><span><b>새 유심</b><small>받은 뒤에 개통해요</small></span><span class=\"ds-q\">1장</span></a></div></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-tray{background:var(--tray);padding:24px;font-family:var(--font)}.ds-slip{background:var(--paper);border:1px solid var(--line);-webkit-mask:var(--cut);mask:var(--cut)}.ds-h{display:flex;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1.5px solid var(--ink);font-size:13px;color:var(--muted)}.ds-h b{font-size:15px;color:var(--ink)}.ds-slip a{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:18px 20px;border-top:1px dashed var(--line);text-decoration:none;color:var(--ink);transition:background-color .2s}.ds-slip a:first-of-type{border-top:0}.ds-slip a:hover{background:var(--yellow-w)}.ds-slip a:focus-visible{outline:3px solid var(--navy);outline-offset:-3px}.ds-no{width:34px;height:34px;border-radius:50%;border:2px solid var(--navy);display:grid;place-items:center;font-weight:900;color:var(--navy)}.ds-slip b{display:block;font-size:17.5px;letter-spacing:-.02em}.ds-slip small{font-size:13.5px;color:var(--muted)}.ds-q{font-size:13px;color:var(--muted)}"
+    },
+    {
+      "name": "Inspection Sheet",
+      "kind": "custom",
+      "refersTo": "document-header-navy",
+      "description": "Navy-headed checklist whose checks draw in on view.",
+      "html": "<div class=\"ds-tray\"><div class=\"ds-sheet\"><div class=\"ds-sh\"><b>1mm 검수 5가지</b><span>중고폰 한 대마다</span></div><ul><li><span class=\"ds-box\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></span>IMEI 분실·도난 조회</li><li><span class=\"ds-box\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></span>배터리 성능 확인</li></ul></div></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-tray{background:var(--tray);padding:24px;font-family:var(--font)}.ds-sheet{background:var(--paper);border:1px solid var(--line);-webkit-mask:var(--cut);mask:var(--cut)}.ds-sh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:var(--navy);color:#fff}.ds-sh span{font-size:12.5px;color:var(--on-navy-m)}.ds-sheet ul{list-style:none;margin:0;padding:6px 0}.ds-sheet li{display:flex;align-items:center;gap:14px;padding:12px 20px;font-size:16px;font-weight:500;color:var(--ink)}.ds-sheet li+li{border-top:1px solid var(--line)}.ds-box{width:26px;height:26px;border-radius:7px;border:2px solid var(--navy);display:grid;place-items:center;color:var(--navy)}.ds-box svg{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .5s var(--ease)}.ds-sheet:hover .ds-box svg{stroke-dashoffset:0}"
+    },
+    {
+      "name": "Receipt with Example Stamp",
+      "kind": "custom",
+      "refersTo": "receipt",
+      "description": "Torn-edge receipt; red 예시 stamp, ○ placeholder digits, navy total.",
+      "html": "<div class=\"ds-tray\"><div class=\"ds-rc\"><div class=\"ds-rh\"><span class=\"ds-logo\">1<b>mm</b></span><span class=\"ds-stamp\">예시</span></div><table><tr><td>출고가</td><td>○○○,○○○원</td></tr><tr class=\"neg\"><td>1mm 회원 할인</td><td>−30,000원</td></tr><tr class=\"tot\"><td>매달 내는 돈</td><td>○○,○○○원</td></tr></table></div></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-tray{background:var(--tray);padding:24px;font-family:var(--font);font-variant-numeric:tabular-nums}.ds-rc{background:var(--paper);padding:22px 20px 26px;border-radius:4px 4px 0 0;box-shadow:0 24px 40px -28px rgba(20,29,66,.4);-webkit-mask:linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat,radial-gradient(circle at 8px 10px,transparent 7px,#000 7.5px) bottom/16px 10px repeat-x;mask:linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat,radial-gradient(circle at 8px 10px,transparent 7px,#000 7.5px) bottom/16px 10px repeat-x}.ds-rh{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--ink);padding-bottom:12px}.ds-logo{font:900 20px/1 var(--logo);color:var(--navy)}.ds-stamp{font-size:12px;font-weight:900;color:var(--bad);border:2px solid var(--bad);border-radius:6px;padding:2px 8px;transform:rotate(-6deg);letter-spacing:.08em}.ds-rc table{width:100%;border-collapse:collapse;font-size:14.5px;color:var(--ink)}.ds-rc td{padding:10px 0;border-bottom:1px dashed var(--line)}.ds-rc td:last-child{text-align:right;font-weight:700}.ds-rc .neg td:last-child{color:var(--good)}.ds-rc .tot td{border-bottom:0;font-size:17px;font-weight:900;color:var(--navy)}"
+    },
+    {
+      "name": "7-Day Care Card",
+      "kind": "card",
+      "refersTo": "insert-card-yellow",
+      "description": "Yellow die-cut card carrying a giant Nunito numeral.",
+      "html": "<div class=\"ds-c7\"><div class=\"ds-big\">7<small>일</small></div><h3>받은 날부터 7일 안 교환·환불</h3></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-c7{background:var(--yellow);color:var(--navy);padding:26px 22px;-webkit-mask:var(--cut);mask:var(--cut);font-family:var(--font)}.ds-big{font:900 110px/.85 var(--logo);letter-spacing:-.04em}.ds-big small{font:900 .28em var(--font);margin-left:6px}.ds-c7 h3{font-size:22px;margin:10px 0 0;letter-spacing:-.02em}"
+    },
+    {
+      "name": "Tag and Numbered Pill",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Static descriptor tags; numbered pills for contents and question lists.",
+      "html": "<div class=\"ds-row\"><span class=\"ds-tagc\">번호이동</span><span class=\"ds-tagc\">기기변경</span><span class=\"ds-pill\"><i>1</i>휴대폰</span><span class=\"ds-pill\"><i>2</i>새 유심</span></div>",
+      "css": ":host{--navy:#1E2A5A;--navy-d:#141d42;--navy-l:#2b3a75;--yellow:#FFD23F;--yellow-w:#FFF3CC;--tray:#f3f5f9;--paper:#fff;--line:#dfe3eb;--ink:#14161c;--muted:#566074;--on-navy:#e8ecf7;--on-navy-m:#b7c0dd;--good:#087a4e;--bad:#c8261d;--font:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif;--logo:'Nunito','Noto Sans KR',sans-serif;--ease:cubic-bezier(.16,1,.3,1);--cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat}.ds-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:20px;background:var(--paper);font-family:var(--font)}.ds-tagc{font-size:12px;font-weight:700;border-radius:7px;padding:3px 9px;background:var(--tray);color:var(--navy)}.ds-pill{display:flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 6px;font-size:13.5px;font-weight:700;color:var(--navy)}.ds-pill i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;display:grid;place-items:center}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quick Parcel",
+    "overview": "The page is the parcel itself. A visitor arrives at the face of a corrugated navy box, sealed by a strip of yellow tape, with a shipping waybill stuck in the middle. Scrolling slits the tape, the two lid flaps swing open, the waybill lifts away, and the pale tray inside shows what was packed: phone, USIM, inspection sheet, care card. Every section after that is one of the box's paper contents: a packing slip, a receipt, an inspection sheet, a 7-day card, the back of the waybill.\n\nThe world is shipping paperwork, not shop window. Information sits in ruled rows, line items, checkboxes and stamps, so limits and example amounts read as printed facts rather than marketing. Density is moderate and phone-first: one column at 390px, two columns of \"prose + document\" from 760px.\n\nThe world is kraft-free. The box board is navy, not brown cardboard, and the yellow is tape and label stock, not a highlight colour sprinkled on generic cards.",
+    "keyCharacteristics": [
+      "Navy board, yellow tape, white paper: three materials, each with a fixed job.",
+      "Every container is a shipping document or a die-cut insert card, never a plain rounded card.",
+      "Ruled rows (1.5px ink under headers, dashed hairlines between line items) carry structure instead of boxes and shadows.",
+      "Heavy Korean type (Noto Sans KR 900) with tight negative tracking; Nunito 900 only for the wordmark and standalone numerals.",
+      "One signature interaction: the scroll-driven unboxing."
+    ],
+    "rules": [
+      {
+        "name": "The Three Materials Rule",
+        "body": "Navy is board, yellow is tape and label stock, white is paper. A new element picks the material it would be made of in a real parcel, and takes that colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yellow Sits On Navy Rule",
+        "body": "Yellow is a fill or a mark on navy; yellow text appears only on navy (wordmark \"mm\", emphasized figures in the pick panel). On white or tray, yellow is a fill behind navy text, never a text colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Stamp Rule",
+        "body": "Any illustrative amount is stamped: a red, outlined, slightly rotated \"예시\" stamp on the document, with unknown digits printed as ○. Red is reserved for stamps and hard \"no\" states.",
+        "section": "colors"
+      },
+      {
+        "name": "The Keep-All Rule",
+        "body": "Korean text breaks at word boundaries (`word-break: keep-all`) and headings wrap balanced. Never let a Korean word split across lines.",
+        "section": "typography"
+      },
+      {
+        "name": "The Nunito Is Only For Marks Rule",
+        "body": "Nunito sets the wordmark, grade letters and the lone big numeral. It never sets a Korean word, a sentence or a heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Numbers are tabular across the page so receipt and waybill columns align.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tray Rule",
+        "body": "Content lives on the tray; navy bands are the box walls between groups of paper. Do not alternate random section colours.",
+        "section": "layout"
+      },
+      {
+        "name": "The Resting Paper Rule",
+        "body": "Shadows have negative spread and navy tint and fall downward. No hard offset shadows, no glows, no shadow on every card.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Die-Cut Rule",
+        "body": "A container that holds content in this world is an insert card with die-cut corners or a named shipping document. Never a plain rounded rectangle card.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** make every new surface a parcel object: a waybill, slip, receipt, sheet, card or label, with a header rule and ruled rows.",
+      "**Do** give insert cards the die-cut corner mask and a 1px hairline, on paper, navy-lift or yellow.",
+      "**Do** stamp every illustrative amount \"예시\" and print unknown digits as ○.",
+      "**Do** keep primary CTAs yellow on navy and navy on yellow or white.",
+      "**Do** set Korean in Noto Sans KR with `keep-all` breaking and negative tracking at 700 to 900.",
+      "**Do** draw icons as stroked inline SVG (2 to 2.4px strokes, round caps) in navy, green or red by meaning.",
+      "**Do** ship the closed-box face as the full reduced-motion experience."
+    ],
+    "donts": [
+      "**Don't** use kraft brown or cardboard textures; the board is navy.",
+      "**Don't** use plain rounded cards, glassmorphism or gradient cards for content.",
+      "**Don't** set yellow text on white or tray.",
+      "**Don't** use Nunito for Korean or for headings.",
+      "**Don't** add hard offset shadows, glows or shadows on every card.",
+      "**Don't** add kicker or eyebrow labels above headings; the subtitle sits under the heading.",
+      "**Don't** use carrier, Apple or Samsung logos; carrier names are plain text.",
+      "**Don't** use emoji or text glyphs as icons."
+    ]
+  }
+}

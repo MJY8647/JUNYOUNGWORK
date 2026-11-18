@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "repeating-stripes-gradient",
+        "value": "*",
+        "files": [
+          "1mm-site/index.html"
+        ],
+        "createdAt": "2026-11-18T05:43:05.467Z",
+        "reason": "agent: corrugated board flutes are the parcel world's material per direction contract"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "1mm-site/index.html"
+        ],
+        "createdAt": "2026-11-18T05:43:05.474Z",
+        "reason": "agent: sections are full-bleed; inset comes from inner .wrap gutter (16px+), verified at 390px"
+      }
+    ]
+  }
+}

@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1mm · 퀵으로 받는 휴대폰</title>
+<meta name="description" content="통신사 개통 · 자급제 · 중고폰을 한 번에 비교하고, 가장 싼 조건으로 오늘 퀵으로 받는 휴대폰. 1mm 서비스 소개.">
+<meta name="theme-color" content="#1E2A5A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1E2A5A; --navy-d:#141d42; --navy-l:#2b3a75;
+  --yellow:#FFD23F; --yellow-d:#e9b923; --yellow-w:#FFF3CC;
+  --tray:#f3f5f9; --paper:#ffffff; --line:#dfe3eb;
+  --ink:#14161c; --muted:#566074; --on-navy:#e8ecf7; --on-navy-m:#b7c0dd;
+  --good:#087a4e; --bad:#c8261d;
+  --font:"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  --logo:"Nunito","Noto Sans KR",sans-serif;
+  --gut:max(16px,env(safe-area-inset-left,0px));
+  --ease:cubic-bezier(.16,1,.3,1);
+  --cut:radial-gradient(circle at 0 0,transparent 15px,#000 15.5px) top left/51% 51% no-repeat,radial-gradient(circle at 100% 0,transparent 15px,#000 15.5px) top right/51% 51% no-repeat,radial-gradient(circle at 0 100%,transparent 15px,#000 15.5px) bottom left/51% 51% no-repeat,radial-gradient(circle at 100% 100%,transparent 15px,#000 15.5px) bottom right/51% 51% no-repeat;
+  color-scheme:light;
+}
+.insert{border:1px solid var(--line);-webkit-mask:var(--cut);mask:var(--cut)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scrollbar-color:var(--navy) var(--tray)}
+body{margin:0;background:var(--tray);color:var(--ink);font-family:var(--font);line-height:1.6;letter-spacing:-.01em;word-break:keep-all;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+::selection{background:var(--yellow);color:var(--navy)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px;border-radius:6px}
+.light :focus-visible,.light:focus-visible{outline-color:var(--navy)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+img,svg{display:block}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding-inline:var(--gut)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- top bar ---------- */
+.bar{position:fixed;inset:0 0 auto;z-index:50;padding-top:env(safe-area-inset-top,0px);
+  background:var(--navy);color:var(--on-navy);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.bar .wrap{display:flex;align-items:center;gap:10px;height:56px}
+.logo{font-family:var(--logo);font-weight:900;font-size:24px;letter-spacing:-.02em;text-decoration:none;color:#fff;line-height:1}
+.logo b{color:var(--yellow);font-weight:900}
+.bar .tag{font-size:12px;color:var(--on-navy-m)}
+.bar .go{margin-left:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font:700 15px/1 var(--font);text-decoration:none;
+  padding:13px 18px;cursor:pointer;border:0;transition:transform .2s var(--ease),box-shadow .2s var(--ease),background-color .2s}
+.btn svg{width:18px;height:18px;transition:transform .25s var(--ease)}
+.btn:hover svg{transform:translateX(3px)}
+.btn:active{transform:scale(.97)}
+.btn.y{background:var(--yellow);color:var(--navy);box-shadow:0 6px 14px -6px rgba(10,14,32,.45)}
+.btn.y:hover{background:#ffdb63}
+.btn.n{background:var(--navy);color:#fff;box-shadow:0 8px 18px -8px rgba(30,42,90,.55)}
+.btn.n:hover{background:var(--navy-l)}
+.btn.sm{padding:10px 14px;font-size:14px;border-radius:12px}
+
+/* ---------- the box (hero) ---------- */
+.unbox{position:relative;background:var(--navy-d)}
+.stage{position:relative;min-height:100svh;overflow:hidden;display:grid;place-items:center;padding:96px var(--gut) 72px}
+.board{position:absolute;inset:0;background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 7px),
+  radial-gradient(120% 90% at 50% 30%,var(--navy-l),var(--navy) 55%,var(--navy-d))}
+.tray-in{display:none}
+.flap{display:none}
+/* tape down the seam */
+.tape{position:absolute;top:0;bottom:0;left:50%;width:min(132px,22vw);transform:translateX(-50%);
+  background:linear-gradient(90deg,rgba(0,0,0,.08),transparent 18%,transparent 82%,rgba(0,0,0,.08)),var(--yellow);opacity:.92;
+  box-shadow:0 0 0 1px rgba(0,0,0,.04)}
+.tape::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 26px,rgba(30,42,90,.07) 26px 27px)}
+.tape span{position:absolute;left:50%;top:calc(64px + 2vh);transform:translateX(-50%);writing-mode:vertical-rl;font:900 13px/1 var(--font);letter-spacing:.3em;color:var(--navy);opacity:.8}
+
+.waybill{position:relative;z-index:5;width:min(560px,100%);background:var(--paper);color:var(--ink);border-radius:6px;
+  box-shadow:0 30px 60px -24px rgba(0,0,0,.6),0 2px 0 rgba(0,0,0,.05);transform-origin:50% 0}
+.wb-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--yellow);border-radius:6px 6px 0 0}
+.wb-top .logo{color:var(--navy);font-size:22px}
+.wb-top .logo b{color:var(--navy)}
+.wb-top .t{font-size:12.5px;font-weight:700;color:var(--navy)}
+.code{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.code svg{height:26px;width:auto}
+.code small{font-size:10px;letter-spacing:.12em;color:var(--navy)}
+.wb-rows{display:grid;grid-template-columns:auto 1fr;margin:0;border-bottom:1.5px solid var(--ink)}
+.wb-rows dt,.wb-rows dd{margin:0;padding:9px 18px;border-top:1px solid var(--line);font-size:13.5px}
+.wb-rows dt{color:var(--muted);font-weight:500;padding-right:8px;white-space:nowrap}
+.wb-rows dd{font-weight:700;padding-left:4px}
+.wb-rows dd em{font-style:normal;font-weight:500;color:var(--muted)}
+.wb-main{padding:20px 18px 18px}
+h1{margin:0;font-size:clamp(34px,9vw,58px);line-height:1.12;letter-spacing:-.035em;font-weight:900;text-wrap:balance;color:var(--navy)}
+h1 b{background:linear-gradient(transparent 62%,var(--yellow) 62% 92%,transparent 92%);font-weight:900}
+.lede{margin:12px 0 0;font-size:16px;color:var(--muted);max-width:36ch}
+.stub{position:relative;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 18px 18px;
+  background:var(--yellow-w);border-radius:0 0 6px 6px}
+.stub::before{content:"";position:absolute;left:10px;right:10px;top:-1px;border-top:2px dashed rgba(30,42,90,.35)}
+.stub::after{content:"";position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:var(--navy);box-shadow:calc(min(560px,100vw - 32px) - 0px) 0 0 var(--navy)}
+.stub .btn{flex:1 1 auto;min-width:200px;font-size:16.5px;padding:16px 20px}
+.stub p{margin:0;font-size:12.5px;color:var(--muted)}
+.stub p b{color:var(--navy)}
+.cue{position:absolute;z-index:6;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:12px;font-weight:900;color:var(--navy);text-decoration:none;letter-spacing:.04em}
+.cue svg{width:20px;height:20px;animation:nudge 1.8s var(--ease) infinite}
+@keyframes nudge{50%{transform:translateY(5px)}}
+
+/* animated unboxing: only when JS + motion allowed */
+.anim .unbox{height:210svh}
+.anim .stage{position:sticky;top:0;height:100svh;min-height:0}
+.anim .tray-in{display:grid;position:absolute;inset:0;place-items:center;background:var(--tray);box-shadow:inset 0 0 0 clamp(14px,3vw,28px) var(--navy),inset 0 0 0 calc(clamp(14px,3vw,28px) + 1px) var(--navy-d),inset 0 30px 60px -10px rgba(20,29,66,.45);opacity:calc(var(--open,0) * 1.4)}
+.anim .board,.anim .tape{display:none}
+.anim .flap{display:block;position:absolute;top:0;bottom:0;width:50%;z-index:3;background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 7px),
+  radial-gradient(160% 90% at var(--fx) 30%,var(--navy-l),var(--navy) 55%,var(--navy-d));
+  backface-visibility:hidden;will-change:transform}
+.anim .persp{position:absolute;inset:0;perspective:1400px;perspective-origin:50% 40%;z-index:3}
+.anim .flap.l{left:0;--fx:100%;transform-origin:0 50%;transform:rotateY(calc(var(--open,0) * -82deg))}
+.anim .flap.r{right:0;--fx:0%;transform-origin:100% 50%;transform:rotateY(calc(var(--open,0) * 82deg))}
+.anim .flap::after{content:"";position:absolute;top:0;bottom:0;width:min(66px,11vw);background:var(--yellow);opacity:calc(.92 - var(--open,0) * .92)}
+.anim .flap.l::after{right:0}
+.anim .flap.r::after{left:0}
+.anim .flap::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35);opacity:calc(var(--open,0) * .9);z-index:1}
+.anim .slit{position:absolute;z-index:4;left:50%;top:0;width:2px;margin-left:-1px;background:var(--navy-d);height:calc(var(--slit,0) * 100%);opacity:calc(1 - var(--open,0) * 3)}
+.anim .waybill{transform:translateY(calc(var(--lift,0) * -115svh)) rotate(calc(var(--lift,0) * -9deg));will-change:transform}
+.anim .cue{opacity:calc(1 - var(--slit,0) * 4)}
+.tray-in .nest{position:relative;display:flex;align-items:flex-end;gap:clamp(18px,5vw,44px);
+  transform:translateY(calc((1 - var(--open,0)) * 40px)) scale(calc(.9 + var(--open,0) * .1))}
+.nest .phone{width:clamp(150px,34vw,230px);height:auto;filter:drop-shadow(0 22px 26px rgba(20,29,66,.35))}
+.nest .usim{width:clamp(88px,19vw,128px);height:auto;filter:drop-shadow(0 12px 14px rgba(20,29,66,.25));transform:rotate(-7deg)}
+.tray-in .lbl{position:absolute;left:0;right:0;bottom:clamp(44px,10svh,96px);display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 48px;margin:0}
+.tray-in .lbl span{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 6px;font-size:13.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:7px}
+.tray-in .lbl i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;display:grid;place-items:center}
+
+/* ---------- light sections ---------- */
+.light{background:var(--tray);color:var(--ink)}
+section.part{padding:clamp(72px,12vw,132px) 0 clamp(48px,8vw,96px)}
+h2{margin:0 0 14px;font-size:clamp(27px,5.4vw,42px);line-height:1.2;letter-spacing:-.03em;font-weight:900;color:var(--navy);text-wrap:balance}
+h2 small{display:block;font-size:clamp(14px,2.6vw,20px);letter-spacing:-.01em;font-weight:700;color:var(--muted);margin-top:6px}
+.sub{margin:0 0 32px;font-size:16.5px;color:var(--muted);max-width:52ch}
+h3{margin:0 0 6px;font-size:19px;letter-spacing:-.02em;line-height:1.35}
+
+/* packing slip */
+.slip{background:var(--paper);overflow:hidden}
+.slip-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:16px 20px;border-bottom:1.5px solid var(--ink);font-size:13px;color:var(--muted)}
+.slip-h b{font-size:15px;color:var(--ink)}
+.slip ol{list-style:none;margin:0;padding:0}
+.slip li a{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:18px 20px;border-top:1px dashed var(--line);text-decoration:none;transition:background-color .2s}
+.slip li:first-child a{border-top:0}
+.slip li a:hover{background:var(--yellow-w)}
+.slip .no{width:34px;height:34px;border-radius:50%;border:2px solid var(--navy);display:grid;place-items:center;font-weight:900;color:var(--navy);font-size:15px}
+.slip .it b{display:block;font-size:17.5px;letter-spacing:-.02em}
+.slip .it span{font-size:13.5px;color:var(--muted)}
+.slip .qty{font-size:13px;color:var(--muted);white-space:nowrap}
+.slip .qty svg{width:18px;height:18px;display:inline-block;vertical-align:-4px;margin-left:6px;color:var(--navy)}
+
+/* ① phone routes */
+.routes{display:grid;gap:0;background:var(--paper)}
+.route{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:22px 20px;border-top:1px dashed var(--line)}
+.route:first-child{border-top:0}
+.route .ic{color:var(--navy);padding-top:2px}
+.route .ic svg{width:30px;height:30px}
+.route h3 em{font-style:normal;font-size:13px;font-weight:500;color:var(--muted);margin-left:8px}
+.route p{margin:0;color:var(--muted);font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tags span{font-size:12px;font-weight:700;border-radius:7px;padding:3px 9px;background:var(--tray);color:var(--navy)}
+.pick{margin-top:22px;background:var(--navy);color:var(--on-navy);border-radius:8px;padding:24px 20px;position:relative;overflow:hidden}
+.pick h3{color:#fff;font-size:21px}
+.pick > p{margin:0 0 18px;color:var(--on-navy-m);font-size:15px}
+.qs{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:8px;counter-reset:q}
+.qs li{counter-increment:q;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 14px 7px 7px;font-size:14px;font-weight:500;color:#fff}
+.qs li::before{content:counter(q);width:24px;height:24px;border-radius:50%;background:var(--yellow);color:var(--navy);font-weight:900;font-size:12.5px;display:grid;place-items:center}
+.pick .out{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pick .out p{margin:0;font-size:14px;color:var(--on-navy)}
+.pick .out p b{color:var(--yellow)}
+
+/* receipt */
+.split{display:grid;gap:28px;margin-top:56px;align-items:start}
+.receipt{background:var(--paper);border-radius:4px 4px 0 0;padding:22px 20px 26px;position:relative;box-shadow:0 24px 40px -28px rgba(20,29,66,.4);
+  -webkit-mask:linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat,radial-gradient(circle at 8px 10px,transparent 7px,#000 7.5px) bottom/16px 10px repeat-x;
+  mask:linear-gradient(#000,#000) top/100% calc(100% - 10px) no-repeat,radial-gradient(circle at 8px 10px,transparent 7px,#000 7.5px) bottom/16px 10px repeat-x}
+.receipt .rh{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.receipt .rh .logo{color:var(--navy);font-size:20px}
+.receipt .rh .logo b{color:var(--navy)}
+.stamp{font-size:12px;font-weight:900;color:var(--bad);border:2px solid var(--bad);border-radius:6px;padding:2px 8px;transform:rotate(-6deg);letter-spacing:.08em}
+.receipt table{width:100%;border-collapse:collapse;font-size:14.5px}
+.receipt td{padding:10px 0;border-bottom:1px dashed var(--line)}
+.receipt td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.receipt td small{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
+.receipt .neg td:last-child{color:var(--good)}
+.receipt .ph{color:#6b7487;letter-spacing:.05em}
+.receipt .tot td{border-bottom:0;padding-top:14px;font-size:17px;font-weight:900;color:var(--navy)}
+.receipt .tot td:last-child{font-size:20px}
+.receipt .fn{margin:14px 0 0;font-size:12px;color:var(--muted)}
+.why h3{font-size:22px;color:var(--navy);margin-bottom:12px}
+.why ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.why li{display:grid;grid-template-columns:26px 1fr;gap:10px;font-size:15.5px}
+.why li svg{width:22px;height:22px;color:var(--good);margin-top:2px}
+.why li span{color:var(--muted)}
+.why li b{color:var(--ink);display:block}
+
+/* ② usim / activation */
+.part.usim{background:var(--navy);color:var(--on-navy)}
+.usim h2{color:#fff}
+.usim .sub{color:var(--on-navy-m)}
+.flow{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:f}
+.flow li{position:relative;background:var(--navy-l);-webkit-mask:var(--cut);mask:var(--cut);padding:20px 20px 20px 72px;counter-increment:f}
+.flow li::before{content:counter(f);position:absolute;left:20px;top:20px;width:34px;height:34px;border-radius:10px;background:var(--yellow);color:var(--navy);font-weight:900;display:grid;place-items:center}
+.flow b{display:block;color:#fff;font-size:17px}
+.flow span{font-size:14.5px;color:var(--on-navy-m)}
+.hours{margin-top:22px;display:grid;gap:0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.14)}
+.hours div{display:flex;justify-content:space-between;gap:16px;padding:13px 18px;font-size:14.5px;border-top:1px solid rgba(255,255,255,.1)}
+.hours div:first-child{border-top:0}
+.hours div span{color:var(--on-navy-m)}
+.hours div b{color:#fff;text-align:right}
+.hours div.no b{color:#ffb4ad}
+.usim .note{margin:14px 0 0;font-size:13px;color:var(--on-navy-m)}
+
+/* ③ inspection sheet */
+.sheet{background:var(--paper);overflow:hidden}
+.sheet li+li{border-top:1px solid #eef1f6}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;background:var(--navy);color:#fff}
+.sheet-h b{font-size:16px}
+.sheet-h span{font-size:12.5px;color:var(--on-navy-m)}
+.sheet ul{list-style:none;margin:0;padding:6px 0}
+.sheet li{display:flex;align-items:center;gap:14px;padding:12px 20px;font-size:16px;font-weight:500}
+.sheet li .box{flex:none;width:26px;height:26px;border-radius:7px;border:2px solid var(--navy);display:grid;place-items:center;color:var(--navy)}
+.sheet li .box svg{width:18px;height:18px;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .5s var(--ease)}
+.sheet.done li .box svg{stroke-dashoffset:0}
+.sheet.done li:nth-child(2) .box svg{transition-delay:.12s}
+.sheet.done li:nth-child(3) .box svg{transition-delay:.24s}
+.sheet.done li:nth-child(4) .box svg{transition-delay:.36s}
+.sheet.done li:nth-child(5) .box svg{transition-delay:.48s}
+.sheet li em{font-style:normal;font-size:13px;color:var(--muted);margin-left:auto;text-align:right}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.grades div{background:var(--paper);padding:14px 14px 16px;border:1px solid var(--line);-webkit-mask:var(--cut);mask:var(--cut)}
+.grades b{display:block;font-family:var(--logo);font-size:30px;line-height:1;color:var(--navy);margin-bottom:6px}
+.grades div:first-child b{color:var(--good)}
+.grades span{font-size:13.5px;color:var(--muted)}
+
+/* ④ care card */
+.care{display:grid;gap:14px}
+.card-7{background:var(--yellow);color:var(--navy);padding:26px 22px;position:relative;overflow:hidden;-webkit-mask:var(--cut);mask:var(--cut)}
+.card-7 .big{font-family:var(--logo);font-weight:900;font-size:clamp(86px,22vw,150px);line-height:.85;letter-spacing:-.04em}
+.card-7 .big small{font-family:var(--font);font-size:.28em;letter-spacing:-.02em;margin-left:6px}
+.card-7 h3{font-size:22px;margin-top:10px}
+.card-7 p{margin:0;font-size:15px;color:#3b4570}
+.care-list{list-style:none;margin:0;padding:0;background:var(--paper);overflow:hidden}
+.care-list li{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:18px 20px;border-top:1px solid var(--line)}
+.care-list li:first-child{border-top:0}
+.care-list .ic{width:44px;height:44px;border-radius:12px;background:var(--tray);display:grid;place-items:center;color:var(--navy)}
+.care-list .ic svg{width:24px;height:24px}
+.care-list b{display:block;font-size:16.5px}
+.care-list span{font-size:14.5px;color:var(--muted)}
+
+/* waybill back: shipping */
+.back{background:var(--paper);overflow:hidden}
+.back-h{padding:16px 20px;border-bottom:1.5px solid var(--ink);display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.back-h b{color:var(--ink);font-size:15px}
+.ship{display:grid}
+.ship div{display:grid;grid-template-columns:30px 1fr;gap:12px;padding:16px 20px;border-top:1px dashed var(--line);font-size:15px}
+.ship div:first-child{border-top:0}
+.ship svg{width:24px;height:24px}
+.ship .ok svg{color:var(--good)}.ship .mid svg{color:var(--navy)}.ship .no svg{color:var(--bad)}
+.ship b{display:block}
+.ship span{color:var(--muted);font-size:14px}
+.big-free{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:22px 20px;background:var(--yellow-w);border-top:1.5px solid var(--ink)}
+.big-free b{font-size:clamp(34px,7vw,48px);font-weight:900;letter-spacing:-.035em;color:var(--navy);line-height:1}
+.big-free span{font-size:15px;color:var(--muted)}
+
+/* compare (for reviewers) */
+.cmp{width:100%;border-collapse:collapse;background:var(--paper);border-radius:10px;overflow:hidden;box-shadow:0 24px 50px -32px rgba(20,29,66,.35);font-size:15px}
+.cmp th,.cmp td{text-align:left;padding:16px 18px;border-top:1px solid var(--line);vertical-align:top}
+.cmp thead th{border-top:0;font-size:13px;color:var(--muted);font-weight:700;background:var(--tray)}
+.cmp thead th:last-child{color:var(--navy)}
+.cmp tbody th{font-weight:700;white-space:nowrap;color:var(--ink)}
+.cmp td{color:var(--muted)}
+.cmp td:last-child{color:var(--ink);font-weight:500;background:color-mix(in srgb,var(--yellow-w) 60%,#fff)}
+.cmp-note{font-size:12.5px;color:var(--muted);margin:12px 0 0}
+
+/* close */
+.close{background:var(--navy);color:var(--on-navy);text-align:center;padding:clamp(80px,14vw,140px) 0 40px;position:relative;overflow:hidden}
+.close::before{content:"";position:absolute;left:50%;top:0;height:clamp(60px,10vw,96px);width:min(132px,22vw);transform:translateX(-50%);background:linear-gradient(90deg,rgba(0,0,0,.08),transparent 18%,transparent 82%,rgba(0,0,0,.08)),repeating-linear-gradient(0deg,transparent 0 26px,rgba(30,42,90,.07) 26px 27px),var(--yellow);opacity:.92;clip-path:polygon(0 0,100% 0,100% 100%,0 84%)}
+.close h2{color:#fff;font-size:clamp(32px,7vw,54px)}
+.close p{margin:0 auto 28px;max-width:40ch;color:var(--on-navy-m);font-size:16px}
+.close .btn{font-size:17px;padding:17px 26px}
+footer{margin-top:72px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);font-size:12.5px;color:var(--on-navy-m);text-align:left;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+footer .logo{font-size:20px}
+
+@media (min-width:760px){
+  .bar .wrap{height:64px}
+  .route{grid-template-columns:40px minmax(0,1fr);padding:24px 28px}
+  .split{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px}
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start}
+  .care{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:stretch}
+  .flow{grid-template-columns:repeat(3,1fr)}
+  .flow li{padding:72px 20px 22px}
+  .pick{padding:30px 32px}
+}
+@media (max-width:420px){
+  .bar .tag{display:none}
+  .wb-rows dt,.wb-rows dd{padding:8px 14px;font-size:13px}
+  .wb-main,.stub,.wb-top{padding-inline:14px}
+  .sheet li em{display:none}
+  .cmp th,.cmp td{padding:13px 12px;font-size:14px}
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="1mm 처음으로">1<b>mm</b></a>
+    <span class="tag">퀵으로 받는 휴대폰</span>
+    <a class="btn y sm go" href="https://claude.ai/artifact/5o5qAhFwsVt9oBGCCPRGjy" target="_blank" rel="noopener">내 견적 보기</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- the parcel -->
+  <section class="unbox" aria-labelledby="h1">
+    <div class="stage">
+      <div class="board" aria-hidden="true"></div>
+      <div class="tape" aria-hidden="true"><span>1mm 퀵</span></div>
+
+      <div class="tray-in" aria-hidden="true">
+        <div class="nest">
+          <svg class="phone" viewBox="0 0 200 400" fill="none">
+            <rect x="4" y="4" width="192" height="392" rx="34" fill="#14161c"/>
+            <rect x="12" y="12" width="176" height="376" rx="27" fill="#1E2A5A"/>
+            <rect x="74" y="24" width="52" height="14" rx="7" fill="#14161c"/>
+            <text x="100" y="196" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#fff">1<tspan fill="#FFD23F">mm</tspan></text>
+            <text x="100" y="228" text-anchor="middle" font-family="Noto Sans KR,sans-serif" font-weight="700" font-size="13" fill="#b7c0dd">미개통 · 개통 요청 대기</text>
+            <rect x="66" y="362" width="68" height="5" rx="2.5" fill="#b7c0dd" opacity=".6"/>
+          </svg>
+          <svg class="usim" viewBox="0 0 120 160" fill="none">
+            <path d="M8 4h78l30 30v118a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fff" stroke="#dfe3eb" stroke-width="2"/>
+            <rect x="26" y="58" width="68" height="54" rx="8" fill="#FFD23F"/>
+            <path d="M26 76h22M26 94h22M72 76h22M72 94h22M60 58v54" stroke="#1E2A5A" stroke-width="2.5" opacity=".55"/>
+            <text x="60" y="140" text-anchor="middle" font-family="Noto Sans KR,sans-serif" font-weight="900" font-size="13" fill="#1E2A5A">새 유심</text>
+          </svg>
+        </div>
+        <p class="lbl"><span><i>1</i>휴대폰</span><span><i>2</i>새 유심</span><span><i>3</i>검수표</span><span><i>4</i>보장 카드</span></p>
+      </div>
+
+      <div class="persp" aria-hidden="true"><div class="flap l"></div><div class="flap r"></div></div>
+      <div class="slit" aria-hidden="true"></div>
+
+      <article class="waybill" aria-label="1mm 퀵 송장">
+        <div class="wb-top">
+          <span class="logo">1<b>mm</b></span><span class="t">퀵 송장</span>
+          <span class="code" aria-hidden="true">
+            <svg viewBox="0 0 110 26"><g fill="#1E2A5A"><rect x="0" width="3" height="26"/><rect x="5" width="1.5" height="26"/><rect x="9" width="4" height="26"/><rect x="15" width="1.5" height="26"/><rect x="18" width="2" height="26"/><rect x="23" width="4" height="26"/><rect x="29" width="1.5" height="26"/><rect x="33" width="3" height="26"/><rect x="38" width="1.5" height="26"/><rect x="42" width="2" height="26"/><rect x="46" width="4" height="26"/><rect x="52" width="1.5" height="26"/><rect x="56" width="3" height="26"/><rect x="61" width="2" height="26"/><rect x="66" width="1.5" height="26"/><rect x="69" width="4" height="26"/><rect x="75" width="2" height="26"/><rect x="80" width="1.5" height="26"/><rect x="83" width="3" height="26"/><rect x="88" width="4" height="26"/><rect x="94" width="1.5" height="26"/><rect x="98" width="2" height="26"/><rect x="103" width="3" height="26"/><rect x="108" width="2" height="26"/></g></svg>
+            <small>TODAY · QUICK</small>
+          </span>
+        </div>
+        <dl class="wb-rows">
+          <dt>보내는 곳</dt><dd>1mm 출고지</dd>
+          <dt>받는 곳</dt><dd>고객님 문 앞</dd>
+          <dt>내용물</dt><dd>미개통 폰 1 · 새 유심 1</dd>
+          <dt>배송</dt><dd>오토바이 퀵 <em>· 퀵비 5만원까지 무료</em></dd>
+        </dl>
+        <div class="wb-main">
+          <h1 id="h1">퀵으로 <b>오늘</b> 받는<br>휴대폰</h1>
+          <p class="lede">통신사 개통 · 자급제 · 중고폰을 한 번에 비교해서, 가장 싼 조건부터 보여드려요.</p>
+        </div>
+        <div class="stub">
+          <a class="btn n" href="https://claude.ai/artifact/5o5qAhFwsVt9oBGCCPRGjy" target="_blank" rel="noopener">내 견적 보기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p><b>질문 몇 개면 끝</b> · 가입 없이 바로 볼 수 있어요</p>
+        </div>
+      </article>
+
+      <a class="cue" href="#inside">상자 열어 보기
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+    </div>
+  </section>
+
+  <!-- packing slip -->
+  <section class="part light" id="inside" aria-labelledby="h-inside">
+    <div class="wrap two">
+      <div>
+        <h2 id="h-inside">상자 안에 든 것</h2>
+        <p class="sub">1mm 상자에는 폰만 들어 있지 않아요. 지금 쓰는 폰이 끊기지 않게 하는 유심, 중고폰 검수표, 받은 뒤를 챙기는 보장 카드까지 같이 와요.</p>
+      </div>
+      <div class="slip insert">
+        <div class="slip-h"><b>내용물 명세</b><span>1mm 출고지 → 고객님</span></div>
+        <ol>
+          <li><a href="#phone"><span class="no">1</span><span class="it"><b>휴대폰</b><span>세 가지 방법 중 가장 싼 조건으로</span></span><span class="qty">1대<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+          <li><a href="#usim"><span class="no">2</span><span class="it"><b>새 유심</b><span>폰을 받은 뒤에 개통해요</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+          <li><a href="#check"><span class="no">3</span><span class="it"><b>검수표</b><span>중고폰은 5가지를 직접 확인해요</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+          <li><a href="#care"><span class="no">4</span><span class="it"><b>보장 카드</b><span>받은 날부터 7일 안 교환·환불</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 phone -->
+  <section class="part light" id="phone" aria-labelledby="h-phone" style="padding-top:clamp(40px,7vw,80px)">
+    <div class="wrap">
+      <h2 id="h-phone">휴대폰<small>세 가지 방법을 한 화면에서 비교해요</small></h2>
+      <p class="sub">어떻게 사든 1mm는 고른 조건에서 가장 싼 것부터 보여드려요.</p>
+
+      <div class="routes insert">
+        <div class="route">
+          <span class="ic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="4" width="14" height="24" rx="3"/><path d="M14 8h4"/><path d="M3 12c1.5-2 1.5-6 0-8M29 12c-1.5-2-1.5-6 0-8"/></svg></span>
+          <div><h3>통신사 개통</h3><p>SKT · KT · LG U+ 지원금을 한 번에 비교해요.</p><div class="tags"><span>번호이동</span><span>기기변경</span></div></div>
+        </div>
+        <div class="route">
+          <span class="ic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="4" width="14" height="24" rx="3"/><path d="M12 8h4"/><path d="M22 18h5l2 2v7h-7z"/></svg></span>
+          <div><h3>자급제</h3><p>약정 없는 새 폰이에요. 유심만 옮겨 꽂으면 돼요.</p><div class="tags"><span>약정 없음</span><span>카드 할부 가능</span></div></div>
+        </div>
+        <div class="route">
+          <span class="ic"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="24" rx="3"/><path d="M10 8h4"/><path d="M23 14l6 2.3v4.5c0 3.7-2.6 5.9-6 7-3.4-1.1-6-3.3-6-7v-4.5z"/><path d="M20.5 21l1.8 1.8 3.4-3.6"/></svg></span>
+          <div><h3>중고폰</h3><p>1mm가 직접 검수한 재고만 팔아요. 입고되면 바로 목록에 떠요.</p><div class="tags"><span>IMEI 조회 완료</span><span>S·A·B 등급</span></div></div>
+        </div>
+      </div>
+
+      <div class="pick">
+        <h3>잘 모르겠다면, 1mm가 골라드려요</h3>
+        <p>통신사 이름도, 요금제 이름도 몰라도 돼요. 질문에 답하면 한 달 예산 안에 들어오는 폰만 보여드려요.</p>
+        <ol class="qs">
+          <li>지금 쓰는 통신사</li><li>가족·인터넷 결합</li><li>한 달 예산 <small style="opacity:.7">(폰값+요금)</small></li><li>데이터 사용량</li><li>원하는 브랜드</li>
+        </ol>
+        <div class="out">
+          <a class="btn y" href="https://claude.ai/artifact/5o5qAhFwsVt9oBGCCPRGjy" target="_blank" rel="noopener">질문에 답하고 추천 받기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p>결합 질문은 통신 3사를 쓰는 분에게만 나와요 · <b>가장 싼 실제 요금제</b>를 자동으로 골라 비교해요</p>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="receipt" aria-label="견적서 예시">
+          <div class="rh"><span class="logo">1<b>mm</b></span><span class="stamp">예시</span></div>
+          <table>
+            <tr><td>출고가</td><td class="ph">○○○,○○○원</td></tr>
+            <tr class="neg"><td>공시지원금<small>통신사</small></td><td class="ph">−○○,○○○원</td></tr>
+            <tr class="neg"><td>추가지원금<small>판매점</small></td><td class="ph">−○○,○○○원</td></tr>
+            <tr class="neg"><td>1mm 회원 할인<small>가입비 없음</small></td><td>−30,000원</td></tr>
+            <tr><td>퀵 배송<small>5만원까지</small></td><td>무료</td></tr>
+            <tr class="tot"><td>매달 내는 돈</td><td class="ph">○○,○○○원</td></tr>
+          </table>
+          <p class="fn">견적서는 이렇게 한 줄씩 나눠서 보여드려요. 금액은 모두 예시이고, 실제 금액은 견적 화면에서 조건을 고르면 계산돼요.</p>
+        </div>
+        <div class="why">
+          <h3>숨은 금액 없이, 줄마다 보여드려요</h3>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><b>지원금은 누가 주는지까지</b><span>통신사 공시지원금과 판매점 추가지원금을 따로 적어요.</span></div></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><b>폰값과 요금을 합쳐서 한 달 금액으로</b><span>예산을 말하면 그 안에서 살 수 있는 폰만 남겨요.</span></div></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><div><b>할부·약정 끝나는 달까지</b><span>주문을 마치면 할부와 약정이 끝나는 달을 알려드려요.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 usim -->
+  <section class="part usim" id="usim" aria-labelledby="h-usim">
+    <div class="wrap">
+      <h2 id="h-usim">새 유심<small style="color:var(--on-navy-m)">폰을 받은 뒤에 개통해요</small></h2>
+      <p class="sub">미개통 폰과 새 유심을 같이 보내드려요. 배송되는 동안에도 지금 쓰는 폰이 끊기지 않아요.</p>
+      <ol class="flow">
+        <li><b>퀵으로 받기</b><span>문 앞에서 미개통 폰과 새 유심을 받아요. 오는 길은 실시간 배송 현황에서 볼 수 있어요.</span></li>
+        <li><b>‘개통 요청’ 누르기</b><span>받은 뒤 배송 현황 화면에서 개통 요청을 눌러요.</span></li>
+        <li><b>개통 가능 시간에 개통</b><span>통신사가 정한 개통 시간에 개통돼요. 시간 밖에 요청하면 다음 개통 시간에 자동으로 처리돼요.</span></li>
+      </ol>
+      <div class="hours" role="table" aria-label="통신사 개통 가능 시간">
+        <div role="row"><span role="cell">월요일 ~ 토요일</span><b role="cell">통신사가 정한 개통 시간에 개통</b></div>
+        <div role="row" class="no"><span role="cell">일요일 · 명절 당일</span><b role="cell">개통 불가 → 다음 개통 시간</b></div>
+      </div>
+      <p class="note">통신사 전산 상황에 따라 늦어질 수 있어요. 주문할 때 통신사별 개통 시간을 한 번 더 안내해 드려요.</p>
+    </div>
+  </section>
+
+  <!-- 3 inspection -->
+  <section class="part light" id="check" aria-labelledby="h-check">
+    <div class="wrap two">
+      <div>
+        <h2 id="h-check">검수표<small>중고폰은 1mm가 직접 확인해요</small></h2>
+        <p class="sub">1mm 중고폰은 검수를 마친 기기만 목록에 올라가요. 배터리 성능은 기기마다 숫자로 보여드려요.</p>
+        <div class="grades">
+          <div><b>S</b><span>사용감 거의 없음</span></div>
+          <div><b>A</b><span>미세 기스</span></div>
+          <div><b>B</b><span>눈에 띄는 기스</span></div>
+        </div>
+      </div>
+      <div class="sheet insert" id="sheet">
+        <div class="sheet-h"><b>1mm 검수 5가지</b><span>중고폰 한 대마다</span></div>
+        <ul>
+          <li><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>IMEI 분실·도난 조회<em>분실폰 걸러내기</em></li>
+          <li><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>통화·카메라·Wi-Fi·충전 정상<em>기능 점검</em></li>
+          <li><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>배터리 성능 확인<em>% 로 표시</em></li>
+          <li><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>초기화 · 계정 잠금 해제<em>바로 쓸 수 있게</em></li>
+          <li><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>7일 안 결함 시 교환·환불<em>받은 날부터</em></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 care -->
+  <section class="part light" id="care" aria-labelledby="h-care" style="padding-top:clamp(32px,6vw,64px)">
+    <div class="wrap">
+      <h2 id="h-care">보장 카드<small>받은 뒤에도 챙겨드려요</small></h2>
+      <p class="sub">폰을 받았다고 끝이 아니에요. 옮기고, 팔고, 다음 폰 바꿀 때까지 이어서 도와드려요.</p>
+      <div class="care">
+        <div class="card-7">
+                    <div class="big">7<small>일</small></div>
+          <h3>받은 날부터 7일 안 교환·환불</h3>
+          <p>기기에 문제가 있으면 1:1 문의를 남겨 주세요. 바로 연락드려요.</p>
+        </div>
+        <ul class="care-list insert">
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="7.5" height="14" rx="2"/><rect x="14" y="5" width="7.5" height="14" rx="2"/><path d="M10.5 10h3M12 8.5l1.5 1.5-1.5 1.5M13.5 15h-3M12 13.5L10.5 15l1.5 1.5"/></svg></span><div><b>데이터 옮기기</b><span>아이폰은 ‘빠른 시작’, 갤럭시는 Smart Switch로 안내해 드려요. 카톡은 대화 백업부터 해 두세요.</span></div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 8v8M14.5 9.5c-.5-.9-1.4-1.3-2.5-1.3-1.4 0-2.4.7-2.4 1.8 0 2.6 5 1.4 5 4 0 1.1-1 1.9-2.6 1.9-1.1 0-2.1-.5-2.6-1.4"/></svg></span><div><b>쓰던 폰은 1mm가 사요</b><span>매입을 신청하면 퀵으로 가지러 가요. 초기화 전에 데이터부터 옮겨 두세요.</span></div></li>
+          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></span><div><b>1mm 회원 · 가입비 없음</b><span>가입하면 추가 할인을 받고, 약정이 끝나기 전에 미리 알려드려요.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- waybill back -->
+  <section class="part light" id="ship" aria-labelledby="h-ship">
+    <div class="wrap two">
+      <div>
+        <h2 id="h-ship">송장 뒷면<small>배송 안내를 미리 적어 둬요</small></h2>
+        <p class="sub">안 되는 건 안 된다고 먼저 말씀드려요. 퀵비가 더 나올 것 같으면 출발하기 전에 알려드려요.</p>
+      </div>
+      <div class="back insert">
+        <div class="back-h"><b>배송 안내</b><span>1mm 출고지 → 고객님</span></div>
+        <div class="ship">
+          <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p style="margin:0"><b>오토바이 퀵으로 오늘 받아요</b><span>라이더 위치를 지도에서 실시간으로 볼 수 있어요.</span></p></div>
+          <div class="mid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><p style="margin:0"><b>5만원을 넘는 먼 거리</b><span>추가 결제가 나올 수 있어요. 출발 전에 알려드리고, 원하면 무료 택배로 바꿔드려요.</span></p></div>
+          <div class="mid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5L12 12l9-4.5M12 12v9"/></svg><p style="margin:0"><b>도서산간 지역</b><span>택배로만 보내드려요.</span></p></div>
+          <div class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><p style="margin:0"><b>제주도</b><span>배송이 안 돼요.</span></p></div>
+        </div>
+        <div class="big-free"><b>퀵비 5만원</b><span>까지 1mm가 내드려요</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- for reviewers -->
+  <section class="part light" id="how" aria-labelledby="h-how" style="padding-top:clamp(32px,6vw,64px)">
+    <div class="wrap">
+      <h2 id="h-how">휴대폰 바꾸기, 1mm는 이렇게 달라요</h2>
+      <p class="sub">지원금·요금제·약정이 통신사마다 달라서 비교하기 어려운 일을, 질문 몇 개와 퀵 배송으로 바꿨어요.</p>
+      <table class="cmp">
+        <thead><tr><th scope="col"><span class="sr">단계</span></th><th scope="col">보통은</th><th scope="col">1mm에서는</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">비교</th><td>통신사 개통, 자급제, 중고폰을 따로 알아봐요</td><td>세 가지를 한 화면에서, 가장 싼 조건부터</td></tr>
+          <tr><th scope="row">요금제</th><td>요금제 이름과 조건을 직접 맞춰 봐요</td><td>예산과 데이터만 고르면 가장 싼 실제 요금제를 자동으로</td></tr>
+          <tr><th scope="row">받기</th><td>개통하고 나서 택배를 기다려요</td><td>오늘 퀵으로 받고, 받은 뒤에 개통</td></tr>
+          <tr><th scope="row">그 뒤</th><td>쓰던 폰 처리와 약정 날짜는 혼자 챙겨요</td><td>쓰던 폰 매입, 할부·약정 끝 알림까지</td></tr>
+        </tbody>
+      </table>
+      <p class="cmp-note">지금 공개된 견적 화면은 프로토타입이에요. 서비스 구조는 실제와 같게 만들었고, 금액·재고·퀵비는 예시예요.</p>
+    </div>
+  </section>
+
+  <!-- close -->
+  <section class="close" aria-labelledby="h-close">
+    <div class="wrap">
+      <h2 id="h-close">다음 폰은 1mm 상자로</h2>
+      <p>조건 몇 개만 고르면 가장 싼 견적부터 나와요. 가입하지 않아도 볼 수 있어요.</p>
+      <a class="btn y" href="https://claude.ai/artifact/5o5qAhFwsVt9oBGCCPRGjy" target="_blank" rel="noopener">내 견적 보기
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <footer>
+        <span class="logo">1<b>mm</b></span>
+        <span>프로토타입 · 지원금·요금·재고·퀵비·회원 할인 금액은 예시예요. 견적 화면에 입력한 정보는 저장·전송되지 않아요.</span>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 상자 열기: 스크롤에 따라 테이프가 갈라지고 뚜껑이 열린다
+  if(!reduce){
+    root.classList.add('anim');
+    var box=document.querySelector('.unbox');
+    var clamp=function(v){return v<0?0:v>1?1:v};
+    var tick=false;
+    var update=function(){
+      tick=false;
+      var r=box.getBoundingClientRect(), run=box.offsetHeight-window.innerHeight;
+      var p=clamp(-r.top/(run||1));
+      var e=function(a,b){var t=clamp((p-a)/(b-a));return 1-Math.pow(1-t,3)};
+      box.style.setProperty('--slit',e(0,.16).toFixed(3));
+      box.style.setProperty('--lift',e(.1,.36).toFixed(3));
+      box.style.setProperty('--open',e(.22,.78).toFixed(3));
+    };
+    window.addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(update)}},{passive:true});
+    window.addEventListener('resize',update);
+    update();
+  }
+  // 검수표: 화면에 들어오면 체크가 하나씩 그려진다 (기본 상태도 읽을 수 있음)
+  var sheet=document.getElementById('sheet');
+  if(reduce||!('IntersectionObserver' in window)){sheet.classList.add('done');return;}
+  new IntersectionObserver(function(es,o){es.forEach(function(x){if(x.isIntersecting){sheet.classList.add('done');o.disconnect()}})},{threshold:.4}).observe(sheet);
+})();
+</script>
+</body>
+</html>
