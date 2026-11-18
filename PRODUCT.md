@@ -42,7 +42,7 @@ delegated: static HTML/CSS/JS, one self-contained folder (`1mm-site/`), so it ca
 
 ## Brand Commitments
 
-- Name: "1mm" only (owner confirmed; do not use "케통령"). Logo is the wordmark "1mm" with "mm" in the accent color.
+- Name: "1mm 모바일" in copy (owner, later request; earlier "1mm"; do not use "케통령"). Logo stays the wordmark "1mm" with "mm" in the accent color.
 - Brand D안: navy #1E2A5A + yellow #FFD23F point; Noto Sans KR text, Nunito 900 logo (from the prototype).
 - Carrier names appear as plain text; official carrier/Apple/Samsung logos are not used.
 - Voice: friendly 해요체, short, concrete ("질문 몇 개면 끝", "가장 싼 조건부터 보여드려요").
