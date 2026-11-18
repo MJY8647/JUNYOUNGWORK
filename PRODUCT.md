@@ -41,7 +41,7 @@ delegated: static HTML/CSS/JS, one self-contained folder (`1mm-site/`), so it ca
 - 알림표 (owner-requested feature): from the 개통일, 1mm tells when the high-tier plan condition (typically 6개월, often counted as 183 days) is met — it shows the later of the calendar-month date and the 183-day date (e.g. 2026-01-01 개통 → 6/1 too early, 7/1 is 181 days, 7/3 safe) — and sends alerts 3 days before / on that day, and 1 month, 2 weeks, 1 week before 약정 ends, for people who switch every cycle. Store contracts override the calculation; lowering below the carrier floor after 6 months can still trigger 반환금 (e.g. LG U+ 5G under 45,000원). Alerts are not actually sent in the prototype.
 - Membership: no fee, extra discount (prototype example 30,000원), contract-end reminder.
 - Status: **prototype**. Subsidies, plans, stock, quick fees and the membership amount are examples. No real customers, reviews, or operating stats exist.
-- Prototype URL (primary CTA target): https://claude.ai/artifact/5o5qAhFwsVt9oBGCCPRGjy
+- Primary CTA target (until one version is chosen): quote version hub https://claude.ai/artifact/Js8FLQDzynLH6nyCQzfWyt (links v1 5o5qAhFwsVt9oBGCCPRGjy, v2 8YejdKoQ6QFvAUqki8AUUy, v3 GLYyusx4ANh1wbSLQhbmSh, v4 6C8DD5EVF2xn4Cag72ZMCn — all model-first).
 
 ## Brand Commitments
 
