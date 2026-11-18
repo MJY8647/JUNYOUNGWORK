@@ -35,6 +35,7 @@ delegated: static HTML/CSS/JS, one self-contained folder (`1mm-site/`), so it ca
 
 - Quick fee covered up to 50,000원; farther distances may cost extra (told before departure, or switch to free parcel). Remote/island areas: parcel only. Jeju: no delivery.
 - Used phones: 1mm 검수 5 checks — IMEI 분실·도난 조회, 통화·카메라·Wi-Fi·충전 정상, 배터리 성능 표시, 초기화·계정 잠금 해제, 7일 안 결함 시 교환·환불. Grades S (거의 사용감 없음) / A (미세 기스) / B (눈에 띄는 기스).
+- 알림표 (owner-requested feature): from the 개통일, 1mm tells when the high-tier plan condition (typically 6개월, often counted as 183 days) is met — it shows the later of the calendar-month date and the 183-day date (e.g. 2026-01-01 개통 → 6/1 too early, 7/1 is 181 days, 7/3 safe) — and sends alerts 3 days before / on that day, and 1 month, 2 weeks, 1 week before 약정 ends, for people who switch every cycle. Store contracts override the calculation; lowering below the carrier floor after 6 months can still trigger 반환금 (e.g. LG U+ 5G under 45,000원). Alerts are not actually sent in the prototype.
 - Membership: no fee, extra discount (prototype example 30,000원), contract-end reminder.
 - Status: **prototype**. Subsidies, plans, stock, quick fees and the membership amount are examples. No real customers, reviews, or operating stats exist.
 - Prototype URL (primary CTA target): https://claude.ai/artifact/5o5qAhFwsVt9oBGCCPRGjy

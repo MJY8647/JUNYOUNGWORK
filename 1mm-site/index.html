@@ -248,6 +248,38 @@ h3{margin:0 0 6px;font-size:19px;letter-spacing:-.02em;line-height:1.35}
 .care-list b{display:block;font-size:16.5px}
 .care-list span{font-size:14.5px;color:var(--muted)}
 
+
+/* ⑤ 알림표: 요금제 변경일 + 약정 알림 */
+.cal{display:grid;gap:14px}
+.cal-in{background:var(--paper);padding:20px;display:grid;gap:14px;align-content:start}
+.cal-in label{display:grid;gap:6px;font-size:13.5px;font-weight:700;color:var(--muted)}
+.cal-in input,.cal-in select{font:500 16px/1.2 var(--font);color:var(--ink);background:var(--tray);border:1.5px solid var(--line);border-radius:10px;padding:12px;width:100%;min-width:0}
+.cal-in input:focus-visible,.cal-in select:focus-visible{outline:3px solid var(--navy);outline-offset:1px}
+.cal-in .hint{margin:0;font-size:12.5px;color:var(--muted)}
+.cal-out{background:var(--paper);overflow:hidden}
+.verdict{background:var(--navy);color:#fff;padding:22px 20px}
+.verdict small{display:block;font-size:13px;color:var(--on-navy-m);font-weight:500}
+.verdict b{display:block;font-size:clamp(26px,6vw,38px);font-weight:900;letter-spacing:-.03em;line-height:1.2;margin:4px 0 2px;color:var(--yellow)}
+.verdict span{font-size:14px;color:var(--on-navy)}
+.cand{list-style:none;margin:0;padding:0}
+.cand li{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:14px 20px;border-top:1px dashed var(--line);font-size:15px}
+.cand li:first-child{border-top:0}
+.cand li svg{width:22px;height:22px}
+.cand .no svg{color:var(--bad)}.cand .mid svg{color:#a15c00}.cand .ok svg{color:var(--good)}
+.cand li span{font-size:13px;color:var(--muted);display:block}
+.cand li em{font-style:normal;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+.alerts{border-top:1.5px solid var(--ink);padding:18px 20px 20px}
+.alerts h3{font-size:16px;margin-bottom:10px}
+.alerts ol{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.alerts li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px}
+.alerts li:first-child{border-top:0}
+.alerts li .d{font-weight:900;color:var(--navy);min-width:118px}
+.alerts li .w{color:var(--muted);font-size:13px}
+.alerts li.end .d,.alerts li.end b{color:var(--bad)}
+.alerts li.past{opacity:.5}
+.cal-note{margin:12px 0 0;font-size:12.5px;color:var(--muted);max-width:70ch}
+@media (min-width:760px){.cal{grid-template-columns:minmax(0,4fr) minmax(0,7fr);align-items:start}}
+
 /* waybill back: shipping */
 .back{background:var(--paper);overflow:hidden}
 .back-h{padding:16px 20px;border-bottom:1.5px solid var(--ink);display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
@@ -335,7 +367,7 @@ footer .logo{font-size:20px}
             <text x="60" y="140" text-anchor="middle" font-family="Noto Sans KR,sans-serif" font-weight="900" font-size="13" fill="#1E2A5A">새 유심</text>
           </svg>
         </div>
-        <p class="lbl"><span><i>1</i>휴대폰</span><span><i>2</i>새 유심</span><span><i>3</i>검수표</span><span><i>4</i>보장 카드</span></p>
+        <p class="lbl"><span><i>1</i>휴대폰</span><span><i>2</i>새 유심</span><span><i>3</i>검수표</span><span><i>4</i>보장 카드</span><span><i>5</i>알림표</span></p>
       </div>
 
       <div class="persp" aria-hidden="true"><div class="flap l"></div><div class="flap r"></div></div>
@@ -385,6 +417,7 @@ footer .logo{font-size:20px}
           <li><a href="#usim"><span class="no">2</span><span class="it"><b>새 유심</b><span>폰을 받은 뒤에 개통해요</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
           <li><a href="#check"><span class="no">3</span><span class="it"><b>검수표</b><span>중고폰은 5가지를 직접 확인해요</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
           <li><a href="#care"><span class="no">4</span><span class="it"><b>보장 카드</b><span>받은 날부터 7일 안 교환·환불</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+          <li><a href="#alarm"><span class="no">5</span><span class="it"><b>알림표</b><span>요금제 바꿀 날 · 약정 끝 알림</span></span><span class="qty">1장<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
         </ol>
       </div>
     </div>
@@ -512,6 +545,29 @@ footer .logo{font-size:20px}
     </div>
   </section>
 
+
+  <!-- 5 alarm sheet -->
+  <section class="part light" id="alarm" aria-labelledby="h-alarm">
+    <div class="wrap">
+      <h2 id="h-alarm">알림표<small>요금제 바꿀 날, 약정 끝날 날을 알려드려요</small></h2>
+      <p class="sub">지원금을 받으면 비싼 요금제를 6개월 써야 하는 조건이 붙곤 해요. 하루라도 일찍 바꾸면 위약금이 나올 수 있어서, 1mm가 바꿔도 되는 날을 계산해 드려요.</p>
+      <div class="cal">
+        <form class="cal-in insert" id="calForm" onsubmit="return false">
+          <label for="calOpen">개통일<input type="date" id="calOpen" value="2026-01-01" required></label>
+          <label for="calKeep">비싼 요금제 유지 조건<select id="calKeep"><option value="6" selected>6개월 (183일)</option></select></label>
+          <label for="calTerm">약정 기간<select id="calTerm"><option value="12">12개월</option><option value="24" selected>24개월</option></select></label>
+          <p class="hint">개통일은 개통 안내 문자나 통신사 앱의 ‘가입 정보’에서 볼 수 있어요.</p>
+        </form>
+        <div class="cal-out insert" aria-live="polite">
+          <div class="verdict"><small>요금제는 이날부터 바꾸세요</small><b id="calSafe">2026년 7월 3일</b><span id="calSafeSub">개통일부터 183일을 채운 날이에요</span></div>
+          <ul class="cand" id="calCand"></ul>
+          <div class="alerts"><h3>1mm가 보내는 알림</h3><ol id="calAlerts"></ol></div>
+        </div>
+      </div>
+      <p class="cal-note">‘6개월 유지’는 달이 아니라 183일로 세는 경우가 많아서, 두 방법 중 늦은 날을 알려드려요. 판매점마다 조건이 다를 수 있으니 가입할 때 받은 약정서의 날짜가 우선이에요. 6개월이 지나도 너무 싼 요금제로 내리면 지원금 일부를 돌려내야 할 수 있어요(예: LG U+ 5G는 월 4만5천원 미만). 알림은 회원에게 보내는 기능이고, 지금 프로토타입에서는 실제로 발송되지 않아요.</p>
+    </div>
+  </section>
+
   <!-- waybill back -->
   <section class="part light" id="ship" aria-labelledby="h-ship">
     <div class="wrap two">
@@ -588,6 +644,44 @@ footer .logo{font-size:20px}
     window.addEventListener('resize',update);
     update();
   }
+
+  // 알림표: 요금제 변경 가능일 + 약정 알림 계산
+  (function(){
+    var f=document.getElementById('calForm');if(!f)return;
+    var $=function(id){return document.getElementById(id)};
+    var DAY=864e5;
+    var parse=function(v){var p=v.split('-');return new Date(+p[0],+p[1]-1,+p[2])};
+    var addDays=function(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r};
+    var addMonths=function(d,n){var y=d.getFullYear(),m=d.getMonth()+n,day=d.getDate();var last=new Date(y,m+1,0).getDate();return new Date(y,m,Math.min(day,last))};
+    var diff=function(a,b){return Math.round((b-a)/DAY)};
+    var W='일월화수목금토';
+    var fmt=function(d){return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일'};
+    var fmtS=function(d){return String(d.getFullYear()).slice(2)+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+W[d.getDay()]+')'};
+    var ic={no:'<path d="M6 6l12 12M18 6L6 18"/>',mid:'<path d="M12 7v6M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>'};
+    var svg=function(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ic[k]+'</svg>'};
+    function run(){
+      var v=$('calOpen').value;if(!v)return;
+      var o=parse(v),keep=+$('calKeep').value,term=+$('calTerm').value;
+      var byMonth=addMonths(o,keep);            // 달로 센 날
+      var byDay=addDays(o,183);                  // 183일 채운 날
+      var safe=byMonth>byDay?byMonth:byDay;
+      var early=addMonths(o,keep-1);             // 흔한 착각: 한 달 일찍
+      $('calSafe').textContent=fmt(safe);
+      $('calSafeSub').textContent='개통일부터 '+diff(o,safe)+'일째 · 달 기준과 183일 기준 중 늦은 날';
+      var rows=[[early,'no',diff(o,early)+'일 · 아직 '+(keep-1)+'개월째라 조건을 못 채워요','바꾸면 안 돼요']];
+      if(+byMonth!==+safe)rows.push([byMonth,'mid','달로는 '+keep+'개월이지만 '+diff(o,byMonth)+'일이라 183일에 '+(183-diff(o,byMonth))+'일 모자라요',(183-diff(o,byMonth))+'일 더 기다리세요']);
+      rows.push([safe,'ok','183일을 채웠어요','이날부터 OK']);
+      $('calCand').innerHTML=rows.map(function(r){return '<li class="'+r[1]+'">'+svg(r[1])+'<div><b>'+fmtS(r[0])+'</b><span>'+r[2]+'</span></div><em>'+r[3]+'</em></li>'}).join('');
+      var end=addDays(addMonths(o,term),-1);     // 약정 마지막 날
+      var today=new Date();today.setHours(0,0,0,0);
+      var al=[[addDays(safe,-3),'요금제 바꿀 날 3일 전',''],[safe,'오늘부터 요금제를 바꿀 수 있어요',''],
+        [addMonths(end,-1),'약정 끝나기 1개월 전 · 다음 폰 견적 준비',''],[addDays(end,-14),'약정 끝나기 2주 전',''],
+        [addDays(end,-7),'약정 끝나기 1주 전',''],[end,'약정 마지막 날 · 다음 날부터 위약금 없이 바꿀 수 있어요','end']];
+      $('calAlerts').innerHTML=al.map(function(a){var dd=diff(today,a[0]);var w=dd<0?'지남':dd===0?'오늘':'D-'+dd;
+        return '<li class="'+a[2]+(dd<0?' past':'')+'"><span class="d">'+fmtS(a[0])+'</span><b>'+a[1]+'</b><span class="w">'+w+'</span></li>'}).join('');
+    }
+    f.addEventListener('input',run);f.addEventListener('change',run);run();
+  })();
   // 검수표: 화면에 들어오면 체크가 하나씩 그려진다 (기본 상태도 읽을 수 있음)
   var sheet=document.getElementById('sheet');
   if(reduce||!('IntersectionObserver' in window)){sheet.classList.add('done');return;}
