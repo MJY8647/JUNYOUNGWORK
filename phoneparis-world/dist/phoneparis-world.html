@@ -6,20 +6,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-/* 폰파리 — 영상과 같은 밝은 하늘·회색 광장 톤 하나로 고정한 단일 테마 */
+/* 폰파리 — 영상과 같은 밝은 하늘·회색 광장 톤 하나로 고정한 단일 테마
+   UI v3: 하단 UI(카드·도크·가게 시트)를 한 장짜리 깨끗한 면으로 정리하고, 마우스 반응을 촘촘하게 */
 :root {
-  --ink: #202529;
-  --muted: #737d86;
-  --line: #dce1e4;
-  --soft: #f3f5f6;
+  --ink: #1c2024;
+  --ink2: #3a4148;
+  --muted: #6f7880;
+  --line: rgba(28, 32, 36, .11);
+  --line2: rgba(28, 32, 36, .06);
+  --soft: #f1f3f5;
+  --soft2: #f8f9fa;
   --paper: #ffffff;
   --blue: #254bf1;
   --orange: #ff6a23;
   --red: #e5333f;
+  --green: #0f8a4f;
   --sky: #cfd8dc;
+  --sh-1: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 1px rgba(16, 24, 40, .04);
+  --sh-2: 0 12px 28px -14px rgba(16, 24, 40, .32), 0 2px 6px -2px rgba(16, 24, 40, .08);
+  --sh-3: 0 34px 80px -30px rgba(16, 24, 40, .5), 0 4px 14px -6px rgba(16, 24, 40, .12);
   --ease: cubic-bezier(.2, .8, .2, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
   --font: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
   --brand: "Arial Black", Arial, var(--font);
+  --ex: 0; --ey: 0;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -45,11 +55,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   pointer-events: none;
 }
 .top > * { pointer-events: auto; }
-.brand { background: rgba(255,255,255,.78); backdrop-filter: blur(8px); padding: 4px 12px 5px; border-radius: 999px; font-family: var(--brand); font-weight: 900; font-size: 22px; letter-spacing: -.04em; color: var(--ink); text-decoration: none; }
+.brand { background: rgba(255,255,255,.8); backdrop-filter: blur(10px); padding: 4px 12px 5px; border-radius: 999px; font-family: var(--brand); font-weight: 900; font-size: 22px; letter-spacing: -.04em; color: var(--ink); text-decoration: none; transition: transform .3s var(--spring); }
 .brand span { color: var(--blue); }
-.brand i { font-style: normal; color: var(--orange); margin-left: 2px; }
+.brand i { display: inline-block; font-style: normal; color: var(--orange); margin-left: 2px; transition: transform .6s var(--spring); }
 .top-note { font-size: 13px; color: var(--ink); background: rgba(255,255,255,.6); padding: 4px 10px; border-radius: 999px; }
-.top-cta { margin-left: auto; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); }
+.top-cta { position: relative; overflow: hidden; margin-left: auto; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); transition: transform .3s var(--spring), box-shadow .3s; }
 
 /* 로더 */
 #loader { position: fixed; inset: 0; z-index: 50; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
@@ -64,98 +74,141 @@ body.ready #loader { opacity: 0; visibility: hidden; }
 .headline {
   position: fixed; z-index: 5; left: max(20px, env(safe-area-inset-left, 0px)); top: 92px; max-width: min(560px, 86vw);
   pointer-events: none; transition: opacity .35s var(--ease), transform .5s var(--ease);
-  background: rgba(255,255,255,.62); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 16px 20px 18px; border-radius: 22px;
+  background: rgba(255,255,255,.66); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 16px 20px 18px; border-radius: 22px; border: 1px solid rgba(255,255,255,.6);
 }
 .headline.off { opacity: 0; transform: translateY(14px); }
 .eyebrow { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--ink); opacity: .65; }
-.headline h1 { margin: 0; font-size: clamp(30px, 5.4vw, 64px); line-height: 1.12; font-weight: 900; letter-spacing: -.035em; text-wrap: balance; color: var(--ink); text-shadow: 0 1px 24px rgba(255,255,255,.55); }
+.headline h1 { margin: 0; font-size: clamp(30px, 5.4vw, 64px); line-height: 1.12; font-weight: 900; letter-spacing: -.035em; text-wrap: balance; color: var(--ink); }
 .headline .sub { margin: 12px 0 0; font-size: 15px; color: var(--ink); opacity: .75; }
-.headline.light h1, .headline.light .eyebrow, .headline.light .sub { color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,.35); }
 
-/* 말풍선 */
+/* ───────── 폰팔이 아바타: CSS로 그린 몸 + 마우스를 따라보는 눈 ───────── */
+.ava { --s: 46px; position: relative; flex: none; display: inline-grid; place-items: center; width: calc(var(--s) * .7); height: var(--s); background: var(--c, #ccc); border-radius: 999px; box-shadow: inset -4px -6px 0 rgba(0,0,0,.08), inset 3px 4px 0 rgba(255,255,255,.25); vertical-align: middle; }
+.ava.sm { --s: 26px; } .ava.xs { --s: 20px; }
+.ava .eye { position: absolute; top: 22%; width: calc(var(--s) * .24); height: calc(var(--s) * .24); border-radius: 50%; background: #fff; box-shadow: 0 1px 1px rgba(0,0,0,.15); display: grid; place-items: center; animation: avaBlink 4.6s infinite; }
+.ava .eye:first-child { left: 16%; } .ava .eye:last-child { right: 16%; }
+.ava .eye i { width: 52%; height: 52%; border-radius: 50%; background: #111; transform: translate(calc(var(--ex) * 28%), calc(var(--ey) * 28%)); transition: transform .12s linear; }
+@keyframes avaBlink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+.ava[data-d="designer"] { border-radius: 999px 999px 40% 40% / 40% 40% 10% 10%; }
+.ava[data-d="quick"] { width: calc(var(--s) * .78); height: calc(var(--s) * .92); border-radius: 18%; }
+.ava[data-d="price"] { width: calc(var(--s) * .82); border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); box-shadow: none; }
+.ava[data-d="price"] .eye { top: 50%; width: calc(var(--s) * .2); height: calc(var(--s) * .2); }
+.ava[data-d="price"] .eye:first-child { left: 26%; } .ava[data-d="price"] .eye:last-child { right: 26%; }
+.ava[data-d="safe"] { width: calc(var(--s) * 1.02); height: calc(var(--s) * .86); border-radius: 22%; }
+.ava[data-d="used"] { width: calc(var(--s) * .44); border-radius: 18%; }
+.ava[data-d="used"] .eye { width: calc(var(--s) * .17); height: calc(var(--s) * .17); }
+.ava[data-d="used"] .eye:first-child { left: 8%; } .ava[data-d="used"] .eye:last-child { right: 8%; }
+.ava[data-d="allinone"] { width: calc(var(--s) * .82); border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%; }
+.ava[data-d="allinone"] .eye { top: 32%; }
+
+/* ───────── 호객 말풍선 (캐릭터 머리 위) ───────── */
 .bubble {
-  position: fixed; z-index: 6; left: 0; top: 0; transform: translate(-50%, -100%); max-width: 260px;
-  background: rgba(22, 26, 34, .88); color: #fff; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.4;
-  pointer-events: none; transition: opacity .3s; text-align: center; backdrop-filter: blur(6px);
+  position: fixed; z-index: 6; left: 0; top: 0; max-width: 286px; padding: 10px 14px 11px; border-radius: 18px;
+  background: #fff; color: var(--ink); border: 1.5px solid color-mix(in srgb, var(--c, #999) 40%, #fff);
+  box-shadow: var(--sh-2); pointer-events: none; transition: opacity .3s; text-align: left; font-size: 14px; line-height: 1.42; font-weight: 600;
 }
-.bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: rgba(22, 26, 34, .88); }
-.bubble b { display: block; color: var(--c, #ffb27d); font-size: 12px; margin-bottom: 2px; }
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; width: 14px; height: 14px; margin-left: -7px; background: #fff; border-right: 1.5px solid color-mix(in srgb, var(--c, #999) 40%, #fff); border-bottom: 1.5px solid color-mix(in srgb, var(--c, #999) 40%, #fff); transform: rotate(45deg); border-radius: 0 0 4px 0; }
+.bubble b { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 11.5px; font-weight: 800; color: var(--dk, var(--ink)); letter-spacing: .02em; }
+.bubble #bubbleText { display: block; }
+.bubble.swap #bubbleText { animation: bubIn .45s var(--spring); }
+@keyframes bubIn { from { opacity: 0; transform: translateY(6px) scale(.96); } }
+.emote { position: absolute; right: -12px; top: -16px; min-width: 32px; height: 32px; padding: 0 7px; border-radius: 999px; background: var(--dk, var(--ink)); color: #fff; font-weight: 900; font-size: 15px; display: grid; place-items: center; box-shadow: 0 6px 14px -6px rgba(0,0,0,.5); transform: scale(0); }
+.emote.pop { animation: emotePop 1.2s var(--spring); }
+@keyframes emotePop { 0% { transform: scale(0) rotate(-20deg); } 18% { transform: scale(1.25) rotate(8deg); } 30%, 78% { transform: scale(1) rotate(0); } 100% { transform: translateY(-8px) scale(0); } }
+/* 폰팔이별 말풍선 성격 */
+.bubble[data-d="designer"] { border-image: none; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(120deg, #b7a6dc, #f2b6d4, #b7e0f2) border-box; border: 2px solid transparent; }
+.bubble[data-d="designer"].swap #bubbleText { animation: bubSpark .55s var(--spring); }
+@keyframes bubSpark { 0% { opacity: 0; transform: scale(.8) rotate(-3deg); } 60% { transform: scale(1.04) rotate(1deg); } }
+.bubble[data-d="quick"] { transform-origin: 50% 100%; }
+.bubble[data-d="quick"].swap { animation: bubShake .45s; }
+.bubble[data-d="quick"].swap #bubbleText { animation: bubDash .3s var(--ease); }
+@keyframes bubShake { 20% { margin-left: -4px; } 40% { margin-left: 4px; } 60% { margin-left: -2px; } 80% { margin-left: 2px; } }
+@keyframes bubDash { from { opacity: 0; transform: translateX(-18px) skewX(-12deg); } }
+.bubble[data-d="price"] { border-style: dashed; font-size: 13px; color: var(--ink2); }
+.bubble[data-d="price"].swap #bubbleText { animation: bubWhisper .7s var(--ease); }
+@keyframes bubWhisper { from { opacity: 0; filter: blur(4px); letter-spacing: .08em; } }
+.bubble[data-d="safe"] { border-radius: 14px; }
+.bubble[data-d="safe"].swap #bubbleText { animation: bubCalm .8s var(--ease); }
+@keyframes bubCalm { from { opacity: 0; transform: translateY(10px); } }
+.bubble[data-d="used"].swap #bubbleText { animation: bubStamp .4s var(--spring); }
+@keyframes bubStamp { from { opacity: 0; transform: scale(1.25) rotate(-4deg); } }
+.bubble[data-d="allinone"] { border-radius: 24px; }
+.bubble[data-d="allinone"].swap #bubbleText { animation: bubLazy .9s var(--ease); }
+@keyframes bubLazy { 0% { opacity: 0; transform: rotate(-3deg) translateY(4px); } 50% { transform: rotate(1.5deg); } }
 
-/* 폰팔이 카드 (영상 속 흰 카드) */
+/* ───────── 폰팔이 카드 (투어) ───────── */
 .card {
-  position: fixed; z-index: 8; right: max(24px, env(safe-area-inset-right, 0px)); top: 50%; width: 400px; max-height: calc(100vh - 140px);
-  background: var(--paper); border-radius: 22px; padding: 20px; box-shadow: 0 24px 60px -24px rgba(10, 20, 30, .45);
-  transform: translate(30px, -50%); opacity: 0; visibility: hidden; transition: transform .5s var(--ease), opacity .35s, visibility .35s;
-  overflow-y: auto; overscroll-behavior: contain; border-top: 5px solid var(--c, var(--line));
+  position: fixed; z-index: 8; right: max(28px, env(safe-area-inset-right, 0px)); top: 50%; width: 384px; max-height: calc(100vh - 150px);
+  padding: 20px 18px 16px; border-radius: 28px; overflow: hidden;
+  background: rgba(255,255,255,.95); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255,255,255,.75); box-shadow: var(--sh-3);
+  transform: translate(44px, -50%) perspective(1000px); opacity: 0; visibility: hidden;
+  transition: transform .6s var(--ease), opacity .35s, visibility .35s;
 }
-.card.on { transform: translate(0, -50%); opacity: 1; visibility: visible; }
-.badge { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--c); color: #fff; font-weight: 700; font-size: 13px; }
-.card h2 { margin: 10px 0 12px; font-size: 21px; line-height: 1.3; letter-spacing: -.03em; font-weight: 900; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
-.chip { padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; font-weight: 500; background: #fff; }
-.chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-.row { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; margin: 0 -4px; padding-left: 4px; scrollbar-width: none; }
-.row::-webkit-scrollbar { display: none; }
-.prod { flex: 0 0 148px; scroll-snap-align: start; border: 1px solid var(--line); border-radius: 16px; padding: 10px; text-align: left; background: #fff; transition: transform .15s var(--ease), border-color .15s; }
-.prod:hover { border-color: var(--ink); }
-.prod:active { transform: scale(.97); }
-.prod .shot { height: 96px; border-radius: 12px; background: var(--soft); display: grid; place-items: center; margin-bottom: 8px; }
-.prod b { display: block; font-size: 14px; }
-.prod s { display: block; color: var(--muted); font-size: 12px; }
-.prod .pr { font-weight: 900; font-size: 14px; white-space: nowrap; }
-.prod .pr em { font-style: normal; color: var(--red); margin-right: 5px; }
-.prod .tag { color: var(--blue); font-weight: 700; font-size: 13px; }
-.prod .more { display: block; margin-top: 4px; color: var(--blue); font-size: 12px; font-weight: 500; }
-.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.grid3 .prod { flex: none; padding: 8px; text-align: center; }
-.grid3 .prod .shot { height: 70px; }
-.grid3 .prod b { font-size: 12px; }
-.grid3 .prod .pr { color: var(--red); font-size: 12px; }
+.card.on { transform: translate(0, -50%) perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); opacity: 1; visibility: visible; }
+.card.on:hover { transition: transform .15s linear, opacity .35s, visibility .35s; }
+.card::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .35s; background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--c) 20%, transparent), transparent 60%); }
+.card:hover::before { opacity: 1; }
+.card::after { content: ""; position: absolute; left: 22px; right: 22px; top: 0; height: 4px; border-radius: 0 0 4px 4px; background: var(--c); }
+.card > * { position: relative; }
+.card-h { display: flex; align-items: center; gap: 12px; }
+.card-h .who { display: grid; gap: 1px; min-width: 0; }
+.badge { display: inline-block; font-weight: 900; font-size: 15.5px; letter-spacing: -.02em; color: var(--ink); }
+.role { color: var(--muted); font-size: 12px; font-weight: 600; }
+.live { margin-left: auto; display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: color-mix(in srgb, var(--c) 16%, #fff); color: var(--dk, var(--ink)); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--dk, var(--ink)); animation: live 1.4s infinite; }
+@keyframes live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 70%, transparent); } 100% { box-shadow: 0 0 0 9px transparent; } }
+.card h2 { margin: 14px 0 12px; font-size: 22px; line-height: 1.28; letter-spacing: -.035em; font-weight: 900; text-wrap: balance; }
+.points { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 6px; }
+.points li { display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 14px; background: var(--soft2); border: 1px solid var(--line2); font-weight: 700; font-size: 14px; transition: transform .3s var(--spring), background .25s, border-color .25s; }
+.points li i { flex: none; font-style: normal; width: 24px; height: 24px; border-radius: 8px; background: color-mix(in srgb, var(--c) 22%, #fff); color: var(--dk, var(--ink)); display: grid; place-items: center; font-size: 12px; font-weight: 900; transition: transform .4s var(--spring), background .25s, color .25s; }
+.card.on .points li { animation: liIn .5s var(--spring) backwards; animation-delay: calc(.12s + var(--k, 0) * 70ms); }
+@keyframes liIn { from { opacity: 0; transform: translateX(16px); } }
+.card .ava { transition: transform .4s var(--spring); }
 
-.steps-list { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; }
-.steps-list button { width: 100%; display: grid; grid-template-columns: 30px 1fr 16px; gap: 10px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 14px; background: var(--soft); font-weight: 700; font-size: 14px; }
-.steps-list .n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #fff; font-size: 13px; }
-.steps-list .bar { width: 4px; height: 20px; border-radius: 2px; background: var(--c); justify-self: center; }
-.steps-list .ar { color: var(--muted); transition: transform .2s; }
-.steps-list li.open .ar { transform: rotate(90deg); }
-.steps-list p { margin: 0; max-height: 0; overflow: hidden; color: var(--muted); font-size: 13px; padding: 0 12px 0 52px; transition: max-height .3s var(--ease), padding .3s; }
-.steps-list li.open p { max-height: 120px; padding: 6px 12px 6px 52px; }
-
-.combo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.combo button, .grades button { border: 2px solid var(--line); border-radius: 14px; padding: 12px 8px; font-weight: 700; font-size: 13px; background: #fff; display: grid; gap: 4px; justify-items: center; }
-.combo button .ic { font-size: 22px; }
-.combo button.on, .grades button.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, #fff); }
-.grades { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.grades button { justify-items: start; text-align: left; padding: 14px; }
-.grades .badge { font-size: 12px; padding: 3px 10px; }
-.grades small { color: var(--muted); font-weight: 500; }
-.note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
-
-.primary, .ghost { min-height: 50px; padding: 0 20px; border-radius: 14px; font-weight: 700; font-size: 15px; }
+/* 기본 버튼 */
+.primary, .ghost { position: relative; overflow: hidden; min-height: 50px; padding: 0 20px; border-radius: 14px; font-weight: 800; font-size: 15px; transition: transform .25s var(--spring), box-shadow .25s, filter .2s, background .2s; }
 .primary { background: var(--ink); color: #fff; width: 100%; }
-.card .primary { background: var(--c); margin-top: 12px; position: sticky; bottom: 0; box-shadow: 0 -12px 16px -4px #fff; }
 .ghost { background: var(--soft); }
 .link { color: var(--blue); font-weight: 700; font-size: 14px; padding: 6px 0; }
+.card .primary { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; border-radius: 16px; background: linear-gradient(135deg, var(--dk, var(--ink)), color-mix(in srgb, var(--dk, var(--ink)) 70%, var(--c))); box-shadow: 0 14px 28px -14px var(--dk, var(--ink)); transform: translate(var(--tx, 0px), var(--ty, 0px)); }
+.arr { font-style: normal; display: inline-block; transition: transform .35s var(--spring); }
+.primary::after, .say.go::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent); transform: skewX(-18deg); transition: left .7s var(--ease); pointer-events: none; }
 
-/* 폰 아이콘 (CSS로 그린 단말) */
-.ph { --c: #ddd; width: 40px; height: 76px; border-radius: 9px; background: linear-gradient(150deg, color-mix(in srgb, var(--c) 70%, #fff), var(--c)); position: relative; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.08), 0 6px 12px -6px rgba(0,0,0,.35); }
-.ph::before { content: ""; position: absolute; left: 5px; top: 5px; width: 16px; height: 16px; border-radius: 5px; background: rgba(0,0,0,.18); box-shadow: inset 4px 4px 0 -1px rgba(20,20,25,.7), inset -4px -4px 0 -1px rgba(20,20,25,.7); }
-.ph.folder { height: 64px; width: 38px; border-radius: 6px; }
-.ph.folder::before { left: 6px; top: 8px; width: 26px; height: 18px; border-radius: 3px; background: #556; box-shadow: none; }
-.ph.big { width: 84px; height: 160px; border-radius: 18px; }
-.ph.big::before { left: 10px; top: 10px; width: 34px; height: 34px; border-radius: 10px; }
+/* 물결 (누르면) */
+.rip { position: absolute; border-radius: 50%; background: currentColor; opacity: .2; transform: scale(0); animation: rip .6s var(--ease) forwards; pointer-events: none; }
+@keyframes rip { to { transform: scale(1); opacity: 0; } }
 
-/* 장면 내비 */
-.chapters { position: fixed; z-index: 9; left: max(18px, env(safe-area-inset-left, 0px)); bottom: 26px; display: flex; gap: 6px; flex-wrap: wrap; max-width: calc(100vw - 480px); }
-.chapters button { display: flex; align-items: center; gap: 6px; padding: 7px 11px 7px 8px; border-radius: 999px; background: rgba(255,255,255,.72); backdrop-filter: blur(8px); font-size: 12px; font-weight: 700; color: var(--ink); transition: background .2s, color .2s; }
-.chapters i { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--ink)); }
-.chapters button[aria-current="true"] { background: var(--ink); color: #fff; }
+/* ───────── 장면 도크 (하단 가운데) ───────── */
+.chapters {
+  position: fixed; z-index: 9; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 2px; padding: 5px;
+  border-radius: 999px; background: rgba(255,255,255,.74); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid rgba(255,255,255,.75); box-shadow: var(--sh-2); max-width: calc(100vw - 40px);
+}
+.chapters .ind { position: absolute; left: 0; top: 5px; bottom: 5px; width: 0; border-radius: 999px; background: var(--ink); box-shadow: 0 8px 18px -8px var(--c, #000); transition: transform .5s var(--spring), width .5s var(--spring); }
+.chapters button { position: relative; overflow: hidden; z-index: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--ink2); white-space: nowrap; transition: color .25s, transform .3s var(--spring); }
+.chapters button i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--ink)); transition: transform .35s var(--spring), box-shadow .25s; }
+.chapters button[aria-current="true"] { color: #fff; }
+.chapters button[aria-current="true"] i { box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
 .progress { position: fixed; z-index: 9; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.4); }
-.progress i { display: block; height: 100%; width: 0; background: var(--orange); }
-.scroll-hint { position: fixed; z-index: 9; left: 50%; bottom: 74px; transform: translateX(-50%); background: rgba(255,255,255,.8); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; transition: opacity .3s; }
+.progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--orange), #ffb27d); }
+.scroll-hint { position: fixed; z-index: 9; left: 50%; bottom: 84px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.85); backdrop-filter: blur(10px); padding: 8px 14px 8px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; box-shadow: var(--sh-1); transition: opacity .3s, transform .3s var(--spring); }
+.scroll-hint::before { content: ""; width: 14px; height: 20px; border-radius: 8px; border: 2px solid var(--ink); background: radial-gradient(circle at 50% 30%, var(--ink) 1.6px, transparent 2.2px) 0 0 / 100% 100% no-repeat; animation: wheel 1.4s var(--ease) infinite; }
+@keyframes wheel { 50% { background-position: 0 5px; } }
 .scroll-hint span { display: inline-block; animation: nudge 1.4s var(--ease) infinite; }
-@keyframes nudge { 50% { transform: translateY(4px); } }
+@keyframes nudge { 50% { transform: translateY(3px); } }
 .scroll-hint.off { opacity: 0; pointer-events: none; }
+
+/* ───────── 커서 링 + 이름표 ───────── */
+#cursor { position: fixed; left: 0; top: 0; z-index: 80; pointer-events: none; display: none; }
+.has-cursor #cursor { display: block; }
+#cursor .ring { position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(28,32,36,.5); opacity: 0; transition: width .35s var(--spring), height .35s var(--spring), left .35s var(--spring), top .35s var(--spring), background .25s, border-color .25s, opacity .2s, border-radius .3s; }
+#cursor.on .ring { opacity: 1; }
+#cursor.link .ring { width: 46px; height: 46px; left: -23px; top: -23px; background: rgba(28,32,36,.05); border-color: rgba(28,32,36,.22); }
+#cursor.text .ring { width: 4px; height: 26px; left: -2px; top: -13px; border-radius: 2px; background: var(--ink); }
+#cursor.dealer .ring { width: 62px; height: 62px; left: -31px; top: -31px; background: color-mix(in srgb, var(--c) 28%, transparent); border-color: var(--c); }
+#cursorLabel { position: absolute; left: 26px; top: 16px; white-space: nowrap; background: var(--ink); color: #fff; font-size: 12px; font-weight: 800; padding: 7px 11px; border-radius: 999px; box-shadow: var(--sh-2); opacity: 0; transform: translateY(6px) scale(.9); transition: opacity .2s, transform .3s var(--spring); }
+#cursorLabel::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--c); vertical-align: 1px; }
+#cursor.dealer #cursorLabel { opacity: 1; transform: none; }
 
 /* 시트 */
 dialog { border: 0; padding: 0; color: var(--ink); background: transparent; }
@@ -165,21 +218,14 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
 .sheet[open] .sheet-in { animation: rise .4s var(--ease); }
 @keyframes rise { from { transform: translateY(30px); opacity: 0; } }
 .x { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; border-radius: 50%; background: var(--soft); }
-.detail { display: grid; justify-items: center; text-align: center; gap: 6px; padding-top: 6px; }
-.detail .shot { width: 100%; height: 190px; border-radius: 18px; background: var(--soft); display: grid; place-items: center; margin-bottom: 8px; }
-.detail h3 { margin: 0; font-size: 22px; }
-.detail s { color: var(--muted); }
-.detail .big { font-size: 30px; font-weight: 900; letter-spacing: -.03em; }
-.detail .big em { font-style: normal; color: var(--red); font-size: 22px; margin-right: 8px; }
 .btns { display: flex; gap: 8px; width: 100%; margin-top: 12px; }
 .btns > * { flex: 1; }
 .sum-rows { display: grid; gap: 6px; margin: 14px 0; }
 .sum-rows div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; background: var(--soft); border-radius: 12px; font-size: 14px; }
 .sum-rows span { color: var(--muted); }
-.tel { display: block; text-align: center; font-size: 30px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); text-decoration: none; margin: 6px 0 2px; user-select: all; }
 .center { text-align: center; }
-.pick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
 .shot-img { width: 100%; border-radius: 16px; background: var(--soft); }
+.note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 
 /* 3D 작업실 */
 .studio { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; background: #edf2f4; }
@@ -196,7 +242,7 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
 #studioCanvas canvas { display: block; width: 100%; height: 100%; }
 .stage-bottom span { color: var(--muted); font-size: 13px; }
 .seg { display: flex; background: #fff; border-radius: 999px; padding: 3px; }
-.seg button { padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+.seg button { padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; transition: background .2s; }
 .seg button:hover { background: var(--soft); }
 .panel { background: #fff; display: flex; flex-direction: column; min-height: 0; padding: calc(18px + env(safe-area-inset-top, 0px)) 22px calc(18px + env(safe-area-inset-bottom, 0px)); }
 .panel-top { display: flex; justify-content: space-between; align-items: center; font-family: var(--brand); font-size: 12px; letter-spacing: .1em; color: var(--muted); }
@@ -207,7 +253,7 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
 .panel-body { flex: 1; overflow-y: auto; min-height: 0; }
 .panel-body h3 { margin: 4px 0 14px; font-size: 24px; letter-spacing: -.03em; font-weight: 900; }
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.opt { border: 2px solid var(--line); border-radius: 16px; padding: 14px; text-align: left; display: grid; gap: 4px; background: #fff; }
+.opt { border: 2px solid var(--line); border-radius: 16px; padding: 14px; text-align: left; display: grid; gap: 4px; background: #fff; transition: transform .25s var(--spring), border-color .2s; }
 .opt.on { border-color: var(--ink); }
 .opt .sw { width: 28px; height: 28px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
 .opt small { color: var(--muted); }
@@ -221,10 +267,273 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
 .panel-foot .btns { margin: 0; }
 .panel-foot .primary { width: auto; }
 
-.toast { position: fixed; z-index: 60; left: 50%; top: 80px; transform: translate(-50%, -10px); opacity: 0; background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; pointer-events: none; transition: opacity .25s, transform .25s var(--ease); }
-.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast { position: fixed; z-index: 60; left: 50%; top: 80px; transform: translate(-50%, -10px) scale(.96); opacity: 0; background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: var(--sh-2); pointer-events: none; transition: opacity .25s, transform .35s var(--spring); }
+.toast.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
 
-/* 모바일: 영상처럼 세로 화면, 카드는 아래에서 올라옴 */
+/* ═════════ 폰팔이 가게: 미션 스테퍼 + 한 장짜리 시트(대사 → 테이블 → 선택) ═════════ */
+html.shopping { overflow: hidden; scroll-snap-type: none; }
+html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shopping .chapters, html.shopping .scroll-hint, html.shopping .progress, html.shopping .top-note { display: none !important; }
+.shop { position: fixed; inset: 0; z-index: 30; pointer-events: none; --navy: #1E2A5A; --gold: #FFC83D; }
+.shop > * { pointer-events: auto; }
+.shop-top { position: absolute; left: 0; right: 0; top: calc(70px + env(safe-area-inset-top, 0px)); display: flex; gap: 10px; align-items: center; justify-content: center; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+.sbtn { position: relative; overflow: hidden; flex: none; width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.8); box-shadow: var(--sh-2); font-size: 16px; font-weight: 800; transition: transform .3s var(--spring), background .2s; }
+.mission { position: relative; flex: 1; list-style: none; margin: 0; padding: 9px 12px 7px; display: flex; gap: 0; max-width: 560px; min-width: 0; background: rgba(255,255,255,.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.8); border-radius: 20px; box-shadow: var(--sh-2); }
+.mission li { position: relative; flex: 1; display: grid; justify-items: center; gap: 3px; min-width: 0; }
+.mission li::before { content: ""; position: absolute; top: 13px; right: 50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.mission li:first-child::before { display: none; }
+.mission li.on::before, .mission li.now::before { background: linear-gradient(90deg, var(--dk), var(--c)); }
+.mission li i { position: relative; z-index: 1; font-style: normal; font-size: 13px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #fff; border: 1.5px solid var(--line); filter: grayscale(1); opacity: .55; transition: transform .4s var(--spring), background .3s, border-color .3s, opacity .3s; }
+.mission li span { font-size: 10.5px; font-weight: 700; color: var(--muted); white-space: nowrap; transition: color .3s; }
+.mission li.on i { filter: none; opacity: 1; background: color-mix(in srgb, var(--c) 22%, #fff); border-color: transparent; color: transparent; }
+.mission li.on i::after { content: "✓"; position: absolute; color: var(--dk); font-weight: 900; font-size: 13px; animation: popIn .35s var(--spring); }
+.mission li.now i { filter: none; opacity: 1; background: var(--dk); border-color: var(--dk); transform: scale(1.12); animation: nowRing 1.8s infinite; }
+.mission li.now span { color: var(--ink); font-weight: 900; }
+.mission li.on span { color: var(--ink2); }
+.mission li.skip span { text-decoration: line-through; }
+@keyframes nowRing { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 65%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+@keyframes popIn { from { transform: scale(0); } }
+
+.shop-low { position: absolute; right: max(22px, env(safe-area-inset-right, 0px)); top: calc(136px + env(safe-area-inset-top, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: 444px; display: flex; flex-direction: column; justify-content: flex-end; }
+.sb { display: flex; flex-direction: column; max-height: 100%; min-height: 0; background: #fff; border-radius: 26px; box-shadow: var(--sh-3); border: 1px solid rgba(255,255,255,.8); overflow: hidden; animation: sbIn .5s var(--spring); }
+@keyframes sbIn { from { transform: translateY(24px) scale(.98); opacity: 0; } }
+/* 대사 */
+.dlg { position: relative; flex: none; padding: 15px 18px 14px; cursor: pointer; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 14%, #fff), #fff 92%); border-bottom: 1px solid var(--line2); }
+.dlg::after { content: attr(data-emote); position: absolute; right: 16px; top: 4px; font-size: 46px; font-weight: 900; line-height: 1; color: var(--c); opacity: .22; pointer-events: none; transform: rotate(10deg); transition: transform .4s var(--spring); }
+.dlg.typing::after { animation: emBob .5s ease-in-out infinite alternate; }
+@keyframes emBob { to { transform: rotate(-4deg) translateY(-3px) scale(1.08); } }
+.dlg .who { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; font-weight: 900; color: var(--dk); letter-spacing: .01em; }
+.dlg p { position: relative; margin: 0; font-size: 16px; line-height: 1.55; font-weight: 600; min-height: 1.55em; padding-right: 30px; }
+.dlg p b { color: var(--dk); background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c) 38%, transparent) 0); }
+.dlg.typing p::after { content: ""; display: inline-block; width: 2px; height: 1.05em; margin-left: 2px; vertical-align: -2px; background: var(--dk); animation: caret .8s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.shop[data-dealer="quick"] .dlg.typing { animation: jit .14s steps(2) infinite; }
+@keyframes jit { 50% { transform: translateX(.6px); } }
+.shop[data-dealer="price"] .dlg p { font-size: 15px; color: var(--ink2); }
+.shop[data-dealer="safe"] .dlg p { letter-spacing: .005em; }
+/* 테이블(내용) */
+.table { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 10px; color: var(--ink); scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.table.enter > * { animation: fadeUp .45s var(--ease) backwards; }
+.table.enter > *:nth-child(2) { animation-delay: .05s; } .table.enter > *:nth-child(3) { animation-delay: .1s; } .table.enter > *:nth-child(4) { animation-delay: .15s; } .table.enter > *:nth-child(n+5) { animation-delay: .2s; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } }
+.tl { display: flex; justify-content: space-between; gap: 8px; margin: 4px 2px 8px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: var(--muted); }
+.tl small { font-weight: 600; letter-spacing: 0; }
+.tl.dark { color: var(--ink); }
+/* 선택(말풍선 버튼) */
+.sch { flex: none; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid var(--line2); background: #fff; }
+.sch:empty { display: none; }
+.sch.grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.say { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 14px; font-weight: 800; font-size: 14.5px; color: var(--ink); background: var(--soft); border: 1px solid var(--line2); transform: translate(var(--tx, 0px), var(--ty, 0px)); transition: transform .3s var(--spring), background .2s, box-shadow .3s, border-color .2s; animation: sayIn .45s var(--spring) backwards; animation-delay: calc(var(--i, 0) * 60ms + 40ms); }
+.say.go { flex: 1 1 auto; color: #fff; background: var(--dk); border-color: transparent; box-shadow: 0 12px 24px -14px var(--dk); }
+.sch.grid .say { padding: 0 6px; }
+@keyframes sayIn { from { opacity: 0; transform: translateY(12px) scale(.96); } }
+.say:active, .primary:active, .ghost:active, .tok:active, .veh button:active, .pk:active, .coin:active, .way:active { transform: scale(.97); }
+
+/* 진열: 제조사 → 카테고리 → 실제 사진 카드 */
+.brands { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 4px; margin-bottom: 10px; background: var(--soft); border-radius: 14px; }
+.brands button { position: relative; overflow: hidden; padding: 9px; border-radius: 10px; font-weight: 800; font-size: 14px; color: var(--muted); transition: color .2s, background .25s, box-shadow .25s; }
+.brands button.on { background: #fff; color: var(--ink); box-shadow: var(--sh-1); }
+.ctabs { display: flex; gap: 18px; margin: 0 2px 12px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.ctabs::-webkit-scrollbar { display: none; }
+.ctabs button { position: relative; overflow: hidden; flex: none; padding: 7px 1px 10px; font-weight: 800; font-size: 13px; color: var(--muted); transition: color .2s; }
+.ctabs button::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2.5px; border-radius: 2px; background: var(--dk); transform: scaleX(0); transition: transform .35s var(--spring); }
+.ctabs button.on { color: var(--ink); }
+.ctabs button.on::after { transform: scaleX(1); }
+.shelf { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; margin: 0 -2px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.shelf::-webkit-scrollbar { display: none; }
+.pk { position: relative; overflow: hidden; flex: none; width: 122px; scroll-snap-align: start; display: grid; gap: 7px; padding: 7px 7px 10px; border-radius: 18px; background: #fff; border: 1px solid var(--line); text-align: left; transition: transform .35s var(--spring), box-shadow .3s, border-color .25s; }
+.pk::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 30%), color-mix(in srgb, var(--c) 26%, transparent), transparent 62%); }
+.pk .im { position: relative; height: 106px; border-radius: 13px; background: radial-gradient(ellipse at 50% 96%, rgba(0,0,0,.12), transparent 55%), var(--soft2); display: grid; place-items: center; }
+.pk .im img { max-width: 82px; max-height: 96px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(0,0,0,.18)); transition: transform .5s var(--spring); }
+.pk .tag { position: relative; display: grid; gap: 1px; padding: 0 3px; }
+.pk .tag b { font-size: 12px; font-weight: 800; line-height: 1.25; }
+.pk .tag s { font-size: 10.5px; color: var(--muted); }
+.pk .tag span { font-size: 15px; font-weight: 900; letter-spacing: -.02em; }
+.pk .tag em { justify-self: start; margin-top: 3px; font-style: normal; font-size: 10.5px; font-weight: 800; color: var(--green); background: #e7f6ed; border-radius: 6px; padding: 1px 6px; }
+.pk.dis { opacity: .42; filter: grayscale(.7); cursor: not-allowed; }
+/* 실측 3D 폰 */
+.pv3d { position: relative; height: 232px; margin: 0 0 10px; border-radius: 20px; background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 26%, #fff), transparent 72%), linear-gradient(180deg, var(--soft2), #fff); display: grid; place-items: center; overflow: hidden; }
+.pv3d .pvimg { max-height: 200px; max-width: 70%; object-fit: contain; filter: drop-shadow(0 14px 16px rgba(0,0,0,.25)); }
+.pv3d.live .pvimg { display: none; }
+.pv { position: absolute; inset: 0; }
+.pv canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.pv canvas:active { cursor: grabbing; }
+.pvbar { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; pointer-events: none; }
+.pvtip { background: rgba(28,32,36,.72); color: #fff; border-radius: 999px; padding: 5px 11px; font-size: 11px; font-weight: 800; backdrop-filter: blur(6px); }
+.pv .pvfold { display: none !important; }
+.foldseg { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 4px; margin-bottom: 10px; background: var(--soft); border-radius: 14px; }
+.foldseg button { position: relative; overflow: hidden; padding: 9px; border-radius: 10px; font-weight: 800; font-size: 13px; color: var(--muted); transition: background .25s, color .2s, box-shadow .25s; }
+.foldseg button.on { background: #fff; color: var(--ink); box-shadow: var(--sh-1); }
+.pick-row { display: flex; gap: 12px; align-items: center; padding: 8px 12px; margin-bottom: 12px; border-radius: 14px; background: var(--soft2); border: 1px solid var(--line2); }
+.pick-row img { width: 46px; height: 54px; object-fit: contain; }
+.pick-row b { display: block; font-size: 14px; } .pick-row em { font-style: normal; font-size: 11.5px; color: var(--muted); }
+.chips2 { display: flex; gap: 12px; margin: 2px 4px 14px; flex-wrap: wrap; }
+.chips2 button { width: 32px; height: 32px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset, 0 2px 6px -2px rgba(0,0,0,.25); transition: transform .3s var(--spring), box-shadow .25s; }
+.chips2 button.on { box-shadow: 0 0 0 2.5px #fff, 0 0 0 4.5px var(--dk); transform: scale(1.08); }
+/* 용량 상자: 올리면 뚜껑이 살짝 열림 */
+.boxes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.pbox { width: 98px; perspective: 420px; transition: transform .35s var(--spring); }
+.pbox .lid { display: block; height: 14px; margin: 0 3px; background: #fff; border: 1px solid var(--line); border-bottom: 0; border-radius: 9px 9px 0 0; transform-origin: 50% 100%; transition: transform .45s var(--spring), border-color .2s; }
+.pbox .bd { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 72px; background: linear-gradient(180deg, #fff, var(--soft2)); border: 1px solid var(--line); border-radius: 4px 4px 14px 14px; box-shadow: var(--sh-1); transition: box-shadow .25s, border-color .2s; }
+.pbox b { font-size: 16px; font-weight: 900; color: var(--ink); transition: color .2s; } .pbox .bd span { font-weight: 800; font-size: 11px; color: var(--muted); }
+.pbox.on .bd { border-color: var(--dk); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent), var(--sh-2); }
+.pbox.on .lid { transform: rotateX(-58deg) translateY(-3px); border-color: var(--dk); }
+.pbox.on b { color: var(--dk); }
+/* 지원금 상자 */
+.sup { margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(180deg, #effaf3, #fff); border: 1px solid #d4efdf; }
+.sup .tl { color: #11734a; }
+.src { font-style: normal; font-size: 10px; font-weight: 700; color: #1d4ed8; background: #e9efff; border-radius: 6px; padding: 1px 6px; margin-left: 3px; white-space: nowrap; }
+/* 셀링포인트 선택 타일 */
+.opts3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.veh { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.veh.four { grid-template-columns: repeat(4, 1fr); }
+.tok, .veh button { position: relative; overflow: hidden; display: grid; justify-items: center; gap: 3px; text-align: center; background: #fff; border: 1.5px solid var(--line); border-radius: 15px; transition: transform .3s var(--spring), border-color .2s, box-shadow .3s, background .2s; }
+.tok { padding: 10px 6px; }
+.veh button { padding: 11px 4px 10px; }
+.tok::before, .veh button::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--c) 22%, transparent), transparent 65%); }
+.tok i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); transition: transform .4s var(--spring); }
+.tok i.none { background: repeating-linear-gradient(45deg, #ddd 0 3px, #fff 3px 6px); }
+.tok b { font-size: 12.5px; } .tok small { font-size: 10.5px; color: var(--muted); }
+.veh i { font-style: normal; font-size: 22px; line-height: 1.2; font-weight: 900; transition: transform .4s var(--spring); }
+.veh b { font-size: 13px; } .veh span { font-size: 10.5px; color: var(--muted); }
+.tok.on, .veh button.on { border-color: var(--dk); background: color-mix(in srgb, var(--c) 10%, #fff); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
+.tok.on::after, .veh button.on::after { content: "✓"; position: absolute; top: 6px; right: 7px; width: 17px; height: 17px; border-radius: 50%; background: var(--dk); color: #fff; font-size: 10px; font-weight: 900; display: grid; place-items: center; animation: popIn .35s var(--spring); }
+.wide { position: relative; overflow: hidden; width: 100%; min-height: 46px; padding: 11px; border-radius: 14px; background: var(--ink); color: #fff; font-weight: 800; transition: transform .3s var(--spring), box-shadow .3s; }
+.memo { margin-top: 8px; padding: 9px 11px; border-radius: 12px; background: #fff8dc; color: #6b5300; border: 1px solid #f2e3a6; font-weight: 700; font-size: 12.5px; }
+.paper { background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 16px; padding: 6px 12px; margin-bottom: 10px; }
+.cl { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border-bottom: 1px dashed var(--line); padding: 10px 2px; }
+.cl:last-of-type { border-bottom: 0; }
+.cl .st { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 2px dashed rgba(28,32,36,.2); display: grid; place-items: center; font-size: 10px; font-weight: 900; color: var(--muted); transition: transform .35s var(--spring), border-color .2s; }
+.cl.on .st { border: 2.5px solid var(--red); color: var(--red); transform: rotate(-12deg); animation: stamp .35s cubic-bezier(.3, 1.6, .5, 1); }
+.cl.err .st { border-color: var(--red); animation: shake .4s; }
+.cl span:last-child { font-size: 13.5px; line-height: 1.4; } .cl b { font-weight: 700; } .cl em { display: block; font-style: normal; font-size: 11.5px; color: var(--muted); }
+@keyframes stamp { from { transform: rotate(-12deg) scale(2); opacity: 0; } }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.ck { font-size: 13px; padding: 5px 0; color: var(--green); font-weight: 700; }
+.auto { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 22px 12px; border-radius: 18px; background: radial-gradient(circle at 50% 0, color-mix(in srgb, var(--c) 30%, #fff), #fff 70%); border: 1px solid var(--line2); }
+.auto b { font-size: 18px; } .auto span { color: var(--muted); font-size: 13px; }
+.loading { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 30px 0; color: var(--muted); font-weight: 700; font-size: 13px; }
+.loading span { width: 100%; text-align: center; }
+.loading i { width: 10px; height: 10px; border-radius: 50%; background: var(--dk); animation: dot 1s infinite; }
+.loading i:nth-child(2) { animation-delay: .15s; } .loading i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 50% { transform: translateY(-8px); opacity: .4; } }
+/* 견적 줄 */
+.ways { display: grid; gap: 7px; }
+.way { position: relative; display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; text-align: left; background: #fff; border: 1.5px solid var(--line); border-radius: 15px; transition: transform .3s var(--spring), border-color .2s, box-shadow .3s, background .2s; }
+.way::before { content: ""; position: absolute; left: -1px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--dk); transform: scaleY(0); transition: transform .35s var(--spring); }
+.way .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); font-weight: 900; font-size: 11px; color: var(--muted); transition: background .2s, color .2s; }
+.way span { font-size: 13.5px; font-weight: 700; min-width: 0; } .way em { display: block; font-style: normal; font-size: 11px; color: var(--muted); font-weight: 500; }
+.way em.sv { color: var(--green); font-weight: 800; }
+.way strong { font-size: 15px; text-align: right; white-space: nowrap; } .way strong small { display: block; font-size: 10.5px; color: var(--muted); font-weight: 500; }
+.way.on { border-color: var(--dk); background: color-mix(in srgb, var(--c) 9%, #fff); }
+.way.on::before { transform: scaleY(1); }
+.way.on .n { background: var(--dk); color: #fff; }
+.way .best { position: absolute; right: 10px; top: -9px; font-style: normal; font-size: 10px; font-weight: 900; color: #fff; background: var(--red); border-radius: 6px; padding: 2px 7px; box-shadow: 0 4px 10px -4px var(--red); animation: bestBob 2.4s var(--ease) infinite; }
+@keyframes bestBob { 0%, 80%, 100% { transform: rotate(4deg); } 88% { transform: rotate(-6deg) scale(1.1); } }
+.foot { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+/* 할인 카드 · 할부 동전 */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.dcard { position: relative; text-align: left; border-radius: 18px; padding: 13px 12px 11px; display: flex; flex-direction: column; gap: 2px; min-height: 132px; color: #fff; cursor: pointer; box-shadow: 0 12px 24px -14px rgba(0,0,0,.55); transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .25s var(--ease), box-shadow .3s; }
+.dcard::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s; background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,.38), transparent 60%); }
+.dcard.a { background: linear-gradient(160deg, #3a5dab, #1E2A5A); } .dcard.b { background: linear-gradient(160deg, #c94a7a, #7a2350); }
+.dcard .ic { font-size: 20px; } .dcard b { font-size: 14.5px; } .dcard span { font-size: 11px; opacity: .88; }
+.dcard strong { margin-top: auto; font-size: 18px; font-weight: 900; } .dcard em { font-style: normal; font-size: 11px; opacity: .88; }
+.dcard.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5.5px var(--dk), 0 18px 30px -16px rgba(0,0,0,.6); }
+.dcard .win { position: absolute; top: -9px; right: -6px; background: var(--gold); color: #2a2420; font-style: normal; font-size: 10px; font-weight: 900; border-radius: 7px; padding: 2px 7px; transform: rotate(6deg); box-shadow: 0 4px 10px -4px rgba(0,0,0,.4); }
+.coins { display: flex; gap: 10px; justify-content: center; margin: 4px 0 14px; }
+.coin { width: 58px; height: 58px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3c4, #f5c84a 55%, #c99a1d); box-shadow: inset 0 -4px 0 rgba(0,0,0,.16), 0 6px 12px -6px rgba(0,0,0,.4); font-weight: 900; font-size: 13px; color: #5a4100; display: grid; place-content: center; line-height: 1.05; transition: transform .6s var(--spring), box-shadow .25s; }
+.coin small { font-size: 9.5px; display: block; }
+.coin.on { transform: translateY(-6px); box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--dk), inset 0 -4px 0 rgba(0,0,0,.16), 0 10px 16px -8px rgba(0,0,0,.5); }
+/* 계산서 */
+.bill { background: var(--soft2); border: 1px solid var(--line2); border-radius: 16px; padding: 12px 14px; }
+.ln { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; padding: 3px 0; }
+.ln b { text-align: right; } .ln.m b { color: var(--green); }
+.ln.t { border-top: 1.5px dashed var(--line); margin-top: 6px; padding-top: 8px; font-size: 15px; font-weight: 900; }
+.big { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 6px; margin-top: 10px; }
+.big > div { padding: 9px 11px; border-radius: 13px; background: var(--ink); color: #fff; }
+.big > div:first-child { background: var(--dk); }
+.big span { display: block; font-size: 11px; opacity: .75; } .big b { font-size: 17px; font-weight: 900; letter-spacing: -.02em; }
+/* 멤버십 · 소셜 */
+.mcard { position: relative; overflow: hidden; margin: 2px auto 14px; width: min(290px, 100%); aspect-ratio: 1.6; border-radius: 18px; background: linear-gradient(135deg, #1E2A5A, #3a5dab 60%, #FFC83D 160%); color: #fff; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 18px 30px -16px rgba(30,42,90,.7); animation: give .7s var(--spring); }
+.mcard::after { content: ""; position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.45) 50%, transparent 58%); transform: translateX(-70%); animation: shine 1.4s .5s var(--ease) both; pointer-events: none; }
+@keyframes shine { to { transform: translateX(70%); } }
+@keyframes give { from { transform: translateY(-40px) rotate(-10deg) scale(.8); opacity: 0; } }
+.mcard .l { font-weight: 900; font-size: 22px; color: var(--gold); font-family: var(--brand); } .mcard .v { font-size: 26px; font-weight: 900; } .mcard small { font-size: 11px; opacity: .85; }
+.social { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.social button { position: relative; overflow: hidden; border-radius: 14px; padding: 12px 4px; font-weight: 900; font-size: 13px; box-shadow: var(--sh-1); transition: transform .3s var(--spring), box-shadow .3s; }
+.social .k { background: #FEE500; color: #191600; } .social .n { background: #03C75A; color: #fff; } .social .g { background: #fff; color: #1b1d26; border: 1px solid var(--line); }
+/* 서명 · 입력 */
+.sign { position: relative; margin: 6px 0 8px; border: 1.5px dashed rgba(28,32,36,.25); border-radius: 14px; height: 96px; background: var(--soft2); touch-action: none; transition: border-color .2s, background .2s; }
+.sign canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sign span { position: absolute; left: 12px; top: 8px; font-size: 11px; font-weight: 700; color: var(--muted); pointer-events: none; }
+.sign .x { position: absolute; left: 14px; bottom: 12px; font-style: normal; font-weight: 900; font-size: 18px; color: rgba(28,32,36,.25); pointer-events: none; }
+.sign.err { border-color: var(--red); animation: shake .4s; }
+.fl { position: relative; display: flex; align-items: baseline; gap: 10px; background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 12px 9px; margin-bottom: 8px; transition: border-color .2s, box-shadow .25s; }
+.fl:focus-within { border-color: var(--dk); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 24%, transparent); }
+.fl label { flex: none; width: 52px; font-size: 11.5px; font-weight: 800; color: var(--muted); }
+.fl input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 700 15px var(--font); color: var(--ink); }
+.fl.err { border-color: var(--red); } .fl .e { position: absolute; right: 10px; top: -9px; font-size: 10.5px; font-weight: 700; color: #fff; background: var(--red); border-radius: 6px; padding: 1px 6px; }
+/* 영수증 */
+.rcpt { position: relative; background: #fff; border: 1px solid var(--line); padding: 16px 16px 22px; border-radius: 16px 16px 0 0; -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 8px) no-repeat, conic-gradient(from 135deg at top, transparent, #000 1deg 89deg, transparent 90deg) bottom / 16px 8px repeat-x; mask: linear-gradient(#000 0 0) top / 100% calc(100% - 8px) no-repeat, conic-gradient(from 135deg at top, transparent, #000 1deg 89deg, transparent 90deg) bottom / 16px 8px repeat-x; animation: printIn .9s var(--ease) both; }
+@keyframes printIn { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+.rcpt h3 { margin: 0; text-align: center; font-family: var(--brand); font-size: 18px; } .rcpt .no { text-align: center; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.rcpt .ln { border-bottom: 1px dashed var(--line); font-size: 12.5px; padding: 5px 0; }
+.rcpt .done { position: absolute; right: 12px; top: 34px; border: 2.5px solid var(--red); color: var(--red); font-weight: 900; font-size: 13px; border-radius: 8px; padding: 2px 9px; transform: rotate(-12deg); animation: stamp .45s .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+
+/* ───────── 마우스를 올렸을 때 (정밀 포인터만) ───────── */
+@media (hover: hover) and (pointer: fine) {
+  .brand:hover { transform: translateY(-1px); }
+  .brand:hover i { transform: rotate(180deg) scale(1.2); }
+  .top-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(0,0,0,.55); }
+  .card:hover .ava { transform: translateY(-3px) rotate(-6deg); }
+  .points li:hover { transform: translateX(5px); background: color-mix(in srgb, var(--c) 10%, #fff); border-color: color-mix(in srgb, var(--c) 35%, transparent); }
+  .points li:hover i { transform: rotate(-12deg) scale(1.12); background: var(--dk, var(--ink)); color: #fff; }
+  .card .primary:hover { filter: brightness(1.08); box-shadow: 0 18px 32px -14px var(--dk, var(--ink)); }
+  .primary:hover .arr, .say.go:hover .arr { transform: translateX(5px); }
+  .primary:hover::after, .say.go:hover::after { left: 130%; }
+  .primary:hover { transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 2px)); }
+  .ghost:hover { background: #e7eaee; }
+  .chapters button:hover { transform: translateY(-3px) scale(1.06); color: var(--ink); }
+  .chapters button[aria-current="true"]:hover { color: #fff; }
+  .chapters button:hover i { transform: scale(1.6); }
+  .scroll-hint:hover { transform: translateX(-50%) translateY(-2px); }
+  .sbtn:hover { transform: translateY(-2px) rotate(-6deg); background: #fff; }
+  .mission li:hover i { transform: translateY(-2px) scale(1.06); }
+  .mission li.now:hover i { transform: scale(1.18); }
+  .say:hover { transform: translate(var(--tx, 0px), calc(var(--ty, 0px) - 2px)); background: #fff; border-color: color-mix(in srgb, var(--c) 60%, transparent); box-shadow: var(--sh-2); }
+  .say.go:hover { background: var(--dk); filter: brightness(1.1); box-shadow: 0 16px 28px -14px var(--dk); }
+  .brands button:hover { color: var(--ink); }
+  .ctabs button:hover { color: var(--ink); }
+  .ctabs button:hover:not(.on)::after { transform: scaleX(.35); }
+  .pk:not(.dis):hover { transform: translateY(-5px); box-shadow: var(--sh-2); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+  .pk:not(.dis):hover::before { opacity: 1; }
+  .pk:not(.dis):hover .im img { transform: rotate(-7deg) scale(1.09) translateY(-3px); }
+  .chips2 button:hover { transform: scale(1.16); }
+  .pbox:hover { transform: translateY(-4px); }
+  .pbox:hover .lid { transform: rotateX(-40deg) translateY(-2px); }
+  .pbox:hover .bd { box-shadow: var(--sh-2); }
+  .foldseg button:hover { color: var(--ink); }
+  .tok:hover, .veh button:hover { transform: translateY(-3px); box-shadow: var(--sh-2); border-color: color-mix(in srgb, var(--c) 60%, transparent); }
+  .tok:hover::before, .veh button:hover::before { opacity: 1; }
+  .tok:hover i { transform: scale(1.18) rotate(-10deg); }
+  .veh button:hover i { animation: iconHop .55s var(--spring); }
+  .wide:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+  .way:hover { transform: translateX(4px); box-shadow: var(--sh-2); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+  .way:hover::before { transform: scaleY(.55); }
+  .way.on:hover::before { transform: scaleY(1); }
+  .dcard:hover::after { opacity: 1; }
+  .coin:hover { transform: translateY(-4px) rotateY(360deg); }
+  .coin.on:hover { transform: translateY(-8px) rotateY(360deg); }
+  .mcard:hover { transform: translateY(-3px) rotate(-1deg); transition: transform .4s var(--spring); }
+  .social button:hover { transform: translateY(-3px); box-shadow: var(--sh-2); }
+  .cl:hover .st { border-color: var(--dk); transform: rotate(-8deg) scale(1.08); }
+  .sign:hover { border-color: var(--dk); background: #fff; }
+  .seg button:hover { background: var(--soft); }
+  .opt:hover { transform: translateY(-2px); }
+}
+@keyframes iconHop { 40% { transform: translateY(-6px) scale(1.15); } 70% { transform: translateY(1px) scale(.95); } }
+
+/* ───────── 모바일: 영상처럼 세로 화면, 카드·가게는 아래에서 올라옴 ───────── */
 @media (max-width: 760px) {
   .top { padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
   .top-note { display: none; }
@@ -232,208 +541,44 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
   .top-cta { padding: 8px 13px; font-size: 13px; }
   .headline { top: 108px; left: 12px; right: 12px; max-width: none; padding: 14px 16px; }
   .headline h1 { font-size: clamp(28px, 8.4vw, 40px); }
-  .card { left: 10px; right: 10px; width: auto; top: auto; bottom: 10px; max-height: 56vh; max-height: 56svh; transform: translateY(40px); border-radius: 20px; padding: 16px; }
+  .card { left: 10px; right: 10px; width: auto; top: auto; bottom: 10px; max-height: 58vh; max-height: 58svh; overflow-y: auto; transform: translateY(46px); border-radius: 26px; padding: 18px 16px 14px; }
   .card.on { transform: none; }
-  .card h2 { font-size: 18px; margin: 8px 0 10px; }
-  .prod { flex-basis: 132px; }
-  .chapters { top: calc(56px + env(safe-area-inset-top, 0px)); bottom: auto; left: 0; right: 0; max-width: none; flex-wrap: nowrap; overflow-x: auto; padding: 0 12px; scrollbar-width: none; }
+  .card h2 { font-size: 19px; margin: 10px 0 10px; }
+  .points li { padding: 9px 11px; font-size: 13.5px; }
+  .chapters { top: calc(56px + env(safe-area-inset-top, 0px)); bottom: auto; left: 10px; right: 10px; transform: none; max-width: none; flex-wrap: nowrap; overflow-x: auto; padding: 4px; scrollbar-width: none; }
   .chapters::-webkit-scrollbar { display: none; }
-  .chapters button { flex: none; }
-  .scroll-hint { bottom: 40px; }
+  .chapters .ind { top: 4px; bottom: 4px; }
+  .chapters button { flex: none; padding: 7px 11px; }
+  .scroll-hint { bottom: 34px; }
+  .bubble { max-width: 230px; font-size: 13px; }
   .studio-grid { grid-template-columns: 1fr; grid-template-rows: 46% 54%; }
   .panel { padding-top: 14px; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 30px -18px rgba(0,0,0,.3); }
   .stage-bottom { padding: 8px 14px; }
   .stage-bottom span { display: none; }
   .panel-body h3 { font-size: 20px; margin-bottom: 10px; }
   .opt { padding: 11px; }
+  .shop-top { top: calc(52px + env(safe-area-inset-top, 0px)); padding: 0 10px; gap: 8px; }
+  .sbtn { width: 38px; height: 38px; }
+  .mission { padding: 7px 6px 5px; border-radius: 18px; }
+  .mission li span { font-size: 9.5px; }
+  .mission li i { width: 24px; height: 24px; font-size: 12px; }
+  .mission li::before { top: 11px; }
+  .shop-low { left: 8px; right: 8px; width: auto; top: auto; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-height: 68vh; max-height: 68svh; }
+  .sb { border-radius: 26px; }
+  .sb::before { content: ""; position: absolute; left: 50%; top: 7px; width: 38px; height: 4px; margin-left: -19px; border-radius: 4px; background: rgba(28,32,36,.15); z-index: 2; }
+  .dlg { padding: 18px 16px 12px; }
+  .dlg p { font-size: 15px; }
+  .dlg::after { font-size: 38px; }
+  .table { padding: 12px 12px 8px; }
+  .sch { padding: 10px 12px 12px; }
+  .say { min-height: 44px; font-size: 14px; padding: 0 14px; }
+  .pv3d { height: 190px; } .pv3d .pvimg { max-height: 165px; }
+  .opts3 { grid-template-columns: repeat(4, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
 }
-
-/* ===== 폰팔이 가게 (1mm STORE v6 흐름: 미션 → 테이블 → 대사창 → 말풍선) ===== */
-html.shopping { overflow: hidden; scroll-snap-type: none; }
-html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shopping .chapters, html.shopping .scroll-hint, html.shopping .progress, html.shopping .top-note { display: none !important; }
-.shop { position: fixed; inset: 0; z-index: 30; pointer-events: none; --paper: #fffaf0; --pi: #2a2420; --pm: #7b6f62; --navy: #1E2A5A; --gold: #FFC83D; --gold2: #c99a1d; }
-.shop > * { pointer-events: auto; }
-.shop-top { position: absolute; left: 0; right: 0; top: calc(64px + env(safe-area-inset-top, 0px)); display: flex; gap: 8px; align-items: center; padding: 0 max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px)); }
-.sbtn { flex: none; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 4px 12px -6px rgba(0,0,0,.4); font-size: 16px; font-weight: 700; }
-.mission { flex: 1; list-style: none; margin: 0; padding: 6px 8px; display: flex; justify-content: space-between; gap: 2px; background: rgba(255,255,255,.92); border-radius: 16px; border: 1.5px solid var(--c); box-shadow: 0 6px 18px -10px rgba(0,0,0,.5); min-width: 0; max-width: 560px; margin-inline: auto; }
-.mission li { flex: 1; display: grid; justify-items: center; gap: 1px; opacity: .38; filter: grayscale(1); transition: opacity .3s, transform .3s; min-width: 0; }
-.mission li i { font-style: normal; font-size: 15px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; }
-.mission li span { font-size: 10.5px; font-weight: 700; white-space: nowrap; }
-.mission li.on, .mission li.now { opacity: 1; filter: none; }
-.mission li.on i { background: color-mix(in srgb, var(--c) 22%, #fff); }
-.mission li.now i { background: var(--c); color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, #fff); transform: scale(1.1); }
-.mission li.skip span { text-decoration: line-through; }
-.shop-low { position: absolute; right: max(18px, env(safe-area-inset-right, 0px)); top: calc(118px + env(safe-area-inset-top, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 440px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; }
-.table { position: relative; flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: linear-gradient(180deg, #ecdcc4, #d9c3a5 14px, #c7ab88); border-radius: 18px; padding: 14px 12px 12px; color: var(--pi); box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 14px 30px -12px rgba(0,0,0,.45); animation: slideup .35s var(--ease); }
-.table::before { content: ""; position: absolute; inset: 0; border-radius: 18px; pointer-events: none; background: repeating-linear-gradient(92deg, rgba(0,0,0,.035) 0 3px, transparent 3px 11px); }
-@keyframes slideup { from { transform: translateY(20px); opacity: 0; } }
-.table > * { position: relative; }
-.tl { font-size: 12px; font-weight: 900; color: #5a4532; margin: 2px 2px 8px; display: flex; justify-content: space-between; gap: 8px; letter-spacing: .02em; }
-.tl small { font-weight: 700; color: #8a7461; }
-.tl.dark { color: var(--pi); }
-.dlg { position: relative; background: rgba(255,255,255,.97); color: #1d1f27; border: 2px solid var(--c); border-radius: 16px; padding: 18px 16px 12px; min-height: 70px; box-shadow: 0 10px 24px -10px rgba(0,0,0,.4); cursor: pointer; }
-.dlg .who { position: absolute; top: -13px; left: 14px; background: var(--c); color: #fff; font-weight: 900; font-size: 12px; border-radius: 8px; padding: 3px 12px; }
-.dlg p { margin: 0; font-size: 16px; line-height: 1.55; min-height: 1.55em; }
-.dlg p b { color: color-mix(in srgb, var(--c) 70%, #000); }
-.sch { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-.sch.grid { display: grid; grid-template-columns: repeat(4, 1fr); }
-.say { background: #fff; color: var(--navy); border-radius: 18px 18px 4px 18px; padding: 11px 16px; font-weight: 800; font-size: 14.5px; box-shadow: 0 4px 0 #b9c0d8, 0 6px 14px rgba(0,0,0,.2); animation: sayin .3s cubic-bezier(.2, 1.3, .4, 1) backwards; }
-.sch.grid .say { border-radius: 14px; text-align: center; padding: 11px 6px; }
-.say.go { background: var(--c); color: #fff; box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 60%, #000), 0 6px 14px rgba(0,0,0,.2); }
-.say:active { transform: translateY(3px); }
-.say:nth-child(2) { animation-delay: .05s; } .say:nth-child(3) { animation-delay: .1s; } .say:nth-child(4) { animation-delay: .15s; }
-@keyframes sayin { from { transform: translateX(26px); opacity: 0; } }
-
-/* 테이블 위 물건 */
-.shelf { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x mandatory; scrollbar-width: none; }
-.shelf::-webkit-scrollbar { display: none; }
-.pk { flex: none; width: 104px; scroll-snap-align: start; display: grid; justify-items: center; gap: 4px; }
-.pk .im { width: 104px; height: 100px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 92%, rgba(0,0,0,.28), transparent 60%); transition: transform .2s; }
-.pk:hover .im, .pk.on .im { transform: translateY(-6px) rotate(-3deg); }
-.pk .tag { background: var(--paper); border-radius: 4px; padding: 4px 6px 5px; box-shadow: 0 3px 0 rgba(0,0,0,.22); text-align: center; width: 100%; }
-.pk .tag b { display: block; font-size: 11.5px; line-height: 1.25; }
-.pk .tag span { font-weight: 900; font-size: 13px; color: var(--red); }
-.pk .tag em { display: block; font-style: normal; font-size: 10px; color: #14a06b; font-weight: 800; }
-.pick-row { display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,.85); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; }
-.pick-row b { display: block; font-size: 14px; } .pick-row em { font-style: normal; font-size: 11.5px; color: var(--pm); }
-.chips2 { display: flex; gap: 10px; margin: 0 2px 12px; }
-.chips2 button { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 3px 0 rgba(0,0,0,.25); transition: transform .15s; }
-.chips2 button.on { transform: scale(1.18); box-shadow: 0 0 0 3px var(--c), 0 3px 0 rgba(0,0,0,.25); }
-.boxes { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.pbox { width: 100px; transition: transform .2s; position: relative; }
-.pbox .lid { display: block; height: 15px; background: #fdfdfd; border-radius: 6px 6px 0 0; box-shadow: inset 0 -2px 0 #e3e3e3; }
-.pbox .bd { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 76px; background: linear-gradient(180deg, #fff, #eef0f4); border-radius: 0 0 8px 8px; box-shadow: 0 5px 0 rgba(0,0,0,.25); }
-.pbox b { font-size: 17px; color: var(--navy); } .pbox .bd span { font-weight: 900; font-size: 11.5px; color: var(--red); }
-.pbox.on { transform: translateY(-8px); } .pbox.on .bd { box-shadow: 0 0 0 3px var(--c), 0 8px 0 rgba(0,0,0,.25); }
-.opts3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.tok { background: var(--paper); border-radius: 12px; padding: 9px 6px; display: grid; justify-items: center; gap: 3px; box-shadow: 0 3px 0 rgba(0,0,0,.2); border: 2px solid transparent; transition: transform .15s; text-align: center; }
-.tok i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
-.tok i.none { background: repeating-linear-gradient(45deg, #ddd 0 3px, #fff 3px 6px); }
-.tok b { font-size: 12.5px; } .tok small { font-size: 10.5px; color: var(--pm); }
-.tok.on { border-color: var(--c); transform: translateY(-3px); box-shadow: 0 6px 0 rgba(0,0,0,.2); }
-.wide { width: 100%; padding: 11px; border-radius: 12px; background: var(--pi); color: #fff; font-weight: 800; }
-.veh { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-.veh button { background: var(--paper); border: 2px solid transparent; border-radius: 14px; padding: 10px 4px; display: grid; justify-items: center; gap: 2px; box-shadow: 0 3px 0 rgba(0,0,0,.2); transition: transform .15s; }
-.veh i { font-style: normal; font-size: 24px; line-height: 1.2; font-weight: 900; }
-.veh b { font-size: 13px; } .veh span { font-size: 10.5px; color: var(--pm); }
-.veh button.on { border-color: var(--c); transform: translateY(-4px); box-shadow: 0 7px 0 rgba(0,0,0,.2); }
-.memo { background: #fff59d; color: #5a4a00; border-radius: 3px; padding: 7px 10px; font-weight: 700; font-size: 12.5px; transform: rotate(-.6deg); box-shadow: 0 3px 6px rgba(0,0,0,.18); margin-top: 6px; }
-.paper { background: var(--paper); color: var(--pi); border-radius: 6px; padding: 10px 12px; box-shadow: 0 6px 0 rgba(0,0,0,.15); margin-bottom: 8px; }
-.cl { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; border-bottom: 1.5px dashed #e0d5bf; padding: 8px 2px; }
-.cl:last-of-type { border-bottom: 0; }
-.cl .st { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 2px dashed #c9b9a0; display: grid; place-items: center; font-size: 10px; font-weight: 900; color: #b9a88e; }
-.cl.on .st { border: 2.5px solid var(--red); color: var(--red); transform: rotate(-12deg); animation: stamp .3s cubic-bezier(.3, 1.6, .5, 1); }
-.cl.err .st { border-color: var(--red); animation: shake .4s; }
-.cl span:last-child { font-size: 13.5px; line-height: 1.4; } .cl b { font-weight: 700; } .cl em { display: block; font-style: normal; font-size: 11.5px; color: var(--pm); }
-@keyframes stamp { from { transform: rotate(-12deg) scale(2); opacity: 0; } }
-@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-.ck { font-size: 13px; padding: 4px 0; color: #14714c; font-weight: 700; }
-.auto { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 18px 10px; background: var(--paper); border-radius: 14px; box-shadow: 0 5px 0 rgba(0,0,0,.18); }
-.auto b { font-size: 18px; } .auto span { color: var(--pm); font-size: 13px; }
-.loading { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 26px 0; color: #5a4532; font-weight: 700; font-size: 13px; }
-.loading span { width: 100%; text-align: center; }
-.loading i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); animation: dot 1s infinite; }
-.loading i:nth-child(2) { animation-delay: .15s; } .loading i:nth-child(3) { animation-delay: .3s; }
-@keyframes dot { 50% { transform: translateY(-8px); opacity: .4; } }
-.ways { display: grid; gap: 6px; }
-.way { position: relative; display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; background: var(--paper); border: 2px solid transparent; border-radius: 12px; padding: 9px 10px; text-align: left; box-shadow: 0 3px 0 rgba(0,0,0,.15); }
-.way .n { font-weight: 900; color: var(--pm); }
-.way span { font-size: 13.5px; font-weight: 700; min-width: 0; } .way em { display: block; font-style: normal; font-size: 11px; color: var(--pm); font-weight: 500; }
-.way strong { font-size: 15px; text-align: right; white-space: nowrap; } .way strong small { display: block; font-size: 10.5px; color: var(--pm); font-weight: 500; }
-.way.on { border-color: var(--c); }
-.way .best { position: absolute; right: 8px; top: -8px; font-style: normal; font-size: 10px; font-weight: 900; color: #fff; background: var(--red); border-radius: 4px; padding: 1px 6px; transform: rotate(4deg); }
-.foot { font-size: 11px; color: #6b5a48; margin-top: 8px; }
-.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.dcard { position: relative; text-align: left; border-radius: 12px; padding: 12px 10px 10px; display: flex; flex-direction: column; gap: 2px; min-height: 128px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,.25); transition: transform .25s; }
-.dcard.a { background: linear-gradient(160deg, #3a5dab, #1E2A5A); } .dcard.b { background: linear-gradient(160deg, #c94a7a, #7a2350); }
-.dcard .ic { font-size: 20px; } .dcard b { font-size: 14.5px; } .dcard span { font-size: 11px; opacity: .85; }
-.dcard strong { margin-top: auto; font-size: 18px; font-weight: 900; } .dcard em { font-style: normal; font-size: 11px; opacity: .85; }
-.dcard.on { transform: translateY(-8px) rotate(-2deg); box-shadow: 0 0 0 3px var(--gold), 0 12px 0 rgba(0,0,0,.25); }
-.dcard .win { position: absolute; top: -8px; right: -6px; background: var(--gold); color: var(--pi); font-style: normal; font-size: 10px; font-weight: 900; border-radius: 6px; padding: 2px 6px; transform: rotate(6deg); }
-.coins { display: flex; gap: 8px; justify-content: center; margin: 2px 0 12px; }
-.coin { width: 58px; height: 58px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3c4, #f5c84a 55%, #c99a1d); box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), 0 4px 0 rgba(0,0,0,.3); font-weight: 900; font-size: 13px; color: #5a4100; display: grid; place-content: center; line-height: 1.05; transition: transform .2s; }
-.coin small { font-size: 9.5px; display: block; }
-.coin.on { transform: translateY(-8px) scale(1.06); box-shadow: 0 0 0 3px #fff, inset 0 -4px 0 rgba(0,0,0,.18), 0 10px 0 rgba(0,0,0,.3); }
-.bill { background: var(--paper); border-radius: 10px; padding: 10px 12px; }
-.ln { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; padding: 3px 0; }
-.ln b { text-align: right; } .ln.m b { color: var(--red); }
-.ln.t { border-top: 2px solid var(--pi); margin-top: 4px; padding-top: 6px; font-size: 15px; font-weight: 900; }
-.big { display: flex; justify-content: space-around; text-align: center; margin-top: 8px; background: var(--navy); color: #fff; border-radius: 10px; padding: 8px; }
-.big span { display: block; font-size: 11px; opacity: .75; } .big b { font-size: 18px; font-weight: 900; }
-.mcard { margin: 2px auto 12px; width: min(280px, 100%); aspect-ratio: 1.6; border-radius: 14px; background: linear-gradient(135deg, #1E2A5A, #3a5dab 60%, #FFC83D 160%); color: #fff; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 0 rgba(0,0,0,.25); animation: give .6s cubic-bezier(.2, 1.2, .3, 1); }
-@keyframes give { from { transform: translateY(-50px) rotate(-12deg) scale(.7); opacity: 0; } }
-.mcard .l { font-weight: 900; font-size: 22px; color: var(--gold); font-family: var(--brand); } .mcard .v { font-size: 26px; font-weight: 900; } .mcard small { font-size: 11px; opacity: .85; }
-.social { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.social button { border-radius: 12px; padding: 11px 4px; font-weight: 900; font-size: 13px; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
-.social .k { background: #FEE500; color: #191600; } .social .n { background: #03C75A; color: #fff; } .social .g { background: #fff; color: #1b1d26; }
-.sign { position: relative; margin-top: 8px; border: 2px dashed #c9b9a0; border-radius: 8px; height: 92px; background: #fffdf8; touch-action: none; }
-.sign canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.sign span { position: absolute; left: 10px; top: 6px; font-size: 11px; font-weight: 700; color: var(--pm); pointer-events: none; }
-.sign .x { position: absolute; left: 12px; bottom: 12px; font-style: normal; font-weight: 900; font-size: 18px; color: #c9b9a0; pointer-events: none; }
-.sign.err { border-color: var(--red); animation: shake .4s; }
-.fl { position: relative; display: flex; align-items: baseline; gap: 8px; background: var(--paper); border-radius: 10px; padding: 8px 10px 6px; margin-bottom: 6px; border: 1.5px solid transparent; }
-.fl label { flex: none; width: 52px; font-size: 11.5px; font-weight: 800; color: var(--pm); }
-.fl input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 700 15px var(--font); color: var(--navy); }
-.fl.err { border-color: var(--red); } .fl .e { position: absolute; right: 8px; top: -9px; font-size: 10.5px; font-weight: 700; color: #fff; background: var(--red); border-radius: 4px; padding: 0 5px; }
-.rcpt { background: #fff; position: relative; padding: 14px 14px 18px; }
-.rcpt h3 { margin: 0; text-align: center; font-family: var(--brand); font-size: 18px; } .rcpt .no { text-align: center; font-size: 11px; color: var(--pm); margin-bottom: 8px; }
-.rcpt .ln { border-bottom: 1px dashed #ddd; font-size: 12.5px; }
-.rcpt .done { position: absolute; right: 10px; top: 30px; border: 2.5px solid var(--red); color: var(--red); font-weight: 900; font-size: 13px; border-radius: 6px; padding: 2px 8px; transform: rotate(-12deg); animation: stamp .4s .3s cubic-bezier(.3, 1.6, .5, 1) both; }
-.center { text-align: center; }
-
-/* 투어 카드: 셀링포인트 3개 + 들어가기 */
-.points { list-style: none; padding: 0; margin: 0 0 4px; display: grid; gap: 6px; }
-.points li { display: flex; align-items: center; gap: 10px; background: var(--soft); border-radius: 12px; padding: 10px 12px; font-weight: 700; font-size: 14px; }
-.points li i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-size: 12px; }
-
-@media (max-width: 760px) {
-  .shop-top { top: calc(52px + env(safe-area-inset-top, 0px)); padding: 0 10px; }
-  .mission li span { font-size: 9.5px; }
-  .mission li i { width: 22px; height: 22px; font-size: 13px; }
-  .shop-low { left: 10px; right: 10px; width: auto; top: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); max-height: 64vh; max-height: 64svh; }
-  .table { max-height: 40vh; max-height: 40svh; }
-  .dlg { padding: 16px 14px 10px; min-height: 0; } .dlg p { font-size: 15px; }
-  .say { padding: 10px 14px; font-size: 14px; }
-  .opts3 { grid-template-columns: repeat(4, 1fr); }
-}
-
-/* v6 상품 진열: 제조사 → 카테고리 탭 → 실제 사진 */
-.brands { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
-.brands button { padding: 9px; border-radius: 12px; background: rgba(255,255,255,.55); font-weight: 900; font-size: 14px; color: #5a4532; }
-.brands button.on { background: var(--pi); color: #fff; }
-.ctabs { display: flex; gap: 6px; margin-bottom: 8px; overflow-x: auto; scrollbar-width: none; }
-.ctabs::-webkit-scrollbar { display: none; }
-.ctabs button { flex: none; border-radius: 8px 8px 3px 3px; padding: 6px 12px; font-weight: 900; font-size: 12.5px; background: rgba(255,255,255,.3); color: #5a4532; }
-.ctabs button.on { background: var(--paper); color: var(--pi); box-shadow: 0 3px 0 rgba(0,0,0,.2); }
-.pk .im img { max-width: 84px; max-height: 96px; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(0,0,0,.3)); }
-.pk .tag s { display: block; font-size: 10px; color: var(--pm); }
-.pk.dis { opacity: .4; cursor: not-allowed; }
-.pick-row img { width: 48px; height: 56px; object-fit: contain; }
-.sup { background: var(--paper); border-radius: 10px; padding: 10px 12px; margin-top: 12px; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
-.src { font-style: normal; font-size: 10px; font-weight: 700; color: #1d4ed8; background: #e6eeff; border-radius: 5px; padding: 0 5px; margin-left: 2px; white-space: nowrap; }
-.way em.sv { color: #14714c; font-weight: 800; }
-.veh.four { grid-template-columns: repeat(4, 1fr); }
-.big { flex-wrap: wrap; gap: 6px; }
-
-/* 실측 3D 폰 보기 (v6) */
-.pv3d { position: relative; height: 230px; margin: -4px -4px 8px; border-radius: 14px; background: radial-gradient(closest-side, rgba(255,243,222,.95), rgba(255,236,205,.35) 65%, rgba(255,236,205,0)); display: grid; place-items: center; }
-.pv3d .pvimg { max-height: 200px; max-width: 70%; object-fit: contain; filter: drop-shadow(0 12px 14px rgba(46,38,32,.35)); }
-.pv3d.live .pvimg { display: none; }
-.pv { position: absolute; inset: 0; }
-.pv canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
-.pv canvas:active { cursor: grabbing; }
-.pvbar { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; justify-content: center; pointer-events: none; }
-.pvtip { background: rgba(46,38,32,.72); color: #f6eee3; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 800; }
-.pv .pvfold { display: none !important; }
-.foldseg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-.foldseg button { padding: 9px; border-radius: 12px; background: var(--paper); font-weight: 800; font-size: 13px; box-shadow: 0 3px 0 rgba(0,0,0,.18); border: 2px solid transparent; }
-.foldseg button.on { border-color: var(--c); }
-@media (max-width: 760px) { .pv3d { height: 190px; } .pv3d .pvimg { max-height: 165px; } }
 
 </style>
 <header class="top">
@@ -453,7 +598,7 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
     <p class="sub" id="sub"></p>
   </div>
 
-  <div class="bubble" id="bubble" hidden><b id="bubbleName"></b><span id="bubbleText"></span></div>
+  <div class="bubble" id="bubble" hidden><b id="bubbleName"></b><span id="bubbleText"></span><span class="emote" id="emote" aria-hidden="true"></span></div>
 
   <aside class="card" id="card" aria-live="polite" aria-label="폰팔이 카드"></aside>
 
@@ -470,9 +615,11 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
       <button class="sbtn" id="shopExit" aria-label="광장으로">✕</button>
     </div>
     <div class="shop-low">
-      <div class="table" id="shopPanel"></div>
-      <div class="dlg" id="shopDlg"><span class="who" id="shopWho"></span><p id="shopTxt" aria-live="polite"></p></div>
-      <div class="sch" id="shopCh"></div>
+      <div class="sb">
+        <div class="dlg" id="shopDlg"><span class="who" id="shopWho"></span><p id="shopTxt" aria-live="polite"></p></div>
+        <div class="table" id="shopPanel"></div>
+        <div class="sch" id="shopCh"></div>
+      </div>
     </div>
   </section>
 
@@ -506,6 +653,7 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
+  <div id="cursor" aria-hidden="true"><i class="ring"></i><span id="cursorLabel"></span></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
@@ -572,48 +720,165 @@ window.SITE = {
     ],
   },
 
+  // draft: role·tout(첫 줄 제외)·hover·say는 직접 쓴 문구입니다. 첫 줄 quote와 title·points는 원본 영상 카드에서 옮김.
+  // say의 {model} {best} {name} {dc}는 화면에서 실제 값으로 바뀝니다.
   dealers: {
     designer: {
-      name: "디자이너폰팔이", short: "디자이너", color: "#b7a6dc", ink: "#4b3a7a",
+      name: "디자이너폰팔이", short: "디자이너", color: "#b7a6dc", ink: "#4b3a7a", role: "폰꾸 스타일리스트", emote: "★",
       quote: "케이스 + 키링 + 그립톡 or 마그네틱 지갑. 폰꾸도 해야겠지?",
       title: "폰 고르면, 폰꾸까지 한 번에",
       points: ["폰꾸 세트", "3D로 미리 보기", "폰+케이스 한 번에"],
-      pitch: "폰꾸 세트, 같이 골라 봐.",
+      tout: ["폰 색이랑 케이스, 깔맞춤 해 볼래?", "이번 주 신상 케이스 들어왔어!", "폰만 사면 심심하잖아~ 꾸미고 가!"],
+      hover: "어머, 나 보러 왔어? 폰꾸 해 줄게!",
+      say: {
+        model: "어서 와~ 오늘은 어떤 폰에 옷 입혀 볼까?",
+        spec: "<b>{model}</b>! 이 색 진짜 예쁘다. 용량도 골라 줘.",
+        point: "자, 이제 <b>폰꾸 타임</b>! 케이스부터 골라 봐.",
+        cur: "개통은 깔끔하게 맞춰 줄게. 지금 <b>통신사</b>는?",
+        bundle: "가족이나 인터넷 <b>결합</b> 있어? 할인도 예쁘게 챙기자.",
+        data: "데이터는 얼마나 써? 영상 많이 보면 넉넉하게!",
+        calc: "잠깐만~ 제일 예쁜 조건 찾는 중…",
+        quote: "<b>{best}</b>이(가) 제일 싸. 다른 줄도 눌러 봐.",
+        condCarrier: "할인은 <b>하나만</b> 돼. 더 이득인 쪽에 표시해 뒀어.",
+        condPhone: "약정 없이, 폰값 낼 방법만 정하면 끝!",
+        join: "<b>멤버십</b> 가입하면 {dc} 더 빠져. 그 돈으로 키링 하나 더?",
+        joined: "가입 완료! {dc} 빠졌어.",
+        agree: "<b>개봉하면</b> 단순 변심 반품은 안 돼. 불량은 7일 교환! 도장 꾹, 서명 슥.",
+        ship: "예쁘게 포장해서 보낼게. 어디로?",
+        review: "<b>주문 내역</b> 마지막으로 한 번만 확인해 줘.",
+        done: "{name}, 폰꾸까지 완성! 예쁘게 써 줘.",
+      },
     },
     quick: {
-      name: "퀵퀵이폰팔이", short: "퀵퀵이", color: "#f08a2c", ink: "#8a3c00",
+      name: "퀵퀵이폰팔이", short: "퀵퀵이", color: "#f08a2c", ink: "#8a3c00", role: "총알 배송 담당", emote: "!!",
       quote: "폰은 알아서 잘 고를 거잖아? 근데 받는 건 지금 바로!",
       title: "고르는 건 당신이, 보내는 건 지금 바로",
       points: ["오늘 퀵 도착", "16시 전 당일 발송", "받고 나서 개통"],
-      pitch: "언제, 어떻게 받을래?",
+      tout: ["16시 전이면 오늘 바로 출발!", "줄 서지 마, 퀵으로 쏜다!", "부릉부릉~ 지금 사면 오늘 도착!"],
+      hover: "왔다! 바로 출발 준비할게!",
+      say: {
+        model: "빨리빨리! <b>어떤 폰</b>? 고르면 바로 쏜다!",
+        spec: "<b>{model}</b> 콜! 색이랑 용량, 3초 컷!",
+        point: "<b>언제 받을래?</b> 오늘? 지금 바로?",
+        cur: "<b>통신사!</b> 빨리!",
+        bundle: "<b>결합</b> 있어? 있다, 없다만!",
+        data: "데이터 얼마나 써? 휙 골라!",
+        calc: "계산 중… 거의 다 됐어, 진짜로!",
+        quote: "<b>{best}</b>! 이게 제일 싸. 확인했으면 바로 가자!",
+        condCarrier: "할인은 <b>하나!</b> 더 싼 쪽 찍어 놨어. 휙 골라!",
+        condPhone: "약정 없음! 폰값 방법만 고르고 끝!",
+        join: "<b>멤버십</b> 3초 컷! {dc} 바로 빠져!",
+        joined: "가입 끝! {dc} 빠짐!",
+        agree: "<b>개봉하면</b> 반품 안 돼! 불량은 7일! 도장 쾅쾅, 서명 휙!",
+        ship: "주소만 줘. 바로 출발할게, 부릉!",
+        review: "확인했으면 <b>결제!</b> 출발 준비 끝!",
+        done: "{name}, 결제 완료! 지금 바로 출발한다, 부릉!",
+      },
     },
     price: {
-      name: "자린고비폰팔이", short: "자린고비", color: "#9c9e6c", ink: "#4d4f22",
+      name: "자린고비폰팔이", short: "자린고비", color: "#9c9e6c", ink: "#4d4f22", role: "짠돌이 최저가 사냥꾼", emote: "₩",
       quote: "삼시세끼 라면 먹고 살 거야? 싼 게 제일 중요하지!",
       title: "싼 게 제일 중요하지. 0원부터",
       points: ["0원폰", "최저 조건 자동 비교", "2년 총액까지"],
-      pitch: "뭐가 제일 중요해? 돈 얘기만 하자.",
+      tout: ["쉿… 여기 0원폰 있어.", "지원금 한 푼도 안 놓쳐.", "비싸게 사면 손해야. 이리 와 봐."],
+      hover: "쉿… 싸게 해 줄게. 들어와.",
+      say: {
+        model: "쉿… 싸게 사고 싶지? <b>제일 싼 것부터</b> 보여 줄게.",
+        spec: "<b>{model}</b>? 용량은 꼭 필요한 만큼만. 남는 건 다 돈이야.",
+        point: "돈 얘기만 하자. 너한테 <b>제일 중요한 게</b> 뭐야?",
+        cur: "지금 <b>통신사</b> 어디야? 옮기면 지원금이 더 붙거든.",
+        bundle: "<b>결합</b> 있어? 할인 하나도 놓치면 안 돼.",
+        data: "데이터 너무 많이 잡지 마. 요금이 새.",
+        calc: "한 푼까지 계산 중… 잠깐만.",
+        quote: "<b>{best}</b>. 이게 제일 싸. 내가 보증해.",
+        condCarrier: "할인은 <b>하나만</b>. 2년 기준으로 더 남는 쪽 찍어 놨어.",
+        condPhone: "약정 없는 대신 폰값을 잘 나눠 내자.",
+        join: "<b>멤버십</b>은 공짜야. 근데 {dc} 깎아 줘. 안 할 이유가 없지?",
+        joined: "{dc} 굳었다. 좋아, 좋아.",
+        agree: "<b>개봉하면</b> 반품 안 돼. 돈 아까우니까 잘 보고 도장 찍어.",
+        ship: "배송비 아끼려면 잘 골라. 어디로 보내?",
+        review: "<b>숫자</b> 한 번 더 봐. 틀린 거 없지?",
+        done: "{name}, 오늘 진짜 잘 샀다. 남는 거 없어, 나만 손해야.",
+      },
     },
     safe: {
-      name: "세이프티폰팔이", short: "세이프티", color: "#3f4f7d", ink: "#1f2a4d",
+      name: "세이프티폰팔이", short: "세이프티", color: "#3f4f7d", ink: "#1f2a4d", role: "든든한 케어 보안관", emote: "✓",
       quote: "케어는 나한테 맡겨!",
       title: "개통 전부터 개통 후까지, 케어는 맡겨",
       points: ["미개봉 정품", "보호 3종 세트", "공식인증 대리점"],
-      pitch: "지킬 거 골라. 약속은 도장으로.",
+      tout: ["미개봉 정품만 취급해.", "의무 부가서비스? 그런 거 없어.", "막히면 1:1로 끝까지 도와줄게."],
+      hover: "어서 와. 안심하고 들어와.",
+      say: {
+        model: "어서 와. 천천히 골라. 내가 옆에서 지켜볼게.",
+        spec: "<b>{model}</b>, 좋은 선택이야. 미개봉 정품으로만 보내 줄게.",
+        point: "<b>지킬 것</b>을 골라 봐. 약속은 도장으로 남겨 줄게.",
+        cur: "지금 쓰는 <b>통신사</b>를 알려 줘. 끊김 없게 옮겨 줄게.",
+        bundle: "가족·인터넷 <b>결합</b> 있니? 깨지지 않게 확인할게.",
+        data: "데이터는 넉넉하게. 모자라면 불편하니까.",
+        calc: "꼼꼼하게 확인 중이야. 조금만 기다려.",
+        quote: "<b>{best}</b>이(가) 제일 싸. 숨은 조건은 없어.",
+        condCarrier: "할인은 <b>하나만</b> 돼. 둘 다 투명하게 보여 줄게.",
+        condPhone: "약정 없이 깔끔하게. 폰값 낼 방법만 정하자.",
+        join: "<b>멤버십</b> 가입하면 {dc} 할인에 약정 끝 알림까지 챙겨 줄게.",
+        joined: "가입 완료. {dc} 할인 적용했어.",
+        agree: "중요한 거라 천천히 읽어 줘. <b>개봉 후엔</b> 단순 변심 반품이 안 돼.",
+        ship: "안전하게 보낼게. 받을 곳 알려 줘.",
+        review: "<b>주문 내역</b> 같이 확인하자. 이상 없지?",
+        done: "{name}, 이제 안심이야. 막히면 언제든 불러.",
+      },
     },
     used: {
-      name: "중고폰팔이", short: "중고폰", color: "#9c3a55", ink: "#5e1529",
+      name: "중고폰팔이", short: "중고폰", color: "#9c3a55", ink: "#5e1529", role: "깐깐한 검수 장인", emote: "S",
       quote: "진짜 S급! 미개봉 급! 우리 중고폰 관리 잘하는 거 알지?",
       title: "관리 잘된 중고폰, 상담으로 골라 드려요",
       points: ["S급·미개봉급", "배터리 보장", "4단계 검수"],
-      pitch: "등급이랑 배터리, 네가 정해.",
+      tout: ["IMEI 조회부터 초기화까지 다 했어.", "배터리 성능, 숫자로 보여 줄게.", "새 폰 반값에 S급, 구경만 해 봐!"],
+      hover: "S급 보러 왔구나? 눈이 높네!",
+      say: {
+        model: "진짜 S급만 있어. <b>재고 있는 모델</b>부터 볼래?",
+        spec: "<b>{model}</b>! 내가 직접 검수한 거야. 용량 확인해 봐.",
+        point: "<b>등급이랑 배터리</b>, 네 눈으로 직접 골라.",
+        cur: "중고는 알뜰 요금이랑 찰떡이야. 지금 <b>통신사</b>는?",
+        bundle: "<b>결합</b> 있어? 있으면 같이 계산해 줄게.",
+        data: "데이터는 얼마나 써? 요금까지 맞춰 줄게.",
+        calc: "새 폰이랑 비교 중… 차이 보면 놀랄걸?",
+        quote: "<b>{best}</b>. 이게 제일 싸게 먹혀.",
+        condCarrier: "할인은 <b>하나만</b>. 더 남는 쪽 표시해 뒀어.",
+        condPhone: "중고는 약정 없어. 값 낼 방법만 정하면 돼.",
+        join: "<b>멤버십</b>이면 {dc} 더 빠져. 중고 값에서 바로!",
+        joined: "{dc} 추가 할인 완료!",
+        agree: "<b>유심 끼우면</b> 사용 시작이야. 단순 변심 반품은 안 돼. 불량은 7일!",
+        ship: "검수표 동봉해서 보낼게. 어디로?",
+        review: "검수 끝난 그대로 보내. <b>마지막 확인!</b>",
+        done: "{name}, S급 득템! 오래오래 잘 써.",
+      },
     },
     allinone: {
-      name: "올인원 뷰저폰팔이", short: "올인원", color: "#bdb9a8", ink: "#55513f",
+      name: "올인원 뷰저폰팔이", short: "올인원", color: "#bdb9a8", ink: "#55513f", role: "다 해 주는 해결사", emote: "♪",
       quote: "폰 사는 데 무슨 고민을 그렇게 해. 그냥 원하는 모델만 말해봐.",
       title: "원하는 모델만 골라 주세요",
       points: ["모델만 고르면 끝", "상담 질문 생략", "최저 조건 자동"],
-      pitch: "나머진 내가 알아서 할게. 괜찮지?",
+      tout: ["모델만 말해. 나머진 내가 해.", "요금제 고민? 그건 내 일이야.", "폰 사는 데 고민하지 마~"],
+      hover: "왔어? 그냥 나한테 맡겨.",
+      say: {
+        model: "고민 그만. <b>원하는 모델</b>만 말해.",
+        spec: "<b>{model}</b>? 오케이. 색이랑 용량만 찍어.",
+        point: "나머진 <b>내가 알아서</b> 할게. 괜찮지?",
+        cur: "알겠어, 직접 골라 봐. 지금 <b>통신사</b>는?",
+        bundle: "<b>결합</b> 있어? 있으면 그대로 챙겨 줄게.",
+        data: "데이터만 알려 줘. 나머진 내가 해.",
+        calc: "다 맞추는 중이야. 커피 한 모금 마시고 와.",
+        quoteAuto: "제일 싼 건 <b>{best}</b>. 이걸로 맞춰 놨어.",
+        quote: "<b>{best}</b>이(가) 제일 싸. 그냥 이거 해.",
+        condCarrier: "할인은 <b>하나</b>. 이득인 쪽 골라 놨어.",
+        condPhone: "약정 없이, 폰값만 정하자.",
+        join: "<b>멤버십</b> 하면 {dc} 빠져. 내가 너라면 해.",
+        joined: "됐어. {dc} 빠졌어.",
+        agree: "읽고 <b>도장</b>만 찍어. 서명은 슥.",
+        ship: "어디로 보내면 돼?",
+        review: "다 맞췄어. <b>확인</b>만 해.",
+        done: "{name}, 끝. 쉽지?",
+      },
     },
   },
 
@@ -886,29 +1151,32 @@ window.SITE = {
     var m = new T.Mesh(new T.LatheGeometry(points.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg || 40), mat);
     m.castShadow = true; return m;
   }
-  function eyes(group, y, z, gap, size) {
+  function eyes(group, y, z, gap, size) { // 눈 한 쪽씩 그룹: 윙크·돋보기 눈 같은 표정용
     var white = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .18 }), black = new T.MeshStandardMaterial({ color: 0x0c0c0e, roughness: .12, metalness: .2 });
     var shine = new T.MeshBasicMaterial({ color: 0xffffff });
     var pair = new T.Group(); pair.position.set(0, y, z);
-    var pupils = [];
+    var pupils = [], eg = [];
     [-1, 1].forEach(function (s) {
-      var eye = new T.Mesh(new T.SphereGeometry(size, 28, 20), white); eye.scale.z = .6; eye.position.x = s * gap; pair.add(eye);
-      var p = new T.Group(); p.position.set(s * gap, 0, size * .5); p.userData.base = p.position.clone();
+      var e = new T.Group(); e.position.x = s * gap; pair.add(e); eg.push(e);
+      var eye = new T.Mesh(new T.SphereGeometry(size, 28, 20), white); eye.scale.z = .6; e.add(eye);
+      var p = new T.Group(); p.position.set(0, 0, size * .5); p.userData.base = p.position.clone();
       var pu = new T.Mesh(new T.SphereGeometry(size * .5, 20, 14), black); pu.scale.z = .5; p.add(pu);
       var hl = new T.Mesh(new T.SphereGeometry(size * .13, 10, 8), shine); hl.position.set(-size * .17, size * .17, size * .2); p.add(hl);
-      pair.add(p); pupils.push(p);
+      e.add(p); pupils.push(p);
     });
-    group.add(pair); group.userData.eyes = pair; group.userData.pupils = pupils;
+    group.add(pair); group.userData.eyes = pair; group.userData.pupils = pupils; group.userData.eyeGroups = eg;
   }
-  function limb(group, from, to, color, r, hand) { // 캡슐 팔 + 공 손
-    var a = new T.Vector3().fromArray(from), b = new T.Vector3().fromArray(to);
-    var len = a.distanceTo(b), mat = std(color, .55);
+  function limb(group, from, to, color, r, hand) { // 어깨에 관절(pivot)이 있는 캡슐 팔 + 공 손
+    var a = new T.Vector3().fromArray(from), b = new T.Vector3().fromArray(to), d = b.clone().sub(a);
+    var len = d.length(), mat = std(color, .55);
+    var pivot = new T.Group(); pivot.position.copy(a); group.add(pivot);
     var mesh = new T.Mesh(new T.CylinderGeometry(r, r, len, 18), mat); mesh.castShadow = true;
-    mesh.position.copy(a).add(b).multiplyScalar(.5);
-    mesh.quaternion.setFromUnitVectors(UP, b.clone().sub(a).normalize());
-    var j = new T.Mesh(new T.SphereGeometry(r, 16, 12), mat); j.position.copy(a);
-    var end = new T.Mesh(new T.SphereGeometry(r * (hand || 1.3), 20, 14), mat); end.position.copy(b); end.castShadow = true;
-    group.add(mesh, j, end); return end;
+    mesh.position.copy(d).multiplyScalar(.5); mesh.quaternion.setFromUnitVectors(UP, d.clone().normalize());
+    var j = new T.Mesh(new T.SphereGeometry(r, 16, 12), mat);
+    var end = new T.Mesh(new T.SphereGeometry(r * (hand || 1.3), 20, 14), mat); end.position.copy(d); end.castShadow = true;
+    pivot.add(mesh, j, end);
+    (group.userData.arms = group.userData.arms || []).push(pivot);
+    return end;
   }
   function textTex(lines, fg, bg, w, h) {
     var c = document.createElement("canvas"); c.width = w || 256; c.height = h || 128; var x = c.getContext("2d");
@@ -931,26 +1199,26 @@ window.SITE = {
       limb(g, [1.05, 2.4, .1], [1.2, .55, .5], 0xf2b23d, .19);
       var rail = std(0x2f3135, .4);
       [[-2.55, .35], [-1.65, .35]].forEach(function (p) { var r = rbox(.12, 2.6, .12, .05, rail); r.position.set(p[0], 1.45, p[1]); r.rotation.z = -.12; g.add(r); });
-      var wheel = new T.Mesh(new T.TorusGeometry(.48, .2, 14, 28), std(0x18191b, .8)); wheel.position.set(-2.1, .62, .9); wheel.rotation.y = Math.PI / 2; wheel.castShadow = true; g.add(wheel);
+      var wheel = new T.Mesh(new T.TorusGeometry(.48, .2, 14, 28), std(0x18191b, .8)); wheel.position.set(-2.1, .62, .9); wheel.rotation.y = Math.PI / 2; wheel.castShadow = true; g.add(wheel); g.userData.wheel = wheel;
       [[1.2, .8, .9, 1.4], [1.0, .7, .8, 2.15]].forEach(function (b) { var bx = rbox(b[0], b[1], b[2], .05, std(0xc99a62, .9)); bx.position.set(-2.1, b[3], .4); g.add(bx); });
     } else if (id === "price") { // 카키 원뿔 + 가격표
       body = lathe([[0, 0], [1.18, 0], [1.12, .2], [.2, 4.05], [.08, 4.25], [0, 4.3]], m, 48);
       body.rotation.z = -.06;
       eyes(g, 2.15, .72, .26, .2);
       var hand = limb(g, [.6, 1.9, .3], [1.45, 2.75, .55], 0xb3b483, .17);
-      var tag = plate(.8, .5, textTex([{ t: "0원", s: 70 }], "#d8263a", "#fffdf2", 192, 120)); tag.position.copy(hand.position).add(new T.Vector3(.1, .45, .05)); g.add(tag);
+      var tag = plate(.8, .5, textTex([{ t: "0원", s: 70 }], "#d8263a", "#fffdf2", 192, 120)); tag.position.copy(hand.position).add(new T.Vector3(.1, .45, .05)); hand.parent.add(tag);
     } else if (id === "safe") { // 남색 상자 + 두 팔 + 방패
       body = rbox(2.75, 3.4, 1.3, .2, m); body.position.y = 1.7;
       eyes(g, 2.85, .7, .34, .21);
       limb(g, [1.35, 2.3, 0], [2.15, .95, .55], 0x55669a, .21); limb(g, [-1.35, 2.3, 0], [-2.05, 1.25, .45], 0x55669a, .21);
       var sh = new T.Shape(); sh.moveTo(0, .5); sh.quadraticCurveTo(.45, .45, .5, .35); sh.lineTo(.42, -.15); sh.quadraticCurveTo(.25, -.45, 0, -.6); sh.quadraticCurveTo(-.25, -.45, -.42, -.15); sh.lineTo(-.5, .35); sh.quadraticCurveTo(-.45, .45, 0, .5);
-      var shield = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: .08, bevelEnabled: true, bevelSize: .03, bevelThickness: .03 }), std(0xe8edf5, .35)); shield.position.set(0, 1.5, .67); g.add(shield);
+      var shield = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: .08, bevelEnabled: true, bevelSize: .03, bevelThickness: .03 }), std(0xe8edf5, .35)); shield.position.set(0, 1.5, .67); g.add(shield); g.userData.shield = shield;
     } else if (id === "used") { // 버건디 기둥 + S급 팻말
       body = rbox(1.05, 4.6, .9, .14, m); body.position.y = 2.3;
       eyes(g, 3.9, .48, .23, .2);
       var h2 = limb(g, [.52, 3.1, 0], [1.15, 4.05, .4], 0xb54d69, .15);
-      var sign = rbox(1.0, .66, .06, .04, std(0xffffff)); sign.position.copy(h2.position).add(new T.Vector3(.25, .55, .02)); sign.rotation.z = .25; g.add(sign);
-      var st = plate(.9, .56, textTex([{ t: "S급", s: 78 }], "#9c3a55", "#ffffff", 192, 120)); st.position.copy(sign.position).add(new T.Vector3(0, 0, .04)); st.rotation.z = .25; g.add(st);
+      var sign = rbox(1.0, .66, .06, .04, std(0xffffff)); sign.position.copy(h2.position).add(new T.Vector3(.25, .55, .02)); sign.rotation.z = .25; h2.parent.add(sign);
+      var st = plate(.9, .56, textTex([{ t: "S급", s: 78 }], "#9c3a55", "#ffffff", 192, 120)); st.position.copy(sign.position).add(new T.Vector3(0, 0, .04)); st.rotation.z = .25; h2.parent.add(st);
       var sticker = plate(.6, .4, textTex([{ t: "검수", s: 64 }], "#ffffff", "#5e1529", 160, 110)); sticker.position.set(0, 2.2, .46); g.add(sticker);
     } else { // 회색 달걀 + 가슴 선반 + 미니 폰
       body = lathe([[0, 0], [.9, .08], [1.45, .7], [1.6, 1.7], [1.42, 2.8], [.95, 3.65], [.4, 4.02], [0, 4.1]], std(col, .85), 48);
@@ -962,6 +1230,7 @@ window.SITE = {
     body.userData.dealer = id; g.add(body);
     g.traverse(function (o) { if (o.isMesh) { o.userData.dealer = id; o.castShadow = true; } });
     g.userData.blink = 2 + Math.random() * 3;
+    g.userData.body = body; g.userData.col = new T.Color(colorHex); g.userData.glow = 0; g.userData.env = 0;
     return g;
   }
 
@@ -1057,6 +1326,7 @@ window.SITE = {
     this.crowd = buildCrowd(r, this.mobile ? 1300 : 2600, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
+    this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
     var v = function (a) { return new T.Vector3().fromArray(a); };
     this.posCurve = new T.CatmullRomCurve3(this.shots.map(function (s) { return v(s.pos); }), false, "centripetal");
     this.lookCurve = new T.CatmullRomCurve3(this.shots.map(function (s) { return v(s.look); }), false, "centripetal");
@@ -1072,6 +1342,9 @@ window.SITE = {
       self.pick();
     });
     canvas.addEventListener("click", function () { self.pick(); if (self.hover && opts.onDealer) opts.onDealer(self.hover); });
+    canvas.addEventListener("pointerleave", function () { // 캔버스를 벗어나면 호버 해제
+      if (self.hover) { self.hover = null; canvas.style.cursor = ""; if (opts.onHover) opts.onHover(null); }
+    });
 
     this.resize();
     this.clock = new T.Clock();
@@ -1082,8 +1355,10 @@ window.SITE = {
   World.prototype.pick = function () {
     this.ray.setFromCamera(this.pointer, this.camera);
     var hit = this.ray.intersectObjects(this.hitTargets, false)[0];
+    var prev = this.hover;
     this.hover = hit && hit.distance < 40 ? hit.object.userData.dealer : null;
     this.canvas.style.cursor = this.hover ? "pointer" : "";
+    if (prev !== this.hover && this.opts.onHover) this.opts.onHover(this.hover);
   };
 
   World.prototype.resize = function () {
@@ -1132,24 +1407,89 @@ window.SITE = {
       m.compose(pos, q, sc); cd.bodies.setMatrixAt(i, m); cd.heads.setMatrixAt(i, m);
     }
     cd.bodies.instanceMatrix.needsUpdate = true; cd.heads.instanceMatrix.needsUpdate = true;
-    // 캐릭터: 숨쉬기, 눈 깜빡임, 시선
-    var px = this.pointer.x, py = this.pointer.y;
+    // 캐릭터: 폰팔이마다 다른 호객 동작 + 마우스 올리면 반응 + 깜빡임·시선
+    var px = this.pointer.x, py = this.pointer.y, prog = this.progress;
     for (var id in this.dealers) {
-      var g = this.dealers[id].group, k = this.dealers[id].index;
-      var talk = this.talking === id;
-      g.position.y = talk ? Math.abs(Math.sin(time * 9)) * .12 : Math.sin(time * 1.6 + k) * .05;
-      g.scale.y = talk ? 1 + Math.sin(time * 18) * .015 : 1;
-      g.rotation.y = Math.sin(time * .7 + k) * .06;
-      g.userData.blink -= dt;
-      var e = g.userData.eyes;
-      if (g.userData.blink < 0) { e.scale.y = Math.max(.08, e.scale.y - dt * 18); if (g.userData.blink < -.12) { g.userData.blink = 2 + Math.random() * 3.5; } }
+      var D = this.dealers[id], g = D.group, k = D.index, u = g.userData, talk = this.talking === id, S = TOUT[id];
+      var near = Math.max(0, 1 - Math.abs(prog - this.stopOf[id]) * 1.6);
+      var market = Math.max(0, 1 - Math.abs(prog - 2) * 1.6) * .7;
+      var ts = talk ? 1 : Math.max(near, market, this.hover === id ? 1 : 0); // 호객 세기
+      var ph = ((time + k * .83) % S.period) / S.dur;                        // 제스처 진행 (0~1이면 동작 중)
+      var env = ph < 1 ? Math.sin(ph * Math.PI) : 0;
+      if (talk) { env = .75 + Math.sin(time * S.talk) * .25; ph = (time * S.talk / 6) % 1; }
+      env *= ts; u.env = env; u.ph = ph;
+      // 기본 자세로 되돌린 뒤 동작을 얹음
+      g.position.y = Math.sin(time * 1.6 + k) * .05; g.rotation.set(0, Math.sin(time * .7 + k) * .06, 0); g.scale.set(1, 1, 1);
+      u.arms.forEach(function (a) { a.rotation.set(0, 0, 0); });
+      u.eyeGroups.forEach(function (e) { e.scale.set(1, 1, 1); });
+      u.look = 0;
+      STYLE[id](g, u, env, ph, time, dt, talk);
+      // 마우스 올리면: 깡충 + 흔들 + 은은한 빛
+      if (this.hover === id) { if (u.hoverAt == null) u.hoverAt = time; } else u.hoverAt = null;
+      if (u.hoverAt != null) {
+        var r = Math.min(1, (time - u.hoverAt) / .65);
+        g.position.y += Math.sin(r * Math.PI) * .55; g.rotation.y += Math.sin(r * Math.PI * 3) * .22 * (1 - r);
+        g.scale.multiplyScalar(1 + .05 * Math.sin(r * Math.PI));
+      }
+      u.glow += ((this.hover === id ? .24 : 0) - u.glow) * .15;
+      u.body.material.emissive.copy(u.col).multiplyScalar(u.glow);
+      // 깜빡임
+      u.blink -= dt;
+      var e = u.eyes;
+      if (u.blink < 0) { e.scale.y = Math.max(.08, e.scale.y - dt * 18); if (u.blink < -.12) { u.blink = 2 + Math.random() * 3.5; } }
       else e.scale.y = Math.min(1, e.scale.y + dt * 14);
-      g.userData.pupils.forEach(function (pu) {
+      // 시선: 마우스를 따라봄 (+ 자린고비는 두리번)
+      u.pupils.forEach(function (pu) {
         var b = pu.userData.base;
-        pu.position.x += (b.x + px * .075 - pu.position.x) * .15;
+        pu.position.x += (b.x + px * .075 + u.look - pu.position.x) * .15;
         pu.position.y += (b.y + py * .065 - pu.position.y) * .15;
       });
     }
+  };
+
+  // 폰팔이별 호객 동작 (env: 0~1 동작 세기, ph: 0~1 동작 진행)
+  var TOUT = {
+    designer: { period: 4.2, dur: 1.8, talk: 6 },
+    quick: { period: 2.6, dur: 1.1, talk: 14 },
+    price: { period: 3.6, dur: 1.5, talk: 8 },
+    safe: { period: 5.0, dur: 2.0, talk: 3 },
+    used: { period: 3.8, dur: 1.6, talk: 7 },
+    allinone: { period: 4.6, dur: 2.2, talk: 4 },
+  };
+  var STYLE = {
+    designer: function (g, u, env, ph, t) { // 긴 팔로 진열 케이스를 소개 + 한 바퀴 뽐내기 + 윙크
+      g.rotation.z = Math.sin(t * 1.3) * .035;
+      u.arms[0].rotation.z = env * .95 + Math.sin(t * 5) * .12 * env;
+      g.rotation.y += env * .45 * Math.sin(ph * Math.PI * 2);
+      if (env > .55) u.eyeGroups[1].scale.y = Math.max(.12, 1 - (env - .55) * 4);
+    },
+    quick: function (g, u, env, ph, t, dt) { // 깡충깡충 두 번 + 팔을 번쩍 들고 빠르게 손짓 + 손수레 바퀴
+      g.position.y += Math.abs(Math.sin(t * 7)) * .06 + (ph < 1 ? Math.abs(Math.sin(ph * Math.PI * 2)) * .55 * Math.min(1, env * 1.6) : 0);
+      u.arms[0].rotation.z = env * 1.9 + Math.sin(t * 20) * .35 * env;
+      if (u.wheel) u.wheel.rotation.z += dt * (2 + 12 * env);
+    },
+    price: function (g, u, env, ph, t) { // 0원 가격표를 흔들며 몸을 숙여 속삭임 + 두리번
+      g.rotation.x = Math.sin(t * .9) * .03 + .12 * env;
+      u.arms[0].rotation.z = .25 * env + Math.sin(t * 16) * .3 * env;
+      u.look = Math.sin(t * 4) * .09 * env;
+    },
+    safe: function (g, u, env, ph, t) { // 든든하게 두 번 끄덕 + 두 팔 벌려 지켜주기 + 방패가 빛남
+      g.scale.y *= 1 + Math.sin(t * 1.6) * .012;
+      g.rotation.x = Math.sin(ph * Math.PI * 4) * .07 * env;
+      u.arms[0].rotation.z = env * .55; u.arms[1].rotation.z = -env * .55;
+      if (u.shield) u.shield.material.emissive.setRGB(env * .45, env * .5, env * .6);
+    },
+    used: function (g, u, env, ph, t) { // S급 팻말을 경매처럼 들었다 놨다 + 한쪽 눈이 돋보기처럼 커짐
+      g.rotation.z = Math.sin(t * 1.1) * .03 - env * .06;
+      u.arms[0].rotation.z = env * .5 + Math.sin(t * 9) * .18 * env;
+      u.eyeGroups[0].scale.setScalar(1 + .45 * env);
+    },
+    allinone: function (g, u, env, ph, t) { // 달걀처럼 뒤뚱 + 두 팔 활짝 흔들며 "다 맡겨"
+      g.rotation.z = Math.sin(t * 1.4) * .05 + Math.sin(t * 3) * .08 * env;
+      g.position.y += env * .12;
+      var w = Math.sin(t * 5) * .35 * env + .2 * env;
+      u.arms[0].rotation.z = w; u.arms[1].rotation.z = -w;
+    },
   };
 
   World.prototype.loop = function () {
@@ -1170,6 +1510,7 @@ window.SITE = {
   };
 
   World.prototype.talk = function (id) { this.talking = id || null; };
+  World.prototype.toutEnv = function (id) { var d = this.dealers[id]; return d ? d.group.userData.env : 0; };
 
   // 캐릭터 머리 위 말풍선 위치 (화면 px)
   World.prototype.headOnScreen = function (id) {
@@ -2124,36 +2465,42 @@ window.PV3D = {
       '<div class="ln"><span>불량 교환</span><b>받은 날부터 7일</b></div><div class="foot center">문의 ' + D.contact.phone + ' · 프로토타입</div></div>';
   };
 
-  /* ---------- 대본 ---------- */
+  /* ---------- 대본: 폰팔이마다 자기 말투 (content.js의 say) ---------- */
+  function line(key, vars) {
+    var say = D.dealers[G.dealer].say || {}, t = say[key] || (key === "quoteAuto" ? say.quote : "") || "";
+    return t.replace(/\{(\w+)\}/g, function (_, k) { return vars && vars[k] != null ? vars[k] : ""; });
+  }
+  // 폰팔이 얼굴 아바타 (CSS로 그린 몸 + 마우스를 따라보는 눈)
+  function ava(id, cls) { return '<i class="ava' + (cls ? " " + cls : "") + '" data-d="' + id + '" aria-hidden="true"><i class="eye"><i></i></i><i class="eye"><i></i></i></i>'; }
   var STEPS = {
-    model: { q: 0, t: function () { return "“" + D.dealers[G.dealer].quote + "” 어떤 폰?"; }, panel: "model" },
-    spec: { q: 0, t: function () { return "<b>" + esc(G.md.name) + "</b> 좋지! 색이랑 용량 골라. 지원금도 봐 둬."; }, panel: "spec", ch: function () { return [["이걸로", function () { G.usedId = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
-    point: { q: 1, t: function () { return D.dealers[G.dealer].pitch; }, panel: "point", ch: function () {
+    model: { q: 0, t: function () { return line("model"); }, panel: "model" },
+    spec: { q: 0, t: function () { return line("spec", { model: esc(G.md.name) }); }, panel: "spec", ch: function () { return [["이걸로", function () { G.usedId = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
+    point: { q: 1, t: function () { return line("point"); }, panel: "point", ch: function () {
       if (G.dealer === "allinone") return [["🙌 알아서 해 줘", function () { G.auto = true; G.cur = "mvno"; G.bundle = "free"; G.tier = 5; G.months = 24; G.pick = null; G.con = null; go("calc"); }, "go"], ["내가 고를래", function () { G.auto = false; go("cur"); }]];
       if (G.dealer === "used") return [["이 중고로", function () { if (!G.usedId) { var u = usedUnits(G.md)[0]; G.usedId = u && u.id; } go("cur"); }, "go"]];
       return [["좋아, 다음", function () { go("cur"); }, "go"]];
     } },
-    cur: { q: 2, t: function () { return "지금 쓰는 <b>통신사</b>는?"; }, panel: "cur", grid: true, ch: function () {
+    cur: { q: 2, t: function () { return line("cur"); }, panel: "cur", grid: true, ch: function () {
       return CURS.map(function (c) { return [c[1], function () { G.cur = c[0]; go(C.CARRIERS[curKey()] ? "bundle" : "data"); }]; });
     } },
-    bundle: { q: 2, t: function () { return "<b>가족·인터넷 결합</b> 있어? 유지하면 결합 할인도 계산할게."; }, panel: "bundle", ch: function () {
+    bundle: { q: 2, t: function () { return line("bundle"); }, panel: "bundle", ch: function () {
       return [["있어 · 유지", function () { G.bundle = "keep"; go("data"); }], ["없어 · 최저가", function () { G.bundle = "free"; go("data"); }, "go"]];
     } },
-    data: { q: 2, t: function () { return "데이터는 한 달에 얼마나 써?"; }, panel: "data" },
-    calc: { q: 3, t: function () { return "잠깐만, 3사 지원금이랑 다 계산해 볼게…"; }, panel: "calc", auto: 1300, next: "quote" },
+    data: { q: 2, t: function () { return line("data"); }, panel: "data" },
+    calc: { q: 3, t: function () { return line("calc"); }, panel: "calc", auto: 1300, next: "quote" },
     quote: { q: 3, t: function () {
       var L = ways(); if (G.auto) { G.pick = L[0].id; G.con = L[0].o ? L[0].o.con : null; }
-      return G.auto ? "제일 싼 건 <b>" + esc(L[0].title) + "</b>. 이걸로 맞춰 놨어." : "<b>" + esc(L[0].title) + "</b>이(가) 제일 싸. 다른 줄도 눌러 봐.";
+      return line(G.auto ? "quoteAuto" : "quote", { best: esc(L[0].title) });
     }, panel: "quote", ch: function () { return [[G.auto ? "이대로 할게" : "이 방법으로", function () { if (!G.pick) G.pick = ways()[0].id; go(G.auto ? "join" : "cond"); }, "go"]]; } },
-    cond: { q: 3, t: function () { return curWay().kind === "carrier" ? "할인은 <b>둘 중 하나</b>. 지원금 내역 다 적어 놨어." : "약정 없어. 폰값 낼 방법만 골라."; }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
-    join: { q: 4, t: function () { return "<b>1mm 멤버십</b> 가입하면 지금 " + man(C.MEMBER_DC) + " 더 빠져. 3초!"; }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
-    joined: { q: 4, t: function () { return "가입 완료! " + man(C.MEMBER_DC) + " 빠졌어."; }, panel: "join", auto: 1200, next: "agree" },
-    agree: { q: 4, t: function () { return "<b>개봉·개통하면</b> 단순 변심 반품은 안 돼. 불량은 7일 안에 교환. 도장 찍고 서명!"; }, panel: "agree", ch: function () { return [["서명 완료", signDone, "go"]]; } },
-    ship: { q: 5, t: function () { return "어디로 보낼까?"; }, panel: "ship", ch: function () { return [["주문 내역 확인", function () { if (formOk()) go("review"); else repaint(); }, "go"]]; } },
-    review: { q: 5, t: function () { return "<b>주문 내역</b> 확인하고 결제!"; }, panel: "review", ch: function () {
+    cond: { q: 3, t: function () { return line(curWay().kind === "carrier" ? "condCarrier" : "condPhone"); }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
+    join: { q: 4, t: function () { return line("join", { dc: man(C.MEMBER_DC) }); }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
+    joined: { q: 4, t: function () { return line("joined", { dc: man(C.MEMBER_DC) }); }, panel: "join", auto: 1200, next: "agree" },
+    agree: { q: 4, t: function () { return line("agree"); }, panel: "agree", ch: function () { return [["서명 완료", signDone, "go"]]; } },
+    ship: { q: 5, t: function () { return line("ship"); }, panel: "ship", ch: function () { return [["주문 내역 확인", function () { if (formOk()) go("review"); else repaint(); }, "go"]]; } },
+    review: { q: 5, t: function () { return line("review"); }, panel: "review", ch: function () {
       return [["✏️ 수정", function () { go("ship"); }], ["💳 결제하기", function () { var d = new Date(); G.no = "PP-" + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + (1000 + Math.floor(Math.random() * 9000)); go("done"); }, "go"]];
     } },
-    done: { q: 6, t: function () { return "고마워, " + esc(G.f.name) + "! " + (G.ship === "quick" ? "오늘 퀵으로 보낼게." : "잘 챙겨 보낼게.") + " 영수증 받아 가."; }, panel: "done", ch: function () { return [["광장으로", function () { close(); }, "go"], ["처음부터", function () { open(G.dealer); }]]; } },
+    done: { q: 6, t: function () { return line("done", { name: esc(G.f.name) }); }, panel: "done", ch: function () { return [["광장으로", function () { close(); }, "go"], ["처음부터", function () { open(G.dealer); }]]; } },
   };
   function signDone() {
     G.err = {}; needAgree().forEach(function (a) { if (!G.agree[a.id]) G.err[a.id] = 1; }); if (!G.signed) G.err.sign = 1;
@@ -2180,14 +2527,14 @@ window.PV3D = {
     renderMission(st.q);
     $("#shopBack").hidden = !HIST.length || id === "done";
     var panel = $("#shopPanel");
-    if (st.panel) { panel.hidden = false; panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); mount3D(); }
+    if (st.panel) { panel.hidden = false; panel.classList.add("enter"); panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); mount3D(); }
     else panel.hidden = true;
     $("#shopCh").innerHTML = ""; $("#shopCh").className = "sch" + (st.grid ? " grid" : "");
     type(st.t());
     if (st.auto) timers.push(setTimeout(function () { go(st.next); }, st.auto));
   }
   function back() { var p = HIST.pop(); if (p) go(p, true); }
-  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); mount3D(); } }
+  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.classList.remove("enter"); el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); mount3D(); } }
   // 실측 3D 폰: 색·용량 단계에서 띄우고, 접는 폰은 접은/펼친 상태 전환
   function mount3D() {
     var host = $("#pvHost");
@@ -2195,20 +2542,26 @@ window.PV3D = {
     if (PV3D.show(G.md, G.ci, host)) { host.classList.add("live"); PV3D.setOpen(G.open !== false); }
   }
   var full = "";
+  var TYPE_SPEED = { designer: [2, 22], quick: [3, 14], price: [1, 26], safe: [1, 30], used: [2, 20], allinone: [1, 28] };
   function type(html) {
     var p = $("#shopTxt"); full = html; var plain = html.replace(/<[^>]+>/g, ""), i = 0;
     if (typing) clearInterval(typing);
     if (opts.onTalk) opts.onTalk(true);
+    $("#shopDlg").classList.add("typing");
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
     p.textContent = "";
-    typing = setInterval(function () { i += 2; p.textContent = plain.slice(0, i); if (i >= plain.length) finish(); }, 22);
+    var sp = TYPE_SPEED[G.dealer] || [2, 22]; // 말투 속도: 퀵퀵이는 빠르게, 세이프티·올인원은 느긋하게
+    typing = setInterval(function () { i += sp[0]; p.textContent = plain.slice(0, i); if (i >= plain.length) finish(); }, sp[1]);
   }
   function finish() {
-    if (typing) clearInterval(typing); typing = null; $("#shopTxt").innerHTML = full;
+    if (typing) clearInterval(typing); typing = null; $("#shopTxt").innerHTML = full; $("#shopDlg").classList.remove("typing");
     if (opts.onTalk) opts.onTalk(false);
     var st = STEPS[CUR], ch = $("#shopCh");
-    if (st.ch && !ch.children.length) st.ch().forEach(function (c) {
-      var b = document.createElement("button"); b.className = "say" + (c[2] ? " go" : ""); b.textContent = c[0]; b.onclick = c[1]; ch.appendChild(b);
+    if (st.ch && !ch.children.length) st.ch().forEach(function (c, i) {
+      var b = document.createElement("button"); b.className = "say" + (c[2] ? " go" : ""); b.style.setProperty("--i", i);
+      var t = document.createElement("span"); t.textContent = c[0]; b.appendChild(t);
+      if (c[2]) { var ar = document.createElement("i"); ar.className = "arr"; ar.setAttribute("aria-hidden", "true"); ar.textContent = "→"; b.appendChild(ar); }
+      b.onclick = c[1]; ch.appendChild(b);
     });
   }
   function renderMission(q) {
@@ -2260,8 +2613,9 @@ window.PV3D = {
   function open(dealer) {
     G = fresh(dealer); HIST = []; CUR = null;
     var d = D.dealers[dealer], sec = $("#shop");
-    sec.hidden = false; sec.style.setProperty("--c", d.color); sec.dataset.dealer = dealer;
-    $("#shopWho").textContent = d.name;
+    sec.hidden = false; sec.style.setProperty("--c", d.color); sec.style.setProperty("--dk", d.ink || "#202529"); sec.dataset.dealer = dealer;
+    $("#shopDlg").dataset.emote = d.emote || "";
+    $("#shopWho").innerHTML = ava(dealer, "sm") + "<span>" + esc(d.name) + "</span>";
     document.documentElement.classList.add("shopping");
     go("model");
   }
@@ -2283,7 +2637,7 @@ window.PV3D = {
     init: init, open: open, close: close, go: go, repaint: repaint,
     state: function () { return G; }, step: function () { return CUR; },
     setDeco: function (deco) { if (G) { Object.assign(G.deco, deco); if (CUR === "point") repaint(); } },
-    methods: function () { return ways(); }, way: function () { return curWay(); },
+    methods: function () { return ways(); }, way: function () { return curWay(); }, ava: ava,
   };
 })();
 
@@ -2312,38 +2666,50 @@ window.PV3D = {
   var toastT;
   function toast(m) { var t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("on"); }, 1800); }
 
-  /* ---------- 스크롤 트랙 ---------- */
+  /* ---------- 스크롤 트랙 + 장면 도크 ---------- */
   var track = $("#track");
   CH.forEach(function (c, i) {
     var label = c.dealer ? D.dealers[c.id].name : c.title.replace("\n", " ");
     track.appendChild(el("section", { class: "stop", id: "s-" + c.id }, [el("h2", { class: "sr", text: label })]));
   });
-  var nav = $("#chapters");
+  var nav = $("#chapters"), navInd = el("span", { class: "ind", "aria-hidden": "true" });
+  nav.appendChild(navInd);
   CH.forEach(function (c, i) {
     var d = c.dealer ? D.dealers[c.id] : null;
     nav.appendChild(el("button", { style: { "--c": d ? d.color : "#202529" }, "aria-label": (d ? d.name : c.nav) + " 장면으로", onclick: function () { go(i); } },
-      [el("i"), d ? d.short : c.nav]));
+      [el("i"), el("span", { text: d ? d.short : c.nav })]));
   });
+  function moveInd() { // 현재 장면 버튼 아래로 미끄러지는 표시
+    var b = nav.querySelectorAll("button")[cur]; if (!b) return;
+    navInd.style.width = b.offsetWidth + "px"; navInd.style.transform = "translateX(" + b.offsetLeft + "px)";
+    navInd.style.setProperty("--c", b.style.getPropertyValue("--c"));
+  }
   function stopH() { return track.firstChild.offsetHeight || innerHeight; }
   function go(i) { scrollTo({ top: i * stopH(), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
   $("#brand").addEventListener("click", function (e) { e.preventDefault(); go(0); });
   $("#scrollHint").addEventListener("click", function () { go(1); });
+  var shopping = function () { return document.documentElement.classList.contains("shopping"); };
 
   /* ---------- 3D 월드 ---------- */
   var world = null;
   if (window.THREE && window.PPWorld && PPWorld.supported()) {
-    try { world = new PPWorld($("#world"), D, { onDealer: function (id) { if (document.documentElement.classList.contains("shopping")) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); }, preserve: /[?&]shot/.test(location.search) }); }
-    catch (e) { console.warn(e); world = null; }
+    try {
+      world = new PPWorld($("#world"), D, {
+        onDealer: function (id) { if (shopping()) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); },
+        onHover: function (id) { onDealerHover(id); },
+        preserve: /[?&]shot/.test(location.search),
+      });
+    } catch (e) { console.warn(e); world = null; }
   }
   if (!world) { $("#world").hidden = true; $("#fallback").hidden = false; }
   function indexOf(id) { for (var i = 0; i < N; i++) if (CH[i].id === id) return i; return 0; }
-  addEventListener("resize", function () { if (world) world.resize(); });
+  addEventListener("resize", function () { if (world) world.resize(); moveInd(); });
 
   /* ---------- 장면 상태 ---------- */
   var cur = -1, cardOpen = false, cardTimer = 0;
   function progress() { return Math.max(0, Math.min(N - 1, scrollY / stopH())); }
   function onScroll() {
-    if (document.documentElement.classList.contains("shopping")) return;
+    if (shopping()) return;
     var s = progress(), i = Math.round(s), near = Math.abs(s - i);
     if (world) world.setProgress(s);
     else { var img = $("#fallbackImg"), src = "assets/fallback/" + FALLBACK[i] + ".webp"; if (img.getAttribute("src") !== src) img.src = src; }
@@ -2359,7 +2725,7 @@ window.PV3D = {
     }
   }
   function setCard(on) {
-    if (document.documentElement.classList.contains("shopping")) on = false;
+    if (shopping()) on = false;
     cardOpen = on; $("#card").classList.toggle("on", on);
     if (world) {
       var mobile = matchMedia("(max-width: 760px)").matches;
@@ -2369,7 +2735,8 @@ window.PV3D = {
   function setChapter(i) {
     cur = i; var c = CH[i];
     nav.querySelectorAll("button").forEach(function (b, k) { b.setAttribute("aria-current", k === i ? "true" : "false"); });
-    var active = nav.children[i]; if (active && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - nav.clientWidth / 2 + active.offsetWidth / 2;
+    var active = nav.querySelectorAll("button")[i]; if (active && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - nav.clientWidth / 2 + active.offsetWidth / 2;
+    moveInd();
     if (c.dealer) { renderCard(c.id); }
     else {
       $("#title").innerHTML = c.title.split("\n").map(function (t) { var s = el("span", { text: t }); return s.outerHTML; }).join("<br>");
@@ -2377,33 +2744,71 @@ window.PV3D = {
       $("#eyebrow").textContent = i === 0 ? "PHONEPARIS · 에펠탑 광장" : i === N - 1 ? "PHONEPARIS · 다시, 광장" : "PHONEPARIS";
     }
     $("#bubble").hidden = !c.dealer;
-    if (c.dealer) { var d = D.dealers[c.id]; $("#bubbleName").textContent = d.name; $("#bubbleName").style.setProperty("--c", d.color); $("#bubbleText").textContent = "“" + d.quote + "”"; }
+    clearInterval(toutTimer);
+    if (c.dealer) {
+      var d = D.dealers[c.id], b = $("#bubble");
+      b.dataset.d = c.id; b.style.setProperty("--c", d.color); b.style.setProperty("--dk", d.ink || "#202529");
+      $("#bubbleName").innerHTML = PPShop.ava(c.id, "xs") + "<span>" + d.name + "</span>";
+      startTout(c.id);
+    }
   }
+
+  /* ---------- 호객 말풍선: 폰팔이마다 다른 멘트를 돌려 가며 + 동작에 맞춰 이모트 ---------- */
+  var toutTimer = 0, toutIdx = 0, holdUntil = 0, emoteOn = false;
+  function sayBubble(text, hold) {
+    var b = $("#bubble"); $("#bubbleText").textContent = text;
+    b.classList.remove("swap"); void b.offsetWidth; b.classList.add("swap");
+    if (hold) holdUntil = Date.now() + 2800;
+  }
+  function startTout(id) {
+    var d = D.dealers[id], L = ["“" + d.quote + "”"].concat(d.tout || []);
+    toutIdx = 0; holdUntil = 0; sayBubble(L[0]);
+    toutTimer = setInterval(function () {
+      if (Date.now() < holdUntil || document.hidden || shopping()) return;
+      toutIdx = (toutIdx + 1) % L.length; sayBubble(L[toutIdx]);
+    }, 4200);
+  }
+  function popEmote(t) { var e = $("#emote"); e.textContent = t; e.classList.remove("pop"); void e.offsetWidth; e.classList.add("pop"); }
   function tickBubble() {
     requestAnimationFrame(tickBubble);
     var c = CH[cur]; if (!c || !c.dealer || !world) return;
     var p = world.headOnScreen(c.id), b = $("#bubble");
     var mobile = matchMedia("(max-width: 760px)").matches;
     var top = Math.max(mobile ? 150 : 120, p.y);
-    b.style.transform = "translate(" + Math.round(Math.min(innerWidth - 140, Math.max(140, p.x))) + "px," + Math.round(top) + "px) translate(-50%, -100%)";
+    b.style.transform = "translate(" + Math.round(Math.min(innerWidth - 150, Math.max(150, p.x))) + "px," + Math.round(top) + "px) translate(-50%, -100%)";
     b.style.opacity = Math.abs(progress() - cur) < .15 && !(mobile && cardOpen && top > innerHeight * .4) ? 1 : 0;
+    var env = world.toutEnv(c.id);
+    if (env > .5 && !emoteOn) { emoteOn = true; popEmote(D.dealers[c.id].emote || "!"); }
+    if (env < .15) emoteOn = false;
   }
   requestAnimationFrame(tickBubble);
   addEventListener("scroll", onScroll, { passive: true });
 
-  /* ---------- 폰팔이 카드: 셀링포인트 3개 + 가게 들어가기 ---------- */
+  /* ---------- 캐릭터에 마우스를 올리면: 반응 멘트 + 커서 라벨 ---------- */
+  function onDealerHover(id) {
+    cursorDealer(id);
+    var c = CH[cur];
+    if (id && c && c.id === id && !shopping()) sayBubble(D.dealers[id].hover, true);
+  }
+
+  /* ---------- 폰팔이 카드: 아바타 + 셀링포인트 3개 + 가게 들어가기 ---------- */
   function renderCard(id) {
     var d = D.dealers[id], card = $("#card");
-    card.style.setProperty("--c", d.color); card.innerHTML = "";
-    card.appendChild(el("span", { class: "badge", text: d.name }));
+    card.style.setProperty("--c", d.color); card.style.setProperty("--dk", d.ink || "#202529"); card.dataset.d = id; card.innerHTML = "";
+    var head = el("div", { class: "card-h" });
+    head.innerHTML = PPShop.ava(id);
+    head.appendChild(el("div", { class: "who" }, [el("span", { class: "badge", text: d.name }), el("small", { class: "role", text: d.role || "" })]));
+    head.appendChild(el("span", { class: "live" }, [el("i"), "호객 중"]));
+    card.appendChild(head);
     card.appendChild(el("h2", { text: d.title }));
-    card.appendChild(el("ul", { class: "points" }, d.points.map(function (p, k) { return el("li", {}, [el("i", { text: String(k + 1) }), p]); })));
-    card.appendChild(el("button", { class: "primary", text: d.short + "에게 사러 가기 →", onclick: function () { openShop(id); } }));
+    card.appendChild(el("ul", { class: "points" }, d.points.map(function (p, k) { return el("li", { style: { "--k": k } }, [el("i", { text: String(k + 1) }), el("span", { text: p })]); })));
+    var cta = el("button", { class: "primary magnet", onclick: function () { openShop(id); } }, [el("span", { text: d.short + "에게 사러 가기" }), el("i", { class: "arr", "aria-hidden": "true", text: "→" })]);
+    card.appendChild(cta);
   }
   function openDealer(id) { openShop(id); }
   var mobileQ = matchMedia("(max-width: 760px)");
   function openShop(id) {
-    var i = indexOf(id);
+    var i = indexOf(id); cursorDealer(null);
     if (i !== cur) scrollTo({ top: i * stopH(), behavior: "auto" });
     setCard(false); clearTimeout(cardTimer);
     PPShop.open(id);
@@ -2412,7 +2817,7 @@ window.PV3D = {
   PPShop.init({
     toast: toast,
     onTalk: function (on) { if (world) world.talk(on ? PPShop.state().dealer : null); },
-    onClose: function () { if (world) world.talk(null); cardOpen = false; onScroll(); },
+    onClose: function () { if (world) world.talk(null); cursorDealer(null); cardOpen = false; onScroll(); },
     openStudio: function (G) { openStudio(G); },
   });
 
@@ -2495,6 +2900,76 @@ window.PV3D = {
   }
   $("#studioPrev").addEventListener("click", function () { if (sStep > 0) { sStep--; renderStudio(); } });
   $("#studioNext").addEventListener("click", function () { sStep = sStep === STEPS.length - 1 ? 0 : sStep + 1; renderStudio(); });
+
+  /* ---------- 인터랙션: 커서·눈·기울기·자석·물결·스포트라이트 ---------- */
+  var fine = matchMedia("(hover: hover) and (pointer: fine)").matches, still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var root = document.documentElement, cursor = $("#cursor");
+  // 아바타 눈동자: 화면 어디에 마우스가 있든 그쪽을 봄
+  var eyeRaf = 0, ex = 0, ey = 0;
+  addEventListener("pointermove", function (e) {
+    ex = e.clientX / innerWidth * 2 - 1; ey = e.clientY / innerHeight * 2 - 1;
+    if (!eyeRaf) eyeRaf = requestAnimationFrame(function () { eyeRaf = 0; root.style.setProperty("--ex", ex.toFixed(3)); root.style.setProperty("--ey", ey.toFixed(3)); });
+  }, { passive: true });
+  // 커서 따라다니는 링 (+ 캐릭터 위에서는 이름표)
+  if (fine && !still && cursor) {
+    root.classList.add("has-cursor");
+    var cx = -100, cy = -100, tx = -100, ty = -100;
+    addEventListener("pointermove", function (e) { tx = e.clientX; ty = e.clientY; cursor.classList.add("on"); }, { passive: true });
+    document.addEventListener("pointerleave", function () { cursor.classList.remove("on"); });
+    document.addEventListener("pointerover", function (e) {
+      var t = e.target;
+      cursor.classList.toggle("link", !!(t.closest && t.closest("button, a, input, label, [role=button], .pk, canvas")) && !(t.id === "world" && !cursor.classList.contains("dealer")));
+      cursor.classList.toggle("text", !!(t.closest && t.closest("input")));
+    });
+    (function follow() { cx += (tx - cx) * .2; cy += (ty - cy) * .2; cursor.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; requestAnimationFrame(follow); })();
+  }
+  function cursorDealer(id) {
+    if (!cursor) return;
+    cursor.classList.toggle("dealer", !!id);
+    if (id) {
+      var d = D.dealers[id], here = CH[cur] && CH[cur].id === id;
+      cursor.style.setProperty("--c", d.color);
+      $("#cursorLabel").textContent = here ? d.short + "에게 사러 가기" : d.short + " 보러 가기";
+    }
+  }
+  if (fine && !still) {
+    // 카드 3D 기울기 + 스포트라이트
+    var card = $("#card");
+    card.addEventListener("pointermove", function (e) {
+      var r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      card.style.setProperty("--mx", (x * 100).toFixed(1) + "%"); card.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+      card.style.setProperty("--rx", ((.5 - y) * 5).toFixed(2) + "deg"); card.style.setProperty("--ry", ((x - .5) * 6).toFixed(2) + "deg");
+    });
+    card.addEventListener("pointerleave", function () { card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg"); });
+    // 자석 버튼: 마우스 쪽으로 살짝 끌려옴
+    var lastMag = null;
+    document.addEventListener("pointermove", function (e) {
+      var m = e.target.closest && e.target.closest(".magnet, .say.go");
+      if (lastMag && lastMag !== m) { lastMag.style.removeProperty("--tx"); lastMag.style.removeProperty("--ty"); }
+      lastMag = m; if (!m) return;
+      var r = m.getBoundingClientRect();
+      m.style.setProperty("--tx", ((e.clientX - r.left - r.width / 2) * .16).toFixed(1) + "px");
+      m.style.setProperty("--ty", ((e.clientY - r.top - r.height / 2) * .3).toFixed(1) + "px");
+    }, { passive: true });
+    // 가게 테이블: 상품 카드 스포트라이트, 할인 카드 기울기
+    $("#shopPanel").addEventListener("pointermove", function (e) {
+      var t = e.target.closest && e.target.closest(".pk, .dcard, .tok, .veh button, .way"); if (!t) return;
+      var r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      t.style.setProperty("--mx", (x * 100).toFixed(1) + "%"); t.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+      if (t.classList.contains("dcard")) { t.style.setProperty("--rx", ((.5 - y) * 10).toFixed(1) + "deg"); t.style.setProperty("--ry", ((x - .5) * 12).toFixed(1) + "deg"); }
+    });
+    $("#shopPanel").addEventListener("pointerout", function (e) {
+      var t = e.target.closest && e.target.closest(".dcard"); if (t && !t.contains(e.relatedTarget)) { t.style.setProperty("--rx", "0deg"); t.style.setProperty("--ry", "0deg"); }
+    });
+  }
+  // 누르면 물결
+  if (!still) document.addEventListener("pointerdown", function (e) {
+    var b = e.target.closest && e.target.closest(".say, .primary, .ghost, .tok, .veh button, .brands button, .social button, .foldseg button, .sbtn, .top-cta, .chapters button, .ctabs button");
+    if (!b) return;
+    var r = b.getBoundingClientRect(), size = Math.max(r.width, r.height) * 2.2, s = el("span", { class: "rip", "aria-hidden": "true" });
+    s.style.cssText = "width:" + size + "px;height:" + size + "px;left:" + (e.clientX - r.left - size / 2) + "px;top:" + (e.clientY - r.top - size / 2) + "px";
+    b.appendChild(s); setTimeout(function () { s.remove(); }, 650);
+  });
 
   /* ---------- 시작 ---------- */
   function ready() { document.body.classList.add("ready"); }

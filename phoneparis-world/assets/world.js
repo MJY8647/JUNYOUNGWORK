@@ -233,29 +233,32 @@
     var m = new T.Mesh(new T.LatheGeometry(points.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg || 40), mat);
     m.castShadow = true; return m;
   }
-  function eyes(group, y, z, gap, size) {
+  function eyes(group, y, z, gap, size) { // 눈 한 쪽씩 그룹: 윙크·돋보기 눈 같은 표정용
     var white = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .18 }), black = new T.MeshStandardMaterial({ color: 0x0c0c0e, roughness: .12, metalness: .2 });
     var shine = new T.MeshBasicMaterial({ color: 0xffffff });
     var pair = new T.Group(); pair.position.set(0, y, z);
-    var pupils = [];
+    var pupils = [], eg = [];
     [-1, 1].forEach(function (s) {
-      var eye = new T.Mesh(new T.SphereGeometry(size, 28, 20), white); eye.scale.z = .6; eye.position.x = s * gap; pair.add(eye);
-      var p = new T.Group(); p.position.set(s * gap, 0, size * .5); p.userData.base = p.position.clone();
+      var e = new T.Group(); e.position.x = s * gap; pair.add(e); eg.push(e);
+      var eye = new T.Mesh(new T.SphereGeometry(size, 28, 20), white); eye.scale.z = .6; e.add(eye);
+      var p = new T.Group(); p.position.set(0, 0, size * .5); p.userData.base = p.position.clone();
       var pu = new T.Mesh(new T.SphereGeometry(size * .5, 20, 14), black); pu.scale.z = .5; p.add(pu);
       var hl = new T.Mesh(new T.SphereGeometry(size * .13, 10, 8), shine); hl.position.set(-size * .17, size * .17, size * .2); p.add(hl);
-      pair.add(p); pupils.push(p);
+      e.add(p); pupils.push(p);
     });
-    group.add(pair); group.userData.eyes = pair; group.userData.pupils = pupils;
+    group.add(pair); group.userData.eyes = pair; group.userData.pupils = pupils; group.userData.eyeGroups = eg;
   }
-  function limb(group, from, to, color, r, hand) { // 캡슐 팔 + 공 손
-    var a = new T.Vector3().fromArray(from), b = new T.Vector3().fromArray(to);
-    var len = a.distanceTo(b), mat = std(color, .55);
+  function limb(group, from, to, color, r, hand) { // 어깨에 관절(pivot)이 있는 캡슐 팔 + 공 손
+    var a = new T.Vector3().fromArray(from), b = new T.Vector3().fromArray(to), d = b.clone().sub(a);
+    var len = d.length(), mat = std(color, .55);
+    var pivot = new T.Group(); pivot.position.copy(a); group.add(pivot);
     var mesh = new T.Mesh(new T.CylinderGeometry(r, r, len, 18), mat); mesh.castShadow = true;
-    mesh.position.copy(a).add(b).multiplyScalar(.5);
-    mesh.quaternion.setFromUnitVectors(UP, b.clone().sub(a).normalize());
-    var j = new T.Mesh(new T.SphereGeometry(r, 16, 12), mat); j.position.copy(a);
-    var end = new T.Mesh(new T.SphereGeometry(r * (hand || 1.3), 20, 14), mat); end.position.copy(b); end.castShadow = true;
-    group.add(mesh, j, end); return end;
+    mesh.position.copy(d).multiplyScalar(.5); mesh.quaternion.setFromUnitVectors(UP, d.clone().normalize());
+    var j = new T.Mesh(new T.SphereGeometry(r, 16, 12), mat);
+    var end = new T.Mesh(new T.SphereGeometry(r * (hand || 1.3), 20, 14), mat); end.position.copy(d); end.castShadow = true;
+    pivot.add(mesh, j, end);
+    (group.userData.arms = group.userData.arms || []).push(pivot);
+    return end;
   }
   function textTex(lines, fg, bg, w, h) {
     var c = document.createElement("canvas"); c.width = w || 256; c.height = h || 128; var x = c.getContext("2d");
@@ -278,26 +281,26 @@
       limb(g, [1.05, 2.4, .1], [1.2, .55, .5], 0xf2b23d, .19);
       var rail = std(0x2f3135, .4);
       [[-2.55, .35], [-1.65, .35]].forEach(function (p) { var r = rbox(.12, 2.6, .12, .05, rail); r.position.set(p[0], 1.45, p[1]); r.rotation.z = -.12; g.add(r); });
-      var wheel = new T.Mesh(new T.TorusGeometry(.48, .2, 14, 28), std(0x18191b, .8)); wheel.position.set(-2.1, .62, .9); wheel.rotation.y = Math.PI / 2; wheel.castShadow = true; g.add(wheel);
+      var wheel = new T.Mesh(new T.TorusGeometry(.48, .2, 14, 28), std(0x18191b, .8)); wheel.position.set(-2.1, .62, .9); wheel.rotation.y = Math.PI / 2; wheel.castShadow = true; g.add(wheel); g.userData.wheel = wheel;
       [[1.2, .8, .9, 1.4], [1.0, .7, .8, 2.15]].forEach(function (b) { var bx = rbox(b[0], b[1], b[2], .05, std(0xc99a62, .9)); bx.position.set(-2.1, b[3], .4); g.add(bx); });
     } else if (id === "price") { // 카키 원뿔 + 가격표
       body = lathe([[0, 0], [1.18, 0], [1.12, .2], [.2, 4.05], [.08, 4.25], [0, 4.3]], m, 48);
       body.rotation.z = -.06;
       eyes(g, 2.15, .72, .26, .2);
       var hand = limb(g, [.6, 1.9, .3], [1.45, 2.75, .55], 0xb3b483, .17);
-      var tag = plate(.8, .5, textTex([{ t: "0원", s: 70 }], "#d8263a", "#fffdf2", 192, 120)); tag.position.copy(hand.position).add(new T.Vector3(.1, .45, .05)); g.add(tag);
+      var tag = plate(.8, .5, textTex([{ t: "0원", s: 70 }], "#d8263a", "#fffdf2", 192, 120)); tag.position.copy(hand.position).add(new T.Vector3(.1, .45, .05)); hand.parent.add(tag);
     } else if (id === "safe") { // 남색 상자 + 두 팔 + 방패
       body = rbox(2.75, 3.4, 1.3, .2, m); body.position.y = 1.7;
       eyes(g, 2.85, .7, .34, .21);
       limb(g, [1.35, 2.3, 0], [2.15, .95, .55], 0x55669a, .21); limb(g, [-1.35, 2.3, 0], [-2.05, 1.25, .45], 0x55669a, .21);
       var sh = new T.Shape(); sh.moveTo(0, .5); sh.quadraticCurveTo(.45, .45, .5, .35); sh.lineTo(.42, -.15); sh.quadraticCurveTo(.25, -.45, 0, -.6); sh.quadraticCurveTo(-.25, -.45, -.42, -.15); sh.lineTo(-.5, .35); sh.quadraticCurveTo(-.45, .45, 0, .5);
-      var shield = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: .08, bevelEnabled: true, bevelSize: .03, bevelThickness: .03 }), std(0xe8edf5, .35)); shield.position.set(0, 1.5, .67); g.add(shield);
+      var shield = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: .08, bevelEnabled: true, bevelSize: .03, bevelThickness: .03 }), std(0xe8edf5, .35)); shield.position.set(0, 1.5, .67); g.add(shield); g.userData.shield = shield;
     } else if (id === "used") { // 버건디 기둥 + S급 팻말
       body = rbox(1.05, 4.6, .9, .14, m); body.position.y = 2.3;
       eyes(g, 3.9, .48, .23, .2);
       var h2 = limb(g, [.52, 3.1, 0], [1.15, 4.05, .4], 0xb54d69, .15);
-      var sign = rbox(1.0, .66, .06, .04, std(0xffffff)); sign.position.copy(h2.position).add(new T.Vector3(.25, .55, .02)); sign.rotation.z = .25; g.add(sign);
-      var st = plate(.9, .56, textTex([{ t: "S급", s: 78 }], "#9c3a55", "#ffffff", 192, 120)); st.position.copy(sign.position).add(new T.Vector3(0, 0, .04)); st.rotation.z = .25; g.add(st);
+      var sign = rbox(1.0, .66, .06, .04, std(0xffffff)); sign.position.copy(h2.position).add(new T.Vector3(.25, .55, .02)); sign.rotation.z = .25; h2.parent.add(sign);
+      var st = plate(.9, .56, textTex([{ t: "S급", s: 78 }], "#9c3a55", "#ffffff", 192, 120)); st.position.copy(sign.position).add(new T.Vector3(0, 0, .04)); st.rotation.z = .25; h2.parent.add(st);
       var sticker = plate(.6, .4, textTex([{ t: "검수", s: 64 }], "#ffffff", "#5e1529", 160, 110)); sticker.position.set(0, 2.2, .46); g.add(sticker);
     } else { // 회색 달걀 + 가슴 선반 + 미니 폰
       body = lathe([[0, 0], [.9, .08], [1.45, .7], [1.6, 1.7], [1.42, 2.8], [.95, 3.65], [.4, 4.02], [0, 4.1]], std(col, .85), 48);
@@ -309,6 +312,7 @@
     body.userData.dealer = id; g.add(body);
     g.traverse(function (o) { if (o.isMesh) { o.userData.dealer = id; o.castShadow = true; } });
     g.userData.blink = 2 + Math.random() * 3;
+    g.userData.body = body; g.userData.col = new T.Color(colorHex); g.userData.glow = 0; g.userData.env = 0;
     return g;
   }
 
@@ -404,6 +408,7 @@
     this.crowd = buildCrowd(r, this.mobile ? 1300 : 2600, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
+    this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
     var v = function (a) { return new T.Vector3().fromArray(a); };
     this.posCurve = new T.CatmullRomCurve3(this.shots.map(function (s) { return v(s.pos); }), false, "centripetal");
     this.lookCurve = new T.CatmullRomCurve3(this.shots.map(function (s) { return v(s.look); }), false, "centripetal");
@@ -419,6 +424,9 @@
       self.pick();
     });
     canvas.addEventListener("click", function () { self.pick(); if (self.hover && opts.onDealer) opts.onDealer(self.hover); });
+    canvas.addEventListener("pointerleave", function () { // 캔버스를 벗어나면 호버 해제
+      if (self.hover) { self.hover = null; canvas.style.cursor = ""; if (opts.onHover) opts.onHover(null); }
+    });
 
     this.resize();
     this.clock = new T.Clock();
@@ -429,8 +437,10 @@
   World.prototype.pick = function () {
     this.ray.setFromCamera(this.pointer, this.camera);
     var hit = this.ray.intersectObjects(this.hitTargets, false)[0];
+    var prev = this.hover;
     this.hover = hit && hit.distance < 40 ? hit.object.userData.dealer : null;
     this.canvas.style.cursor = this.hover ? "pointer" : "";
+    if (prev !== this.hover && this.opts.onHover) this.opts.onHover(this.hover);
   };
 
   World.prototype.resize = function () {
@@ -479,24 +489,89 @@
       m.compose(pos, q, sc); cd.bodies.setMatrixAt(i, m); cd.heads.setMatrixAt(i, m);
     }
     cd.bodies.instanceMatrix.needsUpdate = true; cd.heads.instanceMatrix.needsUpdate = true;
-    // 캐릭터: 숨쉬기, 눈 깜빡임, 시선
-    var px = this.pointer.x, py = this.pointer.y;
+    // 캐릭터: 폰팔이마다 다른 호객 동작 + 마우스 올리면 반응 + 깜빡임·시선
+    var px = this.pointer.x, py = this.pointer.y, prog = this.progress;
     for (var id in this.dealers) {
-      var g = this.dealers[id].group, k = this.dealers[id].index;
-      var talk = this.talking === id;
-      g.position.y = talk ? Math.abs(Math.sin(time * 9)) * .12 : Math.sin(time * 1.6 + k) * .05;
-      g.scale.y = talk ? 1 + Math.sin(time * 18) * .015 : 1;
-      g.rotation.y = Math.sin(time * .7 + k) * .06;
-      g.userData.blink -= dt;
-      var e = g.userData.eyes;
-      if (g.userData.blink < 0) { e.scale.y = Math.max(.08, e.scale.y - dt * 18); if (g.userData.blink < -.12) { g.userData.blink = 2 + Math.random() * 3.5; } }
+      var D = this.dealers[id], g = D.group, k = D.index, u = g.userData, talk = this.talking === id, S = TOUT[id];
+      var near = Math.max(0, 1 - Math.abs(prog - this.stopOf[id]) * 1.6);
+      var market = Math.max(0, 1 - Math.abs(prog - 2) * 1.6) * .7;
+      var ts = talk ? 1 : Math.max(near, market, this.hover === id ? 1 : 0); // 호객 세기
+      var ph = ((time + k * .83) % S.period) / S.dur;                        // 제스처 진행 (0~1이면 동작 중)
+      var env = ph < 1 ? Math.sin(ph * Math.PI) : 0;
+      if (talk) { env = .75 + Math.sin(time * S.talk) * .25; ph = (time * S.talk / 6) % 1; }
+      env *= ts; u.env = env; u.ph = ph;
+      // 기본 자세로 되돌린 뒤 동작을 얹음
+      g.position.y = Math.sin(time * 1.6 + k) * .05; g.rotation.set(0, Math.sin(time * .7 + k) * .06, 0); g.scale.set(1, 1, 1);
+      u.arms.forEach(function (a) { a.rotation.set(0, 0, 0); });
+      u.eyeGroups.forEach(function (e) { e.scale.set(1, 1, 1); });
+      u.look = 0;
+      STYLE[id](g, u, env, ph, time, dt, talk);
+      // 마우스 올리면: 깡충 + 흔들 + 은은한 빛
+      if (this.hover === id) { if (u.hoverAt == null) u.hoverAt = time; } else u.hoverAt = null;
+      if (u.hoverAt != null) {
+        var r = Math.min(1, (time - u.hoverAt) / .65);
+        g.position.y += Math.sin(r * Math.PI) * .55; g.rotation.y += Math.sin(r * Math.PI * 3) * .22 * (1 - r);
+        g.scale.multiplyScalar(1 + .05 * Math.sin(r * Math.PI));
+      }
+      u.glow += ((this.hover === id ? .24 : 0) - u.glow) * .15;
+      u.body.material.emissive.copy(u.col).multiplyScalar(u.glow);
+      // 깜빡임
+      u.blink -= dt;
+      var e = u.eyes;
+      if (u.blink < 0) { e.scale.y = Math.max(.08, e.scale.y - dt * 18); if (u.blink < -.12) { u.blink = 2 + Math.random() * 3.5; } }
       else e.scale.y = Math.min(1, e.scale.y + dt * 14);
-      g.userData.pupils.forEach(function (pu) {
+      // 시선: 마우스를 따라봄 (+ 자린고비는 두리번)
+      u.pupils.forEach(function (pu) {
         var b = pu.userData.base;
-        pu.position.x += (b.x + px * .075 - pu.position.x) * .15;
+        pu.position.x += (b.x + px * .075 + u.look - pu.position.x) * .15;
         pu.position.y += (b.y + py * .065 - pu.position.y) * .15;
       });
     }
+  };
+
+  // 폰팔이별 호객 동작 (env: 0~1 동작 세기, ph: 0~1 동작 진행)
+  var TOUT = {
+    designer: { period: 4.2, dur: 1.8, talk: 6 },
+    quick: { period: 2.6, dur: 1.1, talk: 14 },
+    price: { period: 3.6, dur: 1.5, talk: 8 },
+    safe: { period: 5.0, dur: 2.0, talk: 3 },
+    used: { period: 3.8, dur: 1.6, talk: 7 },
+    allinone: { period: 4.6, dur: 2.2, talk: 4 },
+  };
+  var STYLE = {
+    designer: function (g, u, env, ph, t) { // 긴 팔로 진열 케이스를 소개 + 한 바퀴 뽐내기 + 윙크
+      g.rotation.z = Math.sin(t * 1.3) * .035;
+      u.arms[0].rotation.z = env * .95 + Math.sin(t * 5) * .12 * env;
+      g.rotation.y += env * .45 * Math.sin(ph * Math.PI * 2);
+      if (env > .55) u.eyeGroups[1].scale.y = Math.max(.12, 1 - (env - .55) * 4);
+    },
+    quick: function (g, u, env, ph, t, dt) { // 깡충깡충 두 번 + 팔을 번쩍 들고 빠르게 손짓 + 손수레 바퀴
+      g.position.y += Math.abs(Math.sin(t * 7)) * .06 + (ph < 1 ? Math.abs(Math.sin(ph * Math.PI * 2)) * .55 * Math.min(1, env * 1.6) : 0);
+      u.arms[0].rotation.z = env * 1.9 + Math.sin(t * 20) * .35 * env;
+      if (u.wheel) u.wheel.rotation.z += dt * (2 + 12 * env);
+    },
+    price: function (g, u, env, ph, t) { // 0원 가격표를 흔들며 몸을 숙여 속삭임 + 두리번
+      g.rotation.x = Math.sin(t * .9) * .03 + .12 * env;
+      u.arms[0].rotation.z = .25 * env + Math.sin(t * 16) * .3 * env;
+      u.look = Math.sin(t * 4) * .09 * env;
+    },
+    safe: function (g, u, env, ph, t) { // 든든하게 두 번 끄덕 + 두 팔 벌려 지켜주기 + 방패가 빛남
+      g.scale.y *= 1 + Math.sin(t * 1.6) * .012;
+      g.rotation.x = Math.sin(ph * Math.PI * 4) * .07 * env;
+      u.arms[0].rotation.z = env * .55; u.arms[1].rotation.z = -env * .55;
+      if (u.shield) u.shield.material.emissive.setRGB(env * .45, env * .5, env * .6);
+    },
+    used: function (g, u, env, ph, t) { // S급 팻말을 경매처럼 들었다 놨다 + 한쪽 눈이 돋보기처럼 커짐
+      g.rotation.z = Math.sin(t * 1.1) * .03 - env * .06;
+      u.arms[0].rotation.z = env * .5 + Math.sin(t * 9) * .18 * env;
+      u.eyeGroups[0].scale.setScalar(1 + .45 * env);
+    },
+    allinone: function (g, u, env, ph, t) { // 달걀처럼 뒤뚱 + 두 팔 활짝 흔들며 "다 맡겨"
+      g.rotation.z = Math.sin(t * 1.4) * .05 + Math.sin(t * 3) * .08 * env;
+      g.position.y += env * .12;
+      var w = Math.sin(t * 5) * .35 * env + .2 * env;
+      u.arms[0].rotation.z = w; u.arms[1].rotation.z = -w;
+    },
   };
 
   World.prototype.loop = function () {
@@ -517,6 +592,7 @@
   };
 
   World.prototype.talk = function (id) { this.talking = id || null; };
+  World.prototype.toutEnv = function (id) { var d = this.dealers[id]; return d ? d.group.userData.env : 0; };
 
   // 캐릭터 머리 위 말풍선 위치 (화면 px)
   World.prototype.headOnScreen = function (id) {

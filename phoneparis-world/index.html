@@ -29,7 +29,7 @@
     <p class="sub" id="sub"></p>
   </div>
 
-  <div class="bubble" id="bubble" hidden><b id="bubbleName"></b><span id="bubbleText"></span></div>
+  <div class="bubble" id="bubble" hidden><b id="bubbleName"></b><span id="bubbleText"></span><span class="emote" id="emote" aria-hidden="true"></span></div>
 
   <aside class="card" id="card" aria-live="polite" aria-label="폰팔이 카드"></aside>
 
@@ -46,9 +46,11 @@
       <button class="sbtn" id="shopExit" aria-label="광장으로">✕</button>
     </div>
     <div class="shop-low">
-      <div class="table" id="shopPanel"></div>
-      <div class="dlg" id="shopDlg"><span class="who" id="shopWho"></span><p id="shopTxt" aria-live="polite"></p></div>
-      <div class="sch" id="shopCh"></div>
+      <div class="sb">
+        <div class="dlg" id="shopDlg"><span class="who" id="shopWho"></span><p id="shopTxt" aria-live="polite"></p></div>
+        <div class="table" id="shopPanel"></div>
+        <div class="sch" id="shopCh"></div>
+      </div>
     </div>
   </section>
 
@@ -82,6 +84,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
+  <div id="cursor" aria-hidden="true"><i class="ring"></i><span id="cursorLabel"></span></div>
 
   <script src="assets/vendor/three.min.js"></script>
   <script src="assets/content.js"></script>

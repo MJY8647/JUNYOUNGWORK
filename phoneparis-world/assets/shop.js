@@ -267,36 +267,42 @@
       '<div class="ln"><span>불량 교환</span><b>받은 날부터 7일</b></div><div class="foot center">문의 ' + D.contact.phone + ' · 프로토타입</div></div>';
   };
 
-  /* ---------- 대본 ---------- */
+  /* ---------- 대본: 폰팔이마다 자기 말투 (content.js의 say) ---------- */
+  function line(key, vars) {
+    var say = D.dealers[G.dealer].say || {}, t = say[key] || (key === "quoteAuto" ? say.quote : "") || "";
+    return t.replace(/\{(\w+)\}/g, function (_, k) { return vars && vars[k] != null ? vars[k] : ""; });
+  }
+  // 폰팔이 얼굴 아바타 (CSS로 그린 몸 + 마우스를 따라보는 눈)
+  function ava(id, cls) { return '<i class="ava' + (cls ? " " + cls : "") + '" data-d="' + id + '" aria-hidden="true"><i class="eye"><i></i></i><i class="eye"><i></i></i></i>'; }
   var STEPS = {
-    model: { q: 0, t: function () { return "“" + D.dealers[G.dealer].quote + "” 어떤 폰?"; }, panel: "model" },
-    spec: { q: 0, t: function () { return "<b>" + esc(G.md.name) + "</b> 좋지! 색이랑 용량 골라. 지원금도 봐 둬."; }, panel: "spec", ch: function () { return [["이걸로", function () { G.usedId = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
-    point: { q: 1, t: function () { return D.dealers[G.dealer].pitch; }, panel: "point", ch: function () {
+    model: { q: 0, t: function () { return line("model"); }, panel: "model" },
+    spec: { q: 0, t: function () { return line("spec", { model: esc(G.md.name) }); }, panel: "spec", ch: function () { return [["이걸로", function () { G.usedId = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
+    point: { q: 1, t: function () { return line("point"); }, panel: "point", ch: function () {
       if (G.dealer === "allinone") return [["🙌 알아서 해 줘", function () { G.auto = true; G.cur = "mvno"; G.bundle = "free"; G.tier = 5; G.months = 24; G.pick = null; G.con = null; go("calc"); }, "go"], ["내가 고를래", function () { G.auto = false; go("cur"); }]];
       if (G.dealer === "used") return [["이 중고로", function () { if (!G.usedId) { var u = usedUnits(G.md)[0]; G.usedId = u && u.id; } go("cur"); }, "go"]];
       return [["좋아, 다음", function () { go("cur"); }, "go"]];
     } },
-    cur: { q: 2, t: function () { return "지금 쓰는 <b>통신사</b>는?"; }, panel: "cur", grid: true, ch: function () {
+    cur: { q: 2, t: function () { return line("cur"); }, panel: "cur", grid: true, ch: function () {
       return CURS.map(function (c) { return [c[1], function () { G.cur = c[0]; go(C.CARRIERS[curKey()] ? "bundle" : "data"); }]; });
     } },
-    bundle: { q: 2, t: function () { return "<b>가족·인터넷 결합</b> 있어? 유지하면 결합 할인도 계산할게."; }, panel: "bundle", ch: function () {
+    bundle: { q: 2, t: function () { return line("bundle"); }, panel: "bundle", ch: function () {
       return [["있어 · 유지", function () { G.bundle = "keep"; go("data"); }], ["없어 · 최저가", function () { G.bundle = "free"; go("data"); }, "go"]];
     } },
-    data: { q: 2, t: function () { return "데이터는 한 달에 얼마나 써?"; }, panel: "data" },
-    calc: { q: 3, t: function () { return "잠깐만, 3사 지원금이랑 다 계산해 볼게…"; }, panel: "calc", auto: 1300, next: "quote" },
+    data: { q: 2, t: function () { return line("data"); }, panel: "data" },
+    calc: { q: 3, t: function () { return line("calc"); }, panel: "calc", auto: 1300, next: "quote" },
     quote: { q: 3, t: function () {
       var L = ways(); if (G.auto) { G.pick = L[0].id; G.con = L[0].o ? L[0].o.con : null; }
-      return G.auto ? "제일 싼 건 <b>" + esc(L[0].title) + "</b>. 이걸로 맞춰 놨어." : "<b>" + esc(L[0].title) + "</b>이(가) 제일 싸. 다른 줄도 눌러 봐.";
+      return line(G.auto ? "quoteAuto" : "quote", { best: esc(L[0].title) });
     }, panel: "quote", ch: function () { return [[G.auto ? "이대로 할게" : "이 방법으로", function () { if (!G.pick) G.pick = ways()[0].id; go(G.auto ? "join" : "cond"); }, "go"]]; } },
-    cond: { q: 3, t: function () { return curWay().kind === "carrier" ? "할인은 <b>둘 중 하나</b>. 지원금 내역 다 적어 놨어." : "약정 없어. 폰값 낼 방법만 골라."; }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
-    join: { q: 4, t: function () { return "<b>1mm 멤버십</b> 가입하면 지금 " + man(C.MEMBER_DC) + " 더 빠져. 3초!"; }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
-    joined: { q: 4, t: function () { return "가입 완료! " + man(C.MEMBER_DC) + " 빠졌어."; }, panel: "join", auto: 1200, next: "agree" },
-    agree: { q: 4, t: function () { return "<b>개봉·개통하면</b> 단순 변심 반품은 안 돼. 불량은 7일 안에 교환. 도장 찍고 서명!"; }, panel: "agree", ch: function () { return [["서명 완료", signDone, "go"]]; } },
-    ship: { q: 5, t: function () { return "어디로 보낼까?"; }, panel: "ship", ch: function () { return [["주문 내역 확인", function () { if (formOk()) go("review"); else repaint(); }, "go"]]; } },
-    review: { q: 5, t: function () { return "<b>주문 내역</b> 확인하고 결제!"; }, panel: "review", ch: function () {
+    cond: { q: 3, t: function () { return line(curWay().kind === "carrier" ? "condCarrier" : "condPhone"); }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
+    join: { q: 4, t: function () { return line("join", { dc: man(C.MEMBER_DC) }); }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
+    joined: { q: 4, t: function () { return line("joined", { dc: man(C.MEMBER_DC) }); }, panel: "join", auto: 1200, next: "agree" },
+    agree: { q: 4, t: function () { return line("agree"); }, panel: "agree", ch: function () { return [["서명 완료", signDone, "go"]]; } },
+    ship: { q: 5, t: function () { return line("ship"); }, panel: "ship", ch: function () { return [["주문 내역 확인", function () { if (formOk()) go("review"); else repaint(); }, "go"]]; } },
+    review: { q: 5, t: function () { return line("review"); }, panel: "review", ch: function () {
       return [["✏️ 수정", function () { go("ship"); }], ["💳 결제하기", function () { var d = new Date(); G.no = "PP-" + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + (1000 + Math.floor(Math.random() * 9000)); go("done"); }, "go"]];
     } },
-    done: { q: 6, t: function () { return "고마워, " + esc(G.f.name) + "! " + (G.ship === "quick" ? "오늘 퀵으로 보낼게." : "잘 챙겨 보낼게.") + " 영수증 받아 가."; }, panel: "done", ch: function () { return [["광장으로", function () { close(); }, "go"], ["처음부터", function () { open(G.dealer); }]]; } },
+    done: { q: 6, t: function () { return line("done", { name: esc(G.f.name) }); }, panel: "done", ch: function () { return [["광장으로", function () { close(); }, "go"], ["처음부터", function () { open(G.dealer); }]]; } },
   };
   function signDone() {
     G.err = {}; needAgree().forEach(function (a) { if (!G.agree[a.id]) G.err[a.id] = 1; }); if (!G.signed) G.err.sign = 1;
@@ -323,14 +329,14 @@
     renderMission(st.q);
     $("#shopBack").hidden = !HIST.length || id === "done";
     var panel = $("#shopPanel");
-    if (st.panel) { panel.hidden = false; panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); mount3D(); }
+    if (st.panel) { panel.hidden = false; panel.classList.add("enter"); panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); mount3D(); }
     else panel.hidden = true;
     $("#shopCh").innerHTML = ""; $("#shopCh").className = "sch" + (st.grid ? " grid" : "");
     type(st.t());
     if (st.auto) timers.push(setTimeout(function () { go(st.next); }, st.auto));
   }
   function back() { var p = HIST.pop(); if (p) go(p, true); }
-  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); mount3D(); } }
+  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.classList.remove("enter"); el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); mount3D(); } }
   // 실측 3D 폰: 색·용량 단계에서 띄우고, 접는 폰은 접은/펼친 상태 전환
   function mount3D() {
     var host = $("#pvHost");
@@ -338,20 +344,26 @@
     if (PV3D.show(G.md, G.ci, host)) { host.classList.add("live"); PV3D.setOpen(G.open !== false); }
   }
   var full = "";
+  var TYPE_SPEED = { designer: [2, 22], quick: [3, 14], price: [1, 26], safe: [1, 30], used: [2, 20], allinone: [1, 28] };
   function type(html) {
     var p = $("#shopTxt"); full = html; var plain = html.replace(/<[^>]+>/g, ""), i = 0;
     if (typing) clearInterval(typing);
     if (opts.onTalk) opts.onTalk(true);
+    $("#shopDlg").classList.add("typing");
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
     p.textContent = "";
-    typing = setInterval(function () { i += 2; p.textContent = plain.slice(0, i); if (i >= plain.length) finish(); }, 22);
+    var sp = TYPE_SPEED[G.dealer] || [2, 22]; // 말투 속도: 퀵퀵이는 빠르게, 세이프티·올인원은 느긋하게
+    typing = setInterval(function () { i += sp[0]; p.textContent = plain.slice(0, i); if (i >= plain.length) finish(); }, sp[1]);
   }
   function finish() {
-    if (typing) clearInterval(typing); typing = null; $("#shopTxt").innerHTML = full;
+    if (typing) clearInterval(typing); typing = null; $("#shopTxt").innerHTML = full; $("#shopDlg").classList.remove("typing");
     if (opts.onTalk) opts.onTalk(false);
     var st = STEPS[CUR], ch = $("#shopCh");
-    if (st.ch && !ch.children.length) st.ch().forEach(function (c) {
-      var b = document.createElement("button"); b.className = "say" + (c[2] ? " go" : ""); b.textContent = c[0]; b.onclick = c[1]; ch.appendChild(b);
+    if (st.ch && !ch.children.length) st.ch().forEach(function (c, i) {
+      var b = document.createElement("button"); b.className = "say" + (c[2] ? " go" : ""); b.style.setProperty("--i", i);
+      var t = document.createElement("span"); t.textContent = c[0]; b.appendChild(t);
+      if (c[2]) { var ar = document.createElement("i"); ar.className = "arr"; ar.setAttribute("aria-hidden", "true"); ar.textContent = "→"; b.appendChild(ar); }
+      b.onclick = c[1]; ch.appendChild(b);
     });
   }
   function renderMission(q) {
@@ -403,8 +415,9 @@
   function open(dealer) {
     G = fresh(dealer); HIST = []; CUR = null;
     var d = D.dealers[dealer], sec = $("#shop");
-    sec.hidden = false; sec.style.setProperty("--c", d.color); sec.dataset.dealer = dealer;
-    $("#shopWho").textContent = d.name;
+    sec.hidden = false; sec.style.setProperty("--c", d.color); sec.style.setProperty("--dk", d.ink || "#202529"); sec.dataset.dealer = dealer;
+    $("#shopDlg").dataset.emote = d.emote || "";
+    $("#shopWho").innerHTML = ava(dealer, "sm") + "<span>" + esc(d.name) + "</span>";
     document.documentElement.classList.add("shopping");
     go("model");
   }
@@ -426,6 +439,6 @@
     init: init, open: open, close: close, go: go, repaint: repaint,
     state: function () { return G; }, step: function () { return CUR; },
     setDeco: function (deco) { if (G) { Object.assign(G.deco, deco); if (CUR === "point") repaint(); } },
-    methods: function () { return ways(); }, way: function () { return curWay(); },
+    methods: function () { return ways(); }, way: function () { return curWay(); }, ava: ava,
   };
 })();

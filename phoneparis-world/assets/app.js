@@ -21,38 +21,50 @@
   var toastT;
   function toast(m) { var t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("on"); }, 1800); }
 
-  /* ---------- 스크롤 트랙 ---------- */
+  /* ---------- 스크롤 트랙 + 장면 도크 ---------- */
   var track = $("#track");
   CH.forEach(function (c, i) {
     var label = c.dealer ? D.dealers[c.id].name : c.title.replace("\n", " ");
     track.appendChild(el("section", { class: "stop", id: "s-" + c.id }, [el("h2", { class: "sr", text: label })]));
   });
-  var nav = $("#chapters");
+  var nav = $("#chapters"), navInd = el("span", { class: "ind", "aria-hidden": "true" });
+  nav.appendChild(navInd);
   CH.forEach(function (c, i) {
     var d = c.dealer ? D.dealers[c.id] : null;
     nav.appendChild(el("button", { style: { "--c": d ? d.color : "#202529" }, "aria-label": (d ? d.name : c.nav) + " 장면으로", onclick: function () { go(i); } },
-      [el("i"), d ? d.short : c.nav]));
+      [el("i"), el("span", { text: d ? d.short : c.nav })]));
   });
+  function moveInd() { // 현재 장면 버튼 아래로 미끄러지는 표시
+    var b = nav.querySelectorAll("button")[cur]; if (!b) return;
+    navInd.style.width = b.offsetWidth + "px"; navInd.style.transform = "translateX(" + b.offsetLeft + "px)";
+    navInd.style.setProperty("--c", b.style.getPropertyValue("--c"));
+  }
   function stopH() { return track.firstChild.offsetHeight || innerHeight; }
   function go(i) { scrollTo({ top: i * stopH(), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
   $("#brand").addEventListener("click", function (e) { e.preventDefault(); go(0); });
   $("#scrollHint").addEventListener("click", function () { go(1); });
+  var shopping = function () { return document.documentElement.classList.contains("shopping"); };
 
   /* ---------- 3D 월드 ---------- */
   var world = null;
   if (window.THREE && window.PPWorld && PPWorld.supported()) {
-    try { world = new PPWorld($("#world"), D, { onDealer: function (id) { if (document.documentElement.classList.contains("shopping")) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); }, preserve: /[?&]shot/.test(location.search) }); }
-    catch (e) { console.warn(e); world = null; }
+    try {
+      world = new PPWorld($("#world"), D, {
+        onDealer: function (id) { if (shopping()) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); },
+        onHover: function (id) { onDealerHover(id); },
+        preserve: /[?&]shot/.test(location.search),
+      });
+    } catch (e) { console.warn(e); world = null; }
   }
   if (!world) { $("#world").hidden = true; $("#fallback").hidden = false; }
   function indexOf(id) { for (var i = 0; i < N; i++) if (CH[i].id === id) return i; return 0; }
-  addEventListener("resize", function () { if (world) world.resize(); });
+  addEventListener("resize", function () { if (world) world.resize(); moveInd(); });
 
   /* ---------- 장면 상태 ---------- */
   var cur = -1, cardOpen = false, cardTimer = 0;
   function progress() { return Math.max(0, Math.min(N - 1, scrollY / stopH())); }
   function onScroll() {
-    if (document.documentElement.classList.contains("shopping")) return;
+    if (shopping()) return;
     var s = progress(), i = Math.round(s), near = Math.abs(s - i);
     if (world) world.setProgress(s);
     else { var img = $("#fallbackImg"), src = "assets/fallback/" + FALLBACK[i] + ".webp"; if (img.getAttribute("src") !== src) img.src = src; }
@@ -68,7 +80,7 @@
     }
   }
   function setCard(on) {
-    if (document.documentElement.classList.contains("shopping")) on = false;
+    if (shopping()) on = false;
     cardOpen = on; $("#card").classList.toggle("on", on);
     if (world) {
       var mobile = matchMedia("(max-width: 760px)").matches;
@@ -78,7 +90,8 @@
   function setChapter(i) {
     cur = i; var c = CH[i];
     nav.querySelectorAll("button").forEach(function (b, k) { b.setAttribute("aria-current", k === i ? "true" : "false"); });
-    var active = nav.children[i]; if (active && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - nav.clientWidth / 2 + active.offsetWidth / 2;
+    var active = nav.querySelectorAll("button")[i]; if (active && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = active.offsetLeft - nav.clientWidth / 2 + active.offsetWidth / 2;
+    moveInd();
     if (c.dealer) { renderCard(c.id); }
     else {
       $("#title").innerHTML = c.title.split("\n").map(function (t) { var s = el("span", { text: t }); return s.outerHTML; }).join("<br>");
@@ -86,33 +99,71 @@
       $("#eyebrow").textContent = i === 0 ? "PHONEPARIS · 에펠탑 광장" : i === N - 1 ? "PHONEPARIS · 다시, 광장" : "PHONEPARIS";
     }
     $("#bubble").hidden = !c.dealer;
-    if (c.dealer) { var d = D.dealers[c.id]; $("#bubbleName").textContent = d.name; $("#bubbleName").style.setProperty("--c", d.color); $("#bubbleText").textContent = "“" + d.quote + "”"; }
+    clearInterval(toutTimer);
+    if (c.dealer) {
+      var d = D.dealers[c.id], b = $("#bubble");
+      b.dataset.d = c.id; b.style.setProperty("--c", d.color); b.style.setProperty("--dk", d.ink || "#202529");
+      $("#bubbleName").innerHTML = PPShop.ava(c.id, "xs") + "<span>" + d.name + "</span>";
+      startTout(c.id);
+    }
   }
+
+  /* ---------- 호객 말풍선: 폰팔이마다 다른 멘트를 돌려 가며 + 동작에 맞춰 이모트 ---------- */
+  var toutTimer = 0, toutIdx = 0, holdUntil = 0, emoteOn = false;
+  function sayBubble(text, hold) {
+    var b = $("#bubble"); $("#bubbleText").textContent = text;
+    b.classList.remove("swap"); void b.offsetWidth; b.classList.add("swap");
+    if (hold) holdUntil = Date.now() + 2800;
+  }
+  function startTout(id) {
+    var d = D.dealers[id], L = ["“" + d.quote + "”"].concat(d.tout || []);
+    toutIdx = 0; holdUntil = 0; sayBubble(L[0]);
+    toutTimer = setInterval(function () {
+      if (Date.now() < holdUntil || document.hidden || shopping()) return;
+      toutIdx = (toutIdx + 1) % L.length; sayBubble(L[toutIdx]);
+    }, 4200);
+  }
+  function popEmote(t) { var e = $("#emote"); e.textContent = t; e.classList.remove("pop"); void e.offsetWidth; e.classList.add("pop"); }
   function tickBubble() {
     requestAnimationFrame(tickBubble);
     var c = CH[cur]; if (!c || !c.dealer || !world) return;
     var p = world.headOnScreen(c.id), b = $("#bubble");
     var mobile = matchMedia("(max-width: 760px)").matches;
     var top = Math.max(mobile ? 150 : 120, p.y);
-    b.style.transform = "translate(" + Math.round(Math.min(innerWidth - 140, Math.max(140, p.x))) + "px," + Math.round(top) + "px) translate(-50%, -100%)";
+    b.style.transform = "translate(" + Math.round(Math.min(innerWidth - 150, Math.max(150, p.x))) + "px," + Math.round(top) + "px) translate(-50%, -100%)";
     b.style.opacity = Math.abs(progress() - cur) < .15 && !(mobile && cardOpen && top > innerHeight * .4) ? 1 : 0;
+    var env = world.toutEnv(c.id);
+    if (env > .5 && !emoteOn) { emoteOn = true; popEmote(D.dealers[c.id].emote || "!"); }
+    if (env < .15) emoteOn = false;
   }
   requestAnimationFrame(tickBubble);
   addEventListener("scroll", onScroll, { passive: true });
 
-  /* ---------- 폰팔이 카드: 셀링포인트 3개 + 가게 들어가기 ---------- */
+  /* ---------- 캐릭터에 마우스를 올리면: 반응 멘트 + 커서 라벨 ---------- */
+  function onDealerHover(id) {
+    cursorDealer(id);
+    var c = CH[cur];
+    if (id && c && c.id === id && !shopping()) sayBubble(D.dealers[id].hover, true);
+  }
+
+  /* ---------- 폰팔이 카드: 아바타 + 셀링포인트 3개 + 가게 들어가기 ---------- */
   function renderCard(id) {
     var d = D.dealers[id], card = $("#card");
-    card.style.setProperty("--c", d.color); card.innerHTML = "";
-    card.appendChild(el("span", { class: "badge", text: d.name }));
+    card.style.setProperty("--c", d.color); card.style.setProperty("--dk", d.ink || "#202529"); card.dataset.d = id; card.innerHTML = "";
+    var head = el("div", { class: "card-h" });
+    head.innerHTML = PPShop.ava(id);
+    head.appendChild(el("div", { class: "who" }, [el("span", { class: "badge", text: d.name }), el("small", { class: "role", text: d.role || "" })]));
+    head.appendChild(el("span", { class: "live" }, [el("i"), "호객 중"]));
+    card.appendChild(head);
     card.appendChild(el("h2", { text: d.title }));
-    card.appendChild(el("ul", { class: "points" }, d.points.map(function (p, k) { return el("li", {}, [el("i", { text: String(k + 1) }), p]); })));
-    card.appendChild(el("button", { class: "primary", text: d.short + "에게 사러 가기 →", onclick: function () { openShop(id); } }));
+    card.appendChild(el("ul", { class: "points" }, d.points.map(function (p, k) { return el("li", { style: { "--k": k } }, [el("i", { text: String(k + 1) }), el("span", { text: p })]); })));
+    var cta = el("button", { class: "primary magnet", onclick: function () { openShop(id); } }, [el("span", { text: d.short + "에게 사러 가기" }), el("i", { class: "arr", "aria-hidden": "true", text: "→" })]);
+    card.appendChild(cta);
   }
   function openDealer(id) { openShop(id); }
   var mobileQ = matchMedia("(max-width: 760px)");
   function openShop(id) {
-    var i = indexOf(id);
+    var i = indexOf(id); cursorDealer(null);
     if (i !== cur) scrollTo({ top: i * stopH(), behavior: "auto" });
     setCard(false); clearTimeout(cardTimer);
     PPShop.open(id);
@@ -121,7 +172,7 @@
   PPShop.init({
     toast: toast,
     onTalk: function (on) { if (world) world.talk(on ? PPShop.state().dealer : null); },
-    onClose: function () { if (world) world.talk(null); cardOpen = false; onScroll(); },
+    onClose: function () { if (world) world.talk(null); cursorDealer(null); cardOpen = false; onScroll(); },
     openStudio: function (G) { openStudio(G); },
   });
 
@@ -204,6 +255,76 @@
   }
   $("#studioPrev").addEventListener("click", function () { if (sStep > 0) { sStep--; renderStudio(); } });
   $("#studioNext").addEventListener("click", function () { sStep = sStep === STEPS.length - 1 ? 0 : sStep + 1; renderStudio(); });
+
+  /* ---------- 인터랙션: 커서·눈·기울기·자석·물결·스포트라이트 ---------- */
+  var fine = matchMedia("(hover: hover) and (pointer: fine)").matches, still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var root = document.documentElement, cursor = $("#cursor");
+  // 아바타 눈동자: 화면 어디에 마우스가 있든 그쪽을 봄
+  var eyeRaf = 0, ex = 0, ey = 0;
+  addEventListener("pointermove", function (e) {
+    ex = e.clientX / innerWidth * 2 - 1; ey = e.clientY / innerHeight * 2 - 1;
+    if (!eyeRaf) eyeRaf = requestAnimationFrame(function () { eyeRaf = 0; root.style.setProperty("--ex", ex.toFixed(3)); root.style.setProperty("--ey", ey.toFixed(3)); });
+  }, { passive: true });
+  // 커서 따라다니는 링 (+ 캐릭터 위에서는 이름표)
+  if (fine && !still && cursor) {
+    root.classList.add("has-cursor");
+    var cx = -100, cy = -100, tx = -100, ty = -100;
+    addEventListener("pointermove", function (e) { tx = e.clientX; ty = e.clientY; cursor.classList.add("on"); }, { passive: true });
+    document.addEventListener("pointerleave", function () { cursor.classList.remove("on"); });
+    document.addEventListener("pointerover", function (e) {
+      var t = e.target;
+      cursor.classList.toggle("link", !!(t.closest && t.closest("button, a, input, label, [role=button], .pk, canvas")) && !(t.id === "world" && !cursor.classList.contains("dealer")));
+      cursor.classList.toggle("text", !!(t.closest && t.closest("input")));
+    });
+    (function follow() { cx += (tx - cx) * .2; cy += (ty - cy) * .2; cursor.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; requestAnimationFrame(follow); })();
+  }
+  function cursorDealer(id) {
+    if (!cursor) return;
+    cursor.classList.toggle("dealer", !!id);
+    if (id) {
+      var d = D.dealers[id], here = CH[cur] && CH[cur].id === id;
+      cursor.style.setProperty("--c", d.color);
+      $("#cursorLabel").textContent = here ? d.short + "에게 사러 가기" : d.short + " 보러 가기";
+    }
+  }
+  if (fine && !still) {
+    // 카드 3D 기울기 + 스포트라이트
+    var card = $("#card");
+    card.addEventListener("pointermove", function (e) {
+      var r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      card.style.setProperty("--mx", (x * 100).toFixed(1) + "%"); card.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+      card.style.setProperty("--rx", ((.5 - y) * 5).toFixed(2) + "deg"); card.style.setProperty("--ry", ((x - .5) * 6).toFixed(2) + "deg");
+    });
+    card.addEventListener("pointerleave", function () { card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg"); });
+    // 자석 버튼: 마우스 쪽으로 살짝 끌려옴
+    var lastMag = null;
+    document.addEventListener("pointermove", function (e) {
+      var m = e.target.closest && e.target.closest(".magnet, .say.go");
+      if (lastMag && lastMag !== m) { lastMag.style.removeProperty("--tx"); lastMag.style.removeProperty("--ty"); }
+      lastMag = m; if (!m) return;
+      var r = m.getBoundingClientRect();
+      m.style.setProperty("--tx", ((e.clientX - r.left - r.width / 2) * .16).toFixed(1) + "px");
+      m.style.setProperty("--ty", ((e.clientY - r.top - r.height / 2) * .3).toFixed(1) + "px");
+    }, { passive: true });
+    // 가게 테이블: 상품 카드 스포트라이트, 할인 카드 기울기
+    $("#shopPanel").addEventListener("pointermove", function (e) {
+      var t = e.target.closest && e.target.closest(".pk, .dcard, .tok, .veh button, .way"); if (!t) return;
+      var r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      t.style.setProperty("--mx", (x * 100).toFixed(1) + "%"); t.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+      if (t.classList.contains("dcard")) { t.style.setProperty("--rx", ((.5 - y) * 10).toFixed(1) + "deg"); t.style.setProperty("--ry", ((x - .5) * 12).toFixed(1) + "deg"); }
+    });
+    $("#shopPanel").addEventListener("pointerout", function (e) {
+      var t = e.target.closest && e.target.closest(".dcard"); if (t && !t.contains(e.relatedTarget)) { t.style.setProperty("--rx", "0deg"); t.style.setProperty("--ry", "0deg"); }
+    });
+  }
+  // 누르면 물결
+  if (!still) document.addEventListener("pointerdown", function (e) {
+    var b = e.target.closest && e.target.closest(".say, .primary, .ghost, .tok, .veh button, .brands button, .social button, .foldseg button, .sbtn, .top-cta, .chapters button, .ctabs button");
+    if (!b) return;
+    var r = b.getBoundingClientRect(), size = Math.max(r.width, r.height) * 2.2, s = el("span", { class: "rip", "aria-hidden": "true" });
+    s.style.cssText = "width:" + size + "px;height:" + size + "px;left:" + (e.clientX - r.left - size / 2) + "px;top:" + (e.clientY - r.top - size / 2) + "px";
+    b.appendChild(s); setTimeout(function () { s.remove(); }, 650);
+  });
 
   /* ---------- 시작 ---------- */
   function ready() { document.body.classList.add("ready"); }
