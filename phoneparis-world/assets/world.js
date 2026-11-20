@@ -424,23 +424,9 @@
     var bar = rbox(6.3, .1, .1, .04, metal); bar.position.set(0, 4.5, -1.7); g.add(bar);
     var counter = rbox(5.6, 1.1, 1.1, .08, std(0x9fa1a3, .7)); counter.position.set(0, .55, 1.55); g.add(counter);
     var top = rbox(5.8, .08, 1.3, .03, std(0xe6e7e8, .3)); top.position.set(0, 1.14, 1.55); g.add(top);
-    if (id === "x") { // 폰팔이가 아닌 노점: 열쇠고리·엽서·베레모 같은 기념품 잡화
-      var gold = std(0xc9a43a, .35), silver = std(0xc5c7cf, .3), mini = new T.ConeGeometry(.11, .42, 4);
-      for (var h2 = 0; h2 < 9; h2++) { // 봉에 걸린 에펠탑 열쇠고리
-        var kr = new T.Mesh(mini, h2 % 2 ? gold : silver); kr.position.set(-2.8 + h2 * .7, 4.12, -1.68); g.add(kr);
-        var ring = new T.Mesh(new T.TorusGeometry(.07, .015, 4, 10), silver); ring.position.set(-2.8 + h2 * .7, 4.4, -1.68); g.add(ring);
-      }
-      for (var k3 = 0; k3 < 6; k3++) { // 뒷판 엽서·에코백
-        var card = rbox(.7, k3 % 2 ? .9 : .55, .04, .03, std(PASTEL[(k3 * 2 + Math.floor(r() * 7)) % 7], .6));
-        card.position.set(-2.5 + k3 * 1, 2.4 + (k3 % 2) * .2, -1.74); g.add(card);
-      }
-      for (var b3 = 0; b3 < 3; b3++) { // 카운터 위 베레모
-        var beret = new T.Mesh(new T.SphereGeometry(.26, 10, 6), std([0x22252a, 0xb33a3a, 0x2d4a8a][b3], .8)); beret.scale.y = .32; beret.position.set(-2.2 + b3 * .62, 1.24, 1.5); g.add(beret);
-      }
-      for (var t3 = 0; t3 < 5; t3++) { // 카운터 위 미니 에펠탑 기념품
-        var fig = new T.Mesh(new T.ConeGeometry(.13, .62, 4), t3 % 2 ? gold : std(0x6b5a4a, .5)); fig.position.set(.3 + t3 * .45, 1.49, 1.55); g.add(fig);
-      }
-      g.traverse(function (o) { if (o.isMesh) o.receiveShadow = true; });
+    if (id === "x") { // 폰팔이가 아닌 노점: 기념품 잡화 (금방 지나가는 배경이라 간단히, 봉에 걸린 열쇠고리 몇 개만)
+      var mini = new T.ConeGeometry(.13, .45, 4), gold = std(0xc9a43a, .4);
+      for (var h2 = 0; h2 < 5; h2++) { var kr = new T.Mesh(mini, gold); kr.position.set(-2.4 + h2 * 1.2, 4.1, -1.68); g.add(kr); }
       return g;
     }
     for (var h = 0; h < 7; h++) { // 위 봉에 걸린 상품 (케이스·파우치)
