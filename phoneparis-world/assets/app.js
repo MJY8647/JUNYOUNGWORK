@@ -167,12 +167,12 @@
     if (i !== cur) scrollTo({ top: i * stopH(), behavior: "auto" });
     setCard(false); clearTimeout(cardTimer);
     PPShop.open(id);
-    if (world) { world.setProgress(i); world.setFrameOffset(mobileQ.matches ? 0 : -.2, mobileQ.matches ? -.17 : 0); }
+    if (world) { world.setProgress(i); world.setFrameOffset(mobileQ.matches ? 0 : -.2, mobileQ.matches ? -.17 : 0); world.halfRate = true; }
   }
   PPShop.init({
     toast: toast,
     onTalk: function (on) { if (world) world.talk(on ? PPShop.state().dealer : null); },
-    onClose: function () { if (world) world.talk(null); cursorDealer(null); cardOpen = false; onScroll(); },
+    onClose: function () { if (world) { world.talk(null); world.halfRate = false; } cursorDealer(null); cardOpen = false; onScroll(); },
     openStudio: function (G) { openStudio(G); },
   });
 

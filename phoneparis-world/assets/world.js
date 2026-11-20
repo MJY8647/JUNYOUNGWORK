@@ -363,17 +363,20 @@
     var self = this; opts = opts || {};
     this.canvas = canvas; this.site = site; this.opts = opts;
     this.mobile = matchMedia("(max-width: 760px)").matches;
+    // 휴대폰·태블릿(가로로 돌린 폰 포함)은 가벼운 설정: 그림자 없음, 군중 절반, 해상도 상한 1.5배
+    this.lite = this.mobile || matchMedia("(pointer: coarse)").matches;
     this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     var r = rng(20261120);
     var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: !!opts.preserve });
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, this.mobile ? 1.5 : 1.75));
+    this.dpr = Math.min(devicePixelRatio || 1, this.lite ? 1.5 : 1.75);
+    renderer.setPixelRatio(this.dpr);
     this.renderer = renderer;
     var scene = new T.Scene(); this.scene = scene;
     scene.fog = new T.Fog(0xcfd8dc, 140, 900);
     scene.add(sky());
     scene.add(new T.HemisphereLight(0xe8f1f8, 0x6d675f, .55));
     var sun = new T.DirectionalLight(0xfff4e6, .78); sun.position.set(-40, 70, 46); scene.add(sun);
-    if (!this.mobile) { // 장터 주변만 그림자 (탑 철골 그림자가 노점에 떨어지게)
+    if (!this.lite) { // 장터 주변만 그림자 (탑 철골 그림자가 노점에 떨어지게)
       renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
       sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
       var sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 10; sc.far = 220;
@@ -405,7 +408,7 @@
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
       obs.add(b.position.x, b.position.z, 3.1);
     }
-    this.crowd = buildCrowd(r, this.mobile ? 1300 : 2600, obs); scene.add(this.crowd);
+    this.crowd = buildCrowd(r, this.lite ? 1300 : 2600, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
     this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
@@ -413,17 +416,27 @@
     this.posCurve = new T.CatmullRomCurve3(this.shots.map(function (s) { return v(s.pos); }), false, "centripetal");
     this.lookCurve = new T.CatmullRomCurve3(this.shots.map(function (s) { return v(s.look); }), false, "centripetal");
     this.camera = new T.PerspectiveCamera(this.shots[0].fov, 1, .3, 3000);
-    this.progress = 0; this.shown = -1; this.speed = 0; this.frames = 0;
+    this.progress = 0; this.shown = -1; this.speed = 0; this.frames = 0; this.tick = 0;
+    this.perf = { t: 0, n: 0, last: 0 }; this.slow = false; this.halfRate = false;
     this.offset = { x: 0, y: 0, tx: 0, ty: 0 };
     this.pointer = new T.Vector2(0, 0); this.ray = new T.Raycaster(); this.hover = null;
     this.prevPos = new T.Vector3();
 
-    canvas.addEventListener("pointermove", function (e) {
+    function aim(e) {
       var rc = canvas.getBoundingClientRect();
       self.pointer.set((e.clientX - rc.left) / rc.width * 2 - 1, -((e.clientY - rc.top) / rc.height) * 2 + 1);
-      self.pick();
+    }
+    canvas.addEventListener("pointermove", function (e) { aim(e); self.pick(); });
+    canvas.addEventListener("pointerdown", function (e) { self.touchy = e.pointerType !== "mouse"; });
+    // 탭은 pointermove 없이 올 수 있어 클릭 위치로 다시 겨눔. 터치는 호버가 없으니 탭하면 잠깐 깡충 반응
+    canvas.addEventListener("click", function (e) {
+      aim(e); self.pick();
+      if (self.touchy && self.hover) {
+        clearTimeout(self.tapT);
+        self.tapT = setTimeout(function () { if (self.hover) { self.hover = null; if (opts.onHover) opts.onHover(null); } }, 1300);
+      }
+      if (self.hover && opts.onDealer) opts.onDealer(self.hover);
     });
-    canvas.addEventListener("click", function () { self.pick(); if (self.hover && opts.onDealer) opts.onDealer(self.hover); });
     canvas.addEventListener("pointerleave", function () { // 캔버스를 벗어나면 호버 해제
       if (self.hover) { self.hover = null; canvas.style.cursor = ""; if (opts.onHover) opts.onHover(null); }
     });
@@ -576,7 +589,19 @@
 
   World.prototype.loop = function () {
     requestAnimationFrame(this.loop);
+    var pf = this.perf, now = performance.now(), gap = (now - pf.last) / 1000; pf.last = now;
     if (document.hidden || this.paused) return;
+    // 느린 기기: 2초 평균이 30fps 아래면 해상도를 한 단계(0.25배)씩 낮춤, 1배 아래로는 안 내림
+    if (gap > 0 && gap < .25 && this.clock.elapsedTime > 3) {
+      pf.t += gap; pf.n++;
+      if (pf.t > 2) {
+        if (pf.t / pf.n > 1 / 30 && this.dpr > 1) { this.dpr = Math.max(1, this.dpr - .25); this.renderer.setPixelRatio(this.dpr); this.resize(); this.slow = true; }
+        pf.t = 0; pf.n = 0;
+      }
+    }
+    // 가게가 화면을 덮는 동안 휴대폰은 절반 속도로만 그림 (배터리·발열)
+    this.tick = (this.tick + 1) | 0;
+    if (this.lite && this.halfRate && (this.tick & 1)) return;
     var dt = Math.min(.05, this.clock.getDelta()), time = this.clock.elapsedTime;
     this.placeCamera();
     // 카메라 속도 → 모션 블러 (영상의 휙 지나가는 전환)
@@ -584,7 +609,7 @@
     this.prevPos.copy(this.camera.position);
     var dist = Math.max(4, this.camera.position.length() * .2);
     this.speed += (Math.min(1, sp / dist / 6) - this.speed) * .25;
-    var blur = this.reduced ? 0 : Math.max(0, this.speed - .12) * 9;
+    var blur = this.reduced || this.slow ? 0 : Math.max(0, this.speed - .12) * (this.lite ? 5 : 9); // 휴대폰은 블러를 약하게
     this.canvas.style.filter = blur > .3 ? "blur(" + blur.toFixed(1) + "px)" : "";
     this.animate(dt, time);
     this.renderer.render(this.scene, this.camera);

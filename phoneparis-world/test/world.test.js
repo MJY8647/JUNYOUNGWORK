@@ -12,7 +12,8 @@ async function open(browser, o = {}) {
   const p = await ctx.newPage(), errors = [];
   p.on("pageerror", (e) => errors.push(e.message));
   p.on("console", (m) => { if (m.type() === "error" && !/fonts\.g/.test(m.text())) errors.push(m.text()); });
-  await p.goto(url);
+  // 스크린샷을 찍는 창은 ?shot (그리지 않는 프레임이 있어도 캔버스가 비어 찍히지 않게)
+  await p.goto(shots && o.shot ? url + (url.includes("?") ? "&" : "?") + "shot" : url);
   await p.waitForFunction(() => document.body.classList.contains("ready"), null, { timeout: 200000 });
   return { p, ctx, errors };
 }
