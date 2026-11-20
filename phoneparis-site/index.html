@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>폰파리 딜러 스튜디오</title>
+  <meta name="description" content="탭만으로 휴대폰 견적·시세표·개통 체크·사후관리 알림까지.">
+  <script>
+    try { var t = localStorage.getItem("pp-theme"); if (t && t !== "system") document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><b id="shopName">폰파리</b><span id="shopTag">딜러 스튜디오</span></div>
+    <nav class="modes" role="tablist" aria-label="모드">
+      <button role="tab" data-mode="quote" aria-selected="true">견적</button>
+      <button role="tab" data-mode="board" aria-selected="false">시세표</button>
+      <button role="tab" data-mode="care" aria-selected="false">사후관리</button>
+    </nav>
+    <button class="icon-btn" id="themeBtn" aria-label="테마 전환" title="테마">◐</button>
+  </header>
+
+  <main>
+    <!-- 견적 마법사 -->
+    <section id="quote" class="mode is-on" aria-label="견적">
+      <ol class="steps" id="steps" aria-label="진행 단계"></ol>
+      <div class="stage" id="stage" aria-live="polite"></div>
+      <div class="pager">
+        <button class="ghost" id="prevBtn">이전</button>
+        <button class="ghost" id="resetBtn">처음부터</button>
+        <button class="primary" id="nextBtn">다음</button>
+      </div>
+    </section>
+
+    <!-- 시세표 디자이너 -->
+    <section id="board" class="mode" aria-label="시세표" hidden>
+      <div class="board-grid">
+        <div class="board-controls" id="boardControls"></div>
+        <div class="board-preview">
+          <canvas id="boardCanvas" width="1080" height="1350" aria-label="시세표 미리보기"></canvas>
+          <div class="row-btns">
+            <button class="primary" id="boardPng">PNG 저장</button>
+            <button class="ghost" id="boardCopy">문구 복사</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 사후관리 알림표 -->
+    <section id="care" class="mode" aria-label="사후관리" hidden>
+      <div class="care-head">
+        <label class="date-pill">개통일 <input type="date" id="careDate"></label>
+        <div class="chips" id="careQuick"></div>
+      </div>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="row-btns">
+        <button class="primary" id="icsBtn">캘린더 저장</button>
+        <button class="ghost" id="careCopy">고객에게 보낼 문구 복사</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 하단 요약 바 -->
+  <button class="dock" id="dock" aria-label="견적 요약 열기">
+    <span class="dock-model" id="dockModel">기종 선택</span>
+    <span class="dock-num"><small>할부원금</small><b id="dockPrin">–</b></span>
+    <span class="dock-num"><small>월 납부</small><b id="dockMonth">–</b></span>
+  </button>
+
+  <dialog id="receipt" aria-label="견적서">
+    <div class="sheet">
+      <div class="sheet-head"><b>견적서</b><button class="icon-btn" data-close aria-label="닫기">✕</button></div>
+      <div id="receiptBody"></div>
+      <div class="row-btns">
+        <button class="primary" id="copyQuote">카톡 문구 복사</button>
+        <button class="ghost" data-close>닫기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="assets/content.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
