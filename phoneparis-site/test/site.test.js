@@ -81,10 +81,8 @@ const tile = (p, text) => p.locator("#stage .tile").filter({
     ok(plan && plan[1] === "2026-7-3", "2026-01-01 개통 → 요금제 변경 7/3 (183일 기준): " + (plan && plan[1]));
     ok(ev.some((e) => e[0] === "폰 보험 해지 가능" && e[1] === "2026-4-1"), "부가서비스 해지일 (3개월)");
     ok(ev.some((e) => e[0].startsWith("약정 만료 ·") && e[1] === "2028-1-1"), "24개월 약정 만료일");
-    const [dl] = await Promise.all([p.waitForEvent("download"), p.click("#icsBtn")]);
-    ok(/\.ics$/.test(dl.suggestedFilename()), ".ics 다운로드: " + dl.suggestedFilename());
-    const ics = await p.evaluate(() => window.PP.ics());
-    ok(ics.includes("BEGIN:VEVENT") && ics.includes("BEGIN:VALARM"), "ics 일정+알림 포함");
+    const g = await p.locator("#timeline li", { hasText: "요금제 변경 가능" }).locator(".gcal").getAttribute("href");
+    ok(/calendar\.google\.com.*dates=20260703\/20260704/.test(g), "요금제 변경일 구글 캘린더 링크");
     if (shots) await p.screenshot({ path: shots + "/desktop-care.png" });
 
     // 3) 시세표
@@ -100,8 +98,11 @@ const tile = (p, text) => p.locator("#stage .tile").filter({
       const seen = new Set(); for (let i = 0; i < d.length; i += 4000) seen.add(d[i] + "," + d[i + 1] + "," + d[i + 2]); return seen.size;
     });
     ok(painted > 3, "캔버스에 실제로 그려짐");
-    const [png] = await Promise.all([p.waitForEvent("download"), p.click("#boardPng")]);
-    ok(/\.png$/.test(png.suggestedFilename()), "시세표 PNG 저장: " + png.suggestedFilename());
+    await p.click("#boardPng");
+    ok(await p.locator("#imgSheet").evaluate((d) => d.open) && (await p.locator("#boardImg").getAttribute("src")).startsWith("data:image/png"), "시세표 이미지 창 (길게 눌러 저장)");
+    const [png] = await Promise.all([p.waitForEvent("download"), p.click("#imgFile")]);
+    ok(/\.png$/.test(png.suggestedFilename()), "로컬에선 PNG 파일 받기");
+    await p.keyboard.press("Escape");
     if (shots) await p.screenshot({ path: shots + "/desktop-board.png", fullPage: true });
     ok(errors.length === 0, "JS 오류 없음 " + errors.join(" | "));
     await ctx.close();

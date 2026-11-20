@@ -460,20 +460,15 @@
         el("b", { text: e.title }),
         el("time", { datetime: ymd(e.date), text: ymd(e.date).replace(/-/g, ".") }),
         el("em", { text: dd === 0 ? "오늘" : (dd > 0 ? "D-" + dd : "지남") }),
+        el("a", { class: "gcal", href: gcal(e), target: "_blank", rel: "noopener", "aria-label": e.title + " 구글 캘린더에 추가", text: "+ 캘린더" }),
       ]));
     });
   }
-  function ics() {
-    var stamp = ymd(new Date()).replace(/-/g, "") + "T000000Z";
-    var out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//phoneparis//dealer-studio//KO", "CALSCALE:GREGORIAN"];
-    careEvents().forEach(function (e, i) {
-      var d = ymd(e.date).replace(/-/g, ""), n = ymd(addDays(e.date, 1)).replace(/-/g, "");
-      out.push("BEGIN:VEVENT", "UID:pp-" + d + "-" + i + "@phoneparis", "DTSTAMP:" + stamp,
-        "DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + n, "SUMMARY:[" + D.shop.name + "] " + e.title,
-        "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + e.title, "TRIGGER:PT9H", "END:VALARM", "END:VEVENT");
-    });
-    out.push("END:VCALENDAR");
-    return out.join("\r\n");
+  function gcal(e) { // 구글 캘린더 일정 추가 링크 (새 탭)
+    var d = ymd(e.date).replace(/-/g, ""), n = ymd(addDays(e.date, 1)).replace(/-/g, "");
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      "&text=" + encodeURIComponent("[" + D.shop.name + "] " + e.title) + "&dates=" + d + "/" + n +
+      "&details=" + encodeURIComponent("매장 계약 조건이 우선합니다");
   }
   function download(name, blob) {
     var a = el("a", { href: URL.createObjectURL(blob), download: name }); document.body.appendChild(a); a.click();
@@ -520,17 +515,19 @@
     });
     $("#dock").addEventListener("click", function () { if (S.model && S.storage && S.carrier && S.join && S.plan) openReceipt(); else setMode("quote"); });
     $("#copyQuote").addEventListener("click", function () { copy(quoteText()); });
-    document.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { $("#receipt").close(); }); });
-    $("#receipt").addEventListener("click", function (e) { if (e.target === this) this.close(); });
-    $("#boardPng").addEventListener("click", function () {
-      $("#boardCanvas").toBlob(function (bl) { download("phoneparis-board-" + ymd(new Date()) + ".png", bl); toast("저장했어요"); });
+    document.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { b.closest("dialog").close(); }); });
+    document.querySelectorAll("dialog").forEach(function (d) { d.addEventListener("click", function (e) { if (e.target === d) d.close(); }); });
+    $("#boardPng").addEventListener("click", function () { // 공유 페이지에선 다운로드가 막혀 있어 이미지를 띄워 길게 눌러 저장
+      $("#boardImg").src = $("#boardCanvas").toDataURL("image/png"); $("#imgSheet").showModal();
+    });
+    $("#imgFile").addEventListener("click", function () {
+      $("#boardCanvas").toBlob(function (bl) { download("phoneparis-board-" + ymd(new Date()) + ".png", bl); });
     });
     $("#boardCopy").addEventListener("click", function () { copy(boardText()); });
     $("#careDate").addEventListener("change", function () { if (this.value) { S.careDate = this.value; save(); renderCare(); } });
-    $("#icsBtn").addEventListener("click", function () { download("phoneparis-alarm.ics", new Blob([ics()], { type: "text/calendar" })); toast("캘린더 파일 저장"); });
     $("#careCopy").addEventListener("click", function () { copy(careText()); });
     document.addEventListener("keydown", function (e) {
-      if (document.body.dataset.mode !== "quote" || $("#receipt").open || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      if (document.body.dataset.mode !== "quote" || document.querySelector("dialog[open]") || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
       if (e.key === "ArrowRight" && !$("#nextBtn").disabled) go(S.step + 1);
       if (e.key === "ArrowLeft") go(S.step - 1);
     });
@@ -541,6 +538,6 @@
   }
 
   // 테스트용 노출
-  window.PP = { calc: calc, quote: quote, defaultSubsidy: defaultSubsidy, careEvents: careEvents, ics: ics, state: function () { return S; } };
+  window.PP = { calc: calc, quote: quote, defaultSubsidy: defaultSubsidy, careEvents: careEvents, gcal: gcal, state: function () { return S; } };
   init();
 })();

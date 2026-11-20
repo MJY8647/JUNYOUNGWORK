@@ -43,7 +43,7 @@
         <div class="board-preview">
           <canvas id="boardCanvas" width="1080" height="1350" aria-label="시세표 미리보기"></canvas>
           <div class="row-btns">
-            <button class="primary" id="boardPng">PNG 저장</button>
+            <button class="primary" id="boardPng">이미지 저장</button>
             <button class="ghost" id="boardCopy">문구 복사</button>
           </div>
         </div>
@@ -58,8 +58,7 @@
       </div>
       <ol class="timeline" id="timeline"></ol>
       <div class="row-btns">
-        <button class="primary" id="icsBtn">캘린더 저장</button>
-        <button class="ghost" id="careCopy">고객에게 보낼 문구 복사</button>
+        <button class="primary" id="careCopy">고객에게 보낼 문구 복사</button>
       </div>
     </section>
   </main>
@@ -78,6 +77,18 @@
       <div class="row-btns">
         <button class="primary" id="copyQuote">카톡 문구 복사</button>
         <button class="ghost" data-close>닫기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="imgSheet" aria-label="시세표 이미지">
+    <div class="sheet">
+      <div class="sheet-head"><b>길게 눌러 저장</b><button class="icon-btn" data-close aria-label="닫기">✕</button></div>
+      <img id="boardImg" alt="시세표 이미지" class="board-img">
+      <p class="hint">휴대폰은 이미지를 길게 눌러 저장, PC는 우클릭 후 저장하세요.</p>
+      <div class="row-btns">
+        <button class="ghost" id="imgFile">파일로 받기</button>
+        <button class="primary" data-close>닫기</button>
       </div>
     </div>
   </dialog>
