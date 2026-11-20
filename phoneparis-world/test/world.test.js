@@ -174,7 +174,9 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
     ok(await p.locator("#studio").evaluate((d) => d.open) && await p.locator("#studioCanvas canvas").count() === 1, "3D 폰꾸 작업실 열림");
     await p.locator("#studioNext").click();
     await p.locator("#studioBody .opt", { hasText: "코발트" }).click();
-    ok(await p.locator("#studioTotal").innerText() === "24,000원", "케이스 선택 → 합계 24,000원");
+    // 작업실은 가게와 꾸미기 조합을 함께 써서, 앞의 디자이너 구매에서 고른 키링이 남아 있을 수 있음 → 고른 것들의 합과 같은지 확인
+    const sum = await p.evaluate(() => { const s = PP.state().studio, S = SITE.studio, f = (l, id) => (l.find((x) => x.id === id) || l[0]).price; return s.case === "cobalt" ? (f(S.cases, s.case) + f(S.keyrings, s.keyring) + f(S.backs, s.back)).toLocaleString("ko-KR") + "원" : "케이스 안 바뀜"; });
+    ok(await p.locator("#studioTotal").innerText() === sum, "케이스 선택 → 합계 반영 (" + sum + ")");
     await p.locator("#studioNext").click();
     await p.locator("#studioBody .opt", { hasText: "오렌지 볼" }).click();
     await p.locator("#studioNext").click();
