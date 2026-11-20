@@ -54,12 +54,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .top-cta { position: relative; overflow: hidden; margin-left: auto; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); transition: transform .3s var(--spring), box-shadow .3s; }
 
 /* 로더 */
-/* 첫 장면 배경: 파리 현지 시각에 맞춘 실사 사진, 스크롤하면 사라지며 3D로 */
-#parisBg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: var(--photo, none) center / cover no-repeat; transition: opacity .25s linear; }
-#parisBg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.08), transparent 30%, transparent 70%, rgba(0,0,0,.18)); }
-#parisClock { position: absolute; z-index: 1; right: 20px; bottom: 88px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.85); color: var(--ink); font-size: 12px; font-weight: 800; }
-#parisBg[data-time="night"] #parisClock { background: rgba(14,20,40,.7); color: #fff; }
-@media (max-width: 760px) { #parisClock { right: 12px; bottom: 24px; } }
 #loader { position: fixed; inset: 0; z-index: 50; isolation: isolate; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
 #loader::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--photo, none) center / cover no-repeat; }
 #loader::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.35)); }
