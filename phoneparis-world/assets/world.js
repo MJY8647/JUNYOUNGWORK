@@ -140,14 +140,41 @@
   /* ---------- 광장 타일, 노점, 군중 ---------- */
   var PASTEL = [0x9fd8cf, 0xf2a7b5, 0xc7b5ea, 0xf4d36b, 0x8fc9e8, 0xb8e0a0, 0xf6b98a];
 
+  /* ---------- 지형: 실제 에펠탑 주변 배치를 줄인 비율로 ----------
+   탑 뒤(-z)로 센강이 흐르고(남쪽 강둑 = 브랑리 강변), 탑 정면으로 이에나 다리, 강 건너 트로카데로 정원과 샤이오 궁.
+   탑 앞(+z, 첫 장면 카메라 쪽)은 샹드마르스 잔디밭. 사람·노점은 사람이 실제로 있을 만한 곳(탑 아래 광장, 샹드마르스 길, 강변 산책로, 다리)에만. */
+  var RIVER = { s: -100, n: -145 };            // 남쪽·북쪽 강둑 z
+  function walkable(x, z) {
+    var d = Math.hypot(x, z);
+    if (d >= 14 && d <= 72) return true;                                 // 탑 아래 광장
+    if (Math.abs(x) < 58 && z > 0 && z < 300) return true;               // 샹드마르스 길·잔디 가장자리
+    if (Math.abs(x) < 26 && z > -90 && z <= 0) return true;              // 탑 → 이에나 다리 길
+    if (Math.abs(x) < 220 && z > -98 && z < -86) return true;            // 브랑리 강변 산책로
+    if (Math.abs(x) < 6.5 && z >= RIVER.n - 2 && z <= -86) return true;  // 이에나 다리 인도
+    return false;
+  }
+  // 사람·노점이 놓일 자리: 구역별 비율로 고름
+  function spot(r, kind) {
+    var t = r();
+    for (var k = 0; k < 40; k++) {
+      var x, z;
+      if (t < .46) { var a = r() * Math.PI * 2, rad = (kind ? 26 : 15) + r() * (kind ? 44 : 56); x = Math.cos(a) * rad; z = Math.sin(a) * rad; }
+      else if (t < .82) { z = 8 + r() * 280; x = (kind ? (r() < .5 ? -1 : 1) * (36 + r() * 18) : (r() - .5) * 112); }
+      else if (t < .97) { x = (r() - .5) * 400; z = kind ? -89 : -96 + r() * 9; }
+      else { if (kind) { t = r() * .82; continue; } x = (r() - .5) * 11; z = RIVER.n - 1 + r() * (RIVER.n * -1 - 88); }
+      if (walkable(x, z)) return [x, z];
+    }
+    return [0, 40];
+  }
   function buildPlaza(r, obs) {
     var g = new T.Group();
     var ground = new T.Mesh(new T.PlaneGeometry(2400, 2400), new T.MeshStandardMaterial({ color: 0x8d8c88, roughness: 1 }));
     ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
-    // 격자 타일 블록 (첫 장면의 광장 패턴)
+    // 격자 타일 블록: 강 남쪽에만, 샹드마르스 잔디 자리는 비움
     var pts = [];
-    for (var x = -440; x <= 440; x += 9) for (var z = -520; z <= 440; z += 9) {
+    for (var x = -360; x <= 360; x += 9) for (var z = -84; z <= 440; z += 9) {
       var d = Math.hypot(x, z); if (d < 75 || Math.abs(x) < 26) continue;
+      if (Math.abs(x) < 64 && z > 80) continue;                         // 샹드마르스 잔디
       if (((Math.floor(x / 63) + Math.floor(z / 63)) & 3) === 0) continue; // 블록 사이 길
       pts.push([x, z]);
     }
@@ -158,13 +185,17 @@
       tile.setColorAt(i, c.setHex(0x9c9c99).offsetHSL(0, 0, (r() - .5) * .05));
     });
     g.add(tile);
-    // 파스텔 노점 (탑 주변 흩어진 가게)
-    var n = 240, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
+    // 샹드마르스 잔디 두 줄 (가운데 산책길)
+    var lawnM = new T.MeshStandardMaterial({ color: 0x8faa6e, roughness: 1 });
+    [-1, 1].forEach(function (sd) { var l = new T.Mesh(new T.BoxGeometry(44, .3, 340), lawnM); l.position.set(sd * 33, .15, 260); l.receiveShadow = true; g.add(l); });
+    // 노점: 사람이 다니는 곳에만, 예전의 절반
+    var n = 120, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
     var roof = new T.InstancedMesh(new T.BoxGeometry(3.1, .35, 2.4), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .7 }), n);
     var q = new T.Quaternion(), e = new T.Euler(), sc = new T.Vector3(1, 1, 1);
     for (var i = 0; i < n; i++) {
-      var a = r() * Math.PI * 2, rad = 26 + Math.pow(r(), .8) * 92, px = Math.cos(a) * rad, pz = Math.sin(a) * rad;
-      e.set(0, r() * Math.PI, 0); q.setFromEuler(e);
+      var sp = spot(r, 1), px = sp[0], pz = sp[1];
+      var face = pz < -84 ? 0 : Math.abs(px) > 30 && pz > 8 ? Math.PI / 2 : Math.atan2(px, pz); // 강변은 산책로, 샹드마르스는 길 쪽을 봄
+      e.set(0, face + (r() - .5) * .3, 0); q.setFromEuler(e);
       m.compose(new T.Vector3(px, .85, pz), q, sc); base.setMatrixAt(i, m); obs.add(px, pz, 1.9);
       e.set(.18, e.y, 0); q.setFromEuler(e);
       m.compose(new T.Vector3(px, 1.9, pz), q, sc); roof.setMatrixAt(i, m);
@@ -172,6 +203,72 @@
       base.setColorAt(i, c.setHex(col).lerp(new T.Color(0xffffff), .35)); roof.setColorAt(i, c.setHex(col));
     }
     g.add(base, roof);
+    g.add(buildRiverside(r, obs));
+    return g;
+  }
+
+  // 센강 + 이에나 다리 + 강 건너 트로카데로·샤이오 궁·파리 건물 (안개 속으로 자연스럽게 흐려짐)
+  function buildRiverside(r, obs) {
+    var g = new T.Group(), m = new T.Matrix4(), c = new T.Color(), q = new T.Quaternion(), e = new T.Euler();
+    var stone = new T.MeshStandardMaterial({ color: 0xb8b0a1, roughness: .9 });
+    var water = new T.Mesh(new T.PlaneGeometry(2400, RIVER.s - RIVER.n), new T.MeshStandardMaterial({ color: 0x6d8b9c, roughness: .22, metalness: .15 }));
+    water.rotation.x = -Math.PI / 2; water.position.set(0, .08, (RIVER.s + RIVER.n) / 2); g.add(water);
+    g.userData.water = water;
+    [RIVER.s, RIVER.n].forEach(function (z, k) { // 강둑 돌벽
+      var w = new T.Mesh(new T.BoxGeometry(2400, 1.3, 2), stone); w.position.set(0, .65, z + (k ? -1 : 1)); g.add(w);
+    });
+    // 이에나 다리: 상판 + 아치 기둥
+    var deck = new T.Mesh(new T.BoxGeometry(14, .9, RIVER.s - RIVER.n + 6), stone); deck.position.set(0, 2.2, (RIVER.s + RIVER.n) / 2); g.add(deck);
+    for (var k = 1; k < 5; k++) { var pr = new T.Mesh(new T.BoxGeometry(15, 2.2, 2.4), stone); pr.position.set(0, 1, RIVER.s + (RIVER.n - RIVER.s) * k / 5); g.add(pr); }
+    // 강 건너 땅: 강둑 위 산책길 → 트로카데로 정원(계단식 잔디) → 샤이오 궁
+    var far = new T.Mesh(new T.BoxGeometry(2400, 1.3, 700), new T.MeshStandardMaterial({ color: 0xa6a296, roughness: 1 })); far.position.set(0, .65, RIVER.n - 352); g.add(far);
+    var green = new T.MeshStandardMaterial({ color: 0x86a36a, roughness: 1 });
+    for (var t = 0; t < 4; t++) { var lw = new T.Mesh(new T.BoxGeometry(150 - t * 16, 1.6 + t * 2.4, 28), green); lw.position.set(0, 1.3 + t * 1.2, RIVER.n - 30 - t * 26); g.add(lw); }
+    var pool = new T.Mesh(new T.BoxGeometry(18, .4, 70), new T.MeshStandardMaterial({ color: 0x7c9cab, roughness: .2, metalness: .15 })); pool.position.set(0, 2.2 + 3.6, RIVER.n - 70); g.add(pool); // 바르샤바 분수
+    var cream = new T.MeshStandardMaterial({ color: 0xe3dccb, roughness: .85 }), zc = RIVER.n - 160;
+    [-1, 1].forEach(function (sd) { // 샤이오 궁: 양쪽으로 굽은 두 날개 + 끝 동
+      for (var k = 0; k < 9; k++) {
+        var a = (.18 + k * .1) * sd, x = Math.sin(a) * 120, z = zc + 120 - Math.cos(a) * 120;
+        var wing = new T.Mesh(new T.BoxGeometry(14.5, 14, 11), cream); wing.position.set(x, 9.3, z); wing.rotation.y = -a; g.add(wing);
+      }
+      var pav = new T.Mesh(new T.BoxGeometry(22, 20, 22), cream); pav.position.set(sd * 22, 12.3, zc + 4); g.add(pav);
+    });
+    // 강 건너 파리 건물 (오스만 양식 크림색 벽 + 회색 지붕), 강 양옆 나무
+    var blocks = [];
+    for (var i = 0; i < 90; i++) {
+      var bx = (r() - .5) * 1100, bz = RIVER.n - 20 - r() * 520;
+      if (Math.abs(bx) < 150 && bz > RIVER.n - 240) continue;               // 정원·궁 자리 비우기
+      blocks.push([bx, bz, 16 + r() * 14, 18 + r() * 12, 14 + r() * 10, r() * .5]);
+    }
+    var wall = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .9 }), blocks.length);
+    var roofs = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0x7d8790, roughness: .7 }), blocks.length);
+    blocks.forEach(function (b, i) {
+      e.set(0, b[5] - .25, 0); q.setFromEuler(e);
+      m.compose(new T.Vector3(b[0], 1.3 + b[4] / 2, b[1]), q, new T.Vector3(b[2], b[4], b[3])); wall.setMatrixAt(i, m);
+      wall.setColorAt(i, c.setHex(0xe6ddc9).offsetHSL(0, 0, (r() - .5) * .08));
+      m.compose(new T.Vector3(b[0], 1.3 + b[4] + 1.6, b[1]), q, new T.Vector3(b[2] * .92, 3.2, b[3] * .92)); roofs.setMatrixAt(i, m);
+    });
+    g.add(wall, roofs);
+    var trunkG = new T.CylinderGeometry(.25, .35, 3, 6); trunkG.translate(0, 1.5, 0);
+    var crownG = new T.SphereGeometry(2.6, 8, 6); crownG.translate(0, 4.6, 0);
+    var tp = [];
+    for (var x2 = -230; x2 <= 230; x2 += 11) { if (Math.abs(x2) > 12) tp.push([x2, RIVER.s + 4.5, 0], [x2, RIVER.n - 5, 1.3]); }
+    var trunks = new T.InstancedMesh(trunkG, new T.MeshStandardMaterial({ color: 0x5e4b3c, roughness: 1 }), tp.length);
+    var crowns = new T.InstancedMesh(crownG, new T.MeshStandardMaterial({ color: 0xffffff, roughness: 1 }), tp.length);
+    tp.forEach(function (p, i) {
+      var s2 = .85 + r() * .35; m.compose(new T.Vector3(p[0], p[2], p[1]), q.identity(), new T.Vector3(s2, s2, s2));
+      trunks.setMatrixAt(i, m); crowns.setMatrixAt(i, m); if (p[2] === 0) obs.add(p[0], p[1], .6); crowns.setColorAt(i, c.setHex(0x6f9157).offsetHSL(0, 0, (r() - .5) * .08));
+    });
+    g.add(trunks, crowns);
+    // 유람선 두 척 (천천히 강을 오감)
+    var boats = [];
+    [[-1, RIVER.s - 14, 0], [1, RIVER.n + 13, 600]].forEach(function (b) {
+      var boat = new T.Group();
+      var hull = new T.Mesh(new T.BoxGeometry(26, 1.6, 6), new T.MeshStandardMaterial({ color: 0xf2f0ea, roughness: .6 })); hull.position.y = .9; boat.add(hull);
+      var cab = new T.Mesh(new T.BoxGeometry(20, 1.8, 5), new T.MeshStandardMaterial({ color: 0x9fb3bf, roughness: .2, metalness: .2 })); cab.position.y = 2.6; boat.add(cab);
+      boat.position.set(b[2] - 300, 0, b[1]); boat.userData = { dir: b[0], off: b[2] }; g.add(boat); boats.push(boat);
+    });
+    g.userData.boats = boats;
     return g;
   }
 
@@ -200,7 +297,7 @@
     var skins = [0xf1c9a5, 0xe0ac85, 0xc68863, 0x9a6648, 0xf6d8bf];
     for (var i = 0; i < n; i++) {
       var x, z, tries = 0;
-      do { var a = r() * Math.PI * 2, rad = 15 + Math.pow(r(), .7) * 110; x = Math.cos(a) * rad; z = Math.sin(a) * rad; tries++; } while (obs.hit(x, z, .5) && tries < 20);
+      do { var sp = spot(r, 0); x = sp[0]; z = sp[1]; tries++; } while (obs.hit(x, z, .5) && tries < 20);
       people.push({ x: x, z: z, h: r() * Math.PI * 2, v: .6 + r() * .9, s: .88 + r() * .25, turn: 0 });
       bodies.setColorAt(i, c.setHex(clothes[i % clothes.length]));
       heads.setColorAt(i, c.setHex(skins[i % skins.length]));
@@ -386,7 +483,8 @@
 
     this.tower = buildTower(); scene.add(this.tower);
     var obs = new Obstacles(); this.obstacles = obs;
-    scene.add(buildPlaza(r, obs));
+    var plaza = buildPlaza(r, obs); scene.add(plaza);
+    this.boats = plaza.children[plaza.children.length - 1].userData.boats;
     [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(function (s2) { obs.add(s2[0] * 17.6, s2[1] * 17.6, 5.4); }); // 탑 다리
 
     // 탑 아래 장터: 폰팔이 여섯 + 이름 없는 노점
@@ -401,14 +499,14 @@
       ch.traverse(function (o) { if (o.isMesh) self.hitTargets.push(o); });
       obs.add(p.x, p.z, 4);
     });
-    for (var i = 0; i < 26; i++) { // 탑 밑 둘레 노점
-      var a = i / 26 * Math.PI * 2 + .12, rad = 17 + (i % 3) * 2.2;
+    for (var i = 0; i < 13; i++) { // 탑 밑 둘레 노점 (예전의 절반)
+      var a = i / 13 * Math.PI * 2 + .12, rad = 17 + (i % 3) * 2.2;
       if (Math.abs(Math.cos(2 * a)) < .45) continue; // 다리 자리 비우기
       var b = buildBooth("x", PASTEL[i % 7], r); b.scale.setScalar(.75);
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
       obs.add(b.position.x, b.position.z, 3.1);
     }
-    this.crowd = buildCrowd(r, this.lite ? 1300 : 2600, obs); scene.add(this.crowd);
+    this.crowd = buildCrowd(r, this.lite ? 650 : 1300, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
     this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
@@ -494,7 +592,7 @@
       if (p.turn > 0) { p.h += p.turnDir * 2.4 * dt; p.turn -= dt; }
       else p.h += Math.sin(time * .3 + i) * .4 * dt;
       var nx = p.x + Math.cos(p.h) * p.v * dt, nz = p.z + Math.sin(p.h) * p.v * dt, d = Math.hypot(nx, nz);
-      if (d < 14 || d > 130) { p.h += Math.PI; }
+      if (!walkable(nx, nz)) { p.h += Math.PI; }
       else if (obs.hit(nx, nz, .35)) { if (p.turn <= 0) { p.turn = .5 + Math.random() * .6; p.turnDir = Math.random() < .5 ? -1 : 1; } }
       else { p.x = nx; p.z = nz; }
       var bob = Math.abs(Math.sin(time * 6 * p.v + i)) * .05;
@@ -502,6 +600,7 @@
       m.compose(pos, q, sc); cd.bodies.setMatrixAt(i, m); cd.heads.setMatrixAt(i, m);
     }
     cd.bodies.instanceMatrix.needsUpdate = true; cd.heads.instanceMatrix.needsUpdate = true;
+    this.boats.forEach(function (b) { b.position.x = ((time * 3 * b.userData.dir + b.userData.off) % 1200 + 1200) % 1200 - 600; b.rotation.y = b.userData.dir < 0 ? Math.PI : 0; }); // 유람선
     // 캐릭터: 폰팔이마다 다른 호객 동작 + 마우스 올리면 반응 + 깜빡임·시선
     var px = this.pointer.x, py = this.pointer.y, prog = this.progress;
     for (var id in this.dealers) {
