@@ -156,7 +156,7 @@
       h += '<div class="tl">약속 도장<small>눌러서 확인</small></div><div class="paper">' + K.safePromises.map(function (t, i) { return '<button class="cl' + (G.stamps[i] ? " on" : "") + '" data-act="stamp" data-v="' + i + '"><span class="st">' + (G.stamps[i] ? "약속" : "") + '</span><span>' + esc(t) + '</span></button>'; }).join("") + '</div>';
     } else if (id === "used") { // 새 폰이든 중고든 검수해서: 고른 것이 견적에서 미리 선택됨
       var units = usedUnits(G.md);
-      h += '<div class="tl">새 폰 또는 검수 중고<small>' + (units.length ? "중고 " + units.length + "대" : "중고 재고 없음") + '</small></div><div class="ways">' +
+      h += '<div class="tl">새 폰 또는 검수 중고<small>' + (units.length ? "중고 " + units.reduce(function (a, u) { return a + C.stock(u); }, 0) + "대" : "중고 재고 없음") + '</small></div><div class="ways">' +
         '<button class="way' + (!G.usedId ? " on" : "") + '" data-act="unit" data-v=""><span class="n">새</span><span>' + esc(G.md.name) + ' ' + sto().gb + '<em>미개봉 새 폰 · 개봉 검수 영상</em></span><strong>' + man(sto().price) + '<small>출고가</small></strong></button>' +
         units.map(function (u) {
           return '<button class="way' + (G.usedId === u.id ? " on" : "") + '" data-act="unit" data-v="' + u.id + '"><span class="n">' + u.grade + '</span><span>' + esc(u.name) + ' ' + u.gb + '<em>배터리 ' + u.battery + '% · ' + u.colors.filter(function (c) { return c.qty; }).map(function (c) { return c.name; }).join(" · ") + '</em></span><strong>' + man(u.price) + '<small>새 폰보다 -' + man(sto().price - u.price) + '</small></strong></button>';
@@ -164,7 +164,7 @@
       if (!units.length) h += '<div class="memo">이 모델은 지금 중고 재고가 없어요 · 새 폰을 검수해서 보내요</div>';
     } else { // 올인원: 맡길 일을 고르면 개통·데이터·쓰던 폰까지 대신 처리 (모두 0원)
       h += '<div class="tl">맡길 일 고르기<small>모두 0원</small></div><div class="veh">' + K.allinoneJobs.map(function (o) { return '<button class="' + (G.jobs[o.id] ? "on" : "") + '" data-act="job" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + o.sub + '</span></button>'; }).join("") + '</div>';
-      h += '<div class="memo">상담·견적은 똑같이 거치고, 제일 싼 조건을 미리 골라 둘게요</div>';
+      h += '<div class="memo">통신사·결합·데이터만 알려 주면 견적에서 제일 싼 조건을 골라 둘게요</div>';
     }
     return h;
   };
