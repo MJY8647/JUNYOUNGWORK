@@ -1,0 +1,301 @@
+{
+  "name": "alshedivat/al-folio",
+  "file_count": 208,
+  "stack": {
+    "framework": "Jekyll (Ruby, Liquid templates)",
+    "generator": "jekyll",
+    "styling": [
+      "Tailwind CSS (via _config.yml style_engine)"
+    ],
+    "notes": [
+      "No _layouts/ in repo: templates ship inside gem(s) al_folio_core, al_folio_cv, al_folio_distill, al_folio_upgrade — inspect the gem source for markup."
+    ],
+    "npm_dependencies": {
+      "@playwright/test": "^1.56.1",
+      "@shopify/prettier-plugin-liquid": "^1.11.1",
+      "pixelmatch": "^7.1.0",
+      "pngjs": "^7.0.0",
+      "prettier": "^3.9.9"
+    },
+    "npm_scripts": {
+      "lint:prettier": "prettier . --check",
+      "lint:style-contract": "node test/style_contract.js",
+      "test:visual": "playwright test --config test/visual/playwright.config.js",
+      "test:visual:update": "playwright test --config test/visual/playwright.config.js --update-snapshots"
+    },
+    "ruby_gems": [
+      "jekyll",
+      "jekyll-3rd-party-libraries",
+      "jekyll-archives-v2",
+      "jekyll-cache-bust",
+      "jekyll-email-protect",
+      "jekyll-feed",
+      "jekyll-get-json",
+      "jekyll-imagemagick",
+      "jekyll-jupyter-notebook",
+      "jekyll-link-attributes",
+      "jekyll-minifier",
+      "jekyll-paginate-v2",
+      "jekyll-regex-replace",
+      "jekyll-scholar",
+      "jekyll-sitemap",
+      "jekyll-socials",
+      "jekyll-tabs",
+      "jekyll-terser",
+      "jekyll-toc",
+      "jekyll-twitter-plugin",
+      "jemoji",
+      "classifier-reborn",
+      "css_parser",
+      "observer",
+      "ostruct",
+      "al_folio_core",
+      "al_icons",
+      "al_folio_cv",
+      "al_folio_distill",
+      "al_folio_upgrade",
+      "al_folio_bootstrap_compat",
+      "al_cookie",
+      "al_analytics",
+      "al_citations",
+      "al_ext_posts",
+      "al_img_tools",
+      "al_search",
+      "al_charts",
+      "al_math",
+      "al_comments",
+      "al_newsletter",
+      "al_email_protect",
+      "al_marimo",
+      "al_rtl"
+    ],
+    "hosting_hints": [
+      "Docker",
+      "GitHub Actions deploy workflow"
+    ],
+    "license": "MIT"
+  },
+  "languages": {
+    "files": {
+      "Markdown": 91,
+      "YAML": 42,
+      "JavaScript": 8,
+      "JSON": 6,
+      "HTML": 2,
+      "BibTeX": 2,
+      "Python": 2
+    },
+    "lines": {
+      "Markdown": 10896,
+      "YAML": 7404,
+      "JavaScript": 899,
+      "JSON": 595,
+      "Python": 444,
+      "BibTeX": 122,
+      "HTML": 33
+    },
+    "raster_images": 19
+  },
+  "dirs": {
+    "top": {
+      ".github/": 39,
+      "assets/": 35,
+      "_posts/": 33,
+      "(root files)": 24,
+      "_pages/": 14,
+      "docs/": 14,
+      "test/": 13,
+      "_projects/": 9,
+      "bin/": 8,
+      "_data/": 7,
+      "_news/": 3,
+      ".devcontainer/": 2,
+      "_teachings/": 2,
+      ".agents/": 2,
+      ".gemini/": 1,
+      "_books/": 1,
+      "_bibliography/": 1
+    },
+    "second": {
+      "assets": {
+        "img/": 21,
+        "rendercv/": 4,
+        "json/": 2,
+        "video/": 2,
+        "html/": 1,
+        "audio/": 1,
+        "bibliography/": 1,
+        "plotly/": 1,
+        "jupyter/": 1,
+        "pdf/": 1
+      },
+      ".github": {
+        "workflows/": 23,
+        "instructions/": 5,
+        "ISSUE_TEMPLATE/": 4,
+        "agents/": 2
+      },
+      "test": {
+        "visual/": 5
+      },
+      "docs": {
+        "releases/": 2
+      },
+      ".agents": {
+        "skills/": 2
+      }
+    }
+  },
+  "routes": [
+    {
+      "route": "/",
+      "source": "_pages/about.md",
+      "kind": "page (layout: about)",
+      "title": "about"
+    },
+    {
+      "route": "/404.html",
+      "source": "_pages/404.md",
+      "kind": "page (layout: page)",
+      "title": "Page not found"
+    },
+    {
+      "route": "/about_einstein/",
+      "source": "_pages/about_einstein.md",
+      "kind": "page (layout: ?)",
+      "title": ""
+    },
+    {
+      "route": "/blog/",
+      "source": "_pages/blog.md",
+      "kind": "page (layout: default)",
+      "title": "blog"
+    },
+    {
+      "route": "/books/",
+      "source": "_pages/books.md",
+      "kind": "page (layout: book-shelf)",
+      "title": "bookshelf"
+    },
+    {
+      "route": "/cv/",
+      "source": "_pages/cv.md",
+      "kind": "page (layout: cv)",
+      "title": "CV"
+    },
+    {
+      "route": "/dropdown/",
+      "source": "_pages/dropdown.md",
+      "kind": "page (layout: page)",
+      "title": "submenus"
+    },
+    {
+      "route": "/news/",
+      "source": "_pages/news.md",
+      "kind": "page (layout: page)",
+      "title": "news"
+    },
+    {
+      "route": "/people/",
+      "source": "_pages/profiles.md",
+      "kind": "page (layout: profiles)",
+      "title": "people"
+    },
+    {
+      "route": "/plugins/",
+      "source": "_pages/plugins.md",
+      "kind": "page (layout: page)",
+      "title": "plugins"
+    },
+    {
+      "route": "/projects/",
+      "source": "_pages/projects.md",
+      "kind": "page (layout: page)",
+      "title": "projects"
+    },
+    {
+      "route": "/publications/",
+      "source": "_pages/publications.md",
+      "kind": "page (layout: page)",
+      "title": "publications"
+    },
+    {
+      "route": "/repositories/",
+      "source": "_pages/repositories.md",
+      "kind": "page (layout: page)",
+      "title": "repositories"
+    },
+    {
+      "route": "/teaching/",
+      "source": "_pages/teaching.md",
+      "kind": "page (layout: page)",
+      "title": "teaching"
+    }
+  ],
+  "components": {},
+  "tokens": {
+    "custom_properties": {
+      "other": {
+        "--i": "o+=r"
+      }
+    },
+    "google_fonts": [],
+    "font_families_in_css": [
+      "Open Sans"
+    ],
+    "tailwind_theme_files": [],
+    "dark_mode_files": []
+  },
+  "interactions": {
+    "dom_events": {
+      "test": 1
+    },
+    "data_attribute_hooks": {},
+    "browser_apis": {
+      "localStorage": 3,
+      "fetch()": 1,
+      "matchMedia (theme/breakpoints)": 1
+    }
+  },
+  "external": {
+    "script_hosts": {},
+    "link_hosts": {}
+  },
+  "seo": {
+    "in_templates": {
+      "canonical URL": 1
+    },
+    "generated": [
+      "robots.txt"
+    ]
+  },
+  "content": {
+    "markdown_collections": {
+      "_posts": 33,
+      "_pages": 14,
+      "_projects": 9,
+      "_news": 3,
+      "_teachings": 2,
+      "_books": 1
+    },
+    "data_files": [
+      "_bibliography/papers.bib",
+      "_config.yml",
+      "_data/citations.yml",
+      "_data/coauthors.yml",
+      "_data/cv.yml",
+      "_data/featured_plugins.yml",
+      "_data/repositories.yml",
+      "_data/socials.yml",
+      "_data/venues.yml"
+    ]
+  },
+  "last_commit": "8158dd0 2026-11-09",
+  "blueprint": [
+    "Source uses Jekyll (Ruby, Liquid templates); a dependency-free rebuild maps each route to a static HTML page and each component to a reusable HTML/CSS pattern (or a JS render function fed by JSON data).",
+    "Recreate the design system first: 1 CSS custom properties → one `tokens.css` (:root).",
+    "Content lives in Markdown collections → export to a JSON array and render lists/detail views in JS.",
+    "Publications come from BibTeX → write a small BibTeX parser that renders grouped-by-year entries.",
+    "Verify with headless browser screenshots at desktop (1440px) and phone (390px) widths."
+  ]
+}

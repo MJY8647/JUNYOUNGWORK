@@ -78,3 +78,11 @@ cd /workspace/JUNYOUNGWORK
 ## 개인정보
 
 사진과 영상은 기기 안에서 처리됩니다. 서버 전송, 분석 SDK, 로그인, 결제 SDK가 없습니다. 선택한 파일만 읽고 결과를 `Pictures/LUMI` 또는 `Movies/LUMI`에 새 파일로 저장합니다. 원본을 수정하지 않습니다.
+
+## Website reverse-engineering
+
+- [`tools/site-analyzer/`](tools/site-analyzer/) — repository analyzer (framework, routes, components, design tokens, interactions, SEO, rebuild blueprint).
+- [`analysis/reports/`](analysis/reports/) — reports for vcard-personal-portfolio, AstroWind, al-folio and its `al_folio_core` theme gem.
+- [`clones/`](clones/) — dependency-free rebuilds of those three sites with Playwright behaviour tests.
+- [`studio-site/`](studio-site/) — original one-page studio site built from the reverse-engineered structure of bunqlabs.com (no copied code or assets); analysis in [`analysis/reports/bunqlabs.com.md`](analysis/reports/bunqlabs.com.md).
+- [`book-site/`](book-site/) — the same structure applied to 이산's book 『너무 성실한 시스템』 (TOC, excerpts, author, purchase links; philosophy program slot reserved).

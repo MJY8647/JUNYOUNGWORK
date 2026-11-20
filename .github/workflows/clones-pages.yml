@@ -1,0 +1,64 @@
+name: Sites — test and deploy to GitHub Pages
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'book-site/**'
+      - 'studio-site/**'
+      - 'clones/**'
+      - 'tools/site-analyzer/**'
+      - '.github/workflows/clones-pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Analyzer unit tests
+        run: python3 -m unittest tools/site-analyzer/test_analyze.py
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Clone behaviour tests
+        run: node clones/test/clones.test.js
+      - name: Studio site tests
+        run: node studio-site/test/site.test.js
+      - name: Book site tests
+        run: node book-site/test/site.test.js
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Assemble site: book site at root, template and clones under subpaths (tests excluded)"
+        run: |
+          mkdir -p _site/studio _site/clones
+          cp -r book-site/index.html book-site/assets _site/
+          cp -r studio-site/index.html studio-site/assets _site/studio/
+          cp -r clones/index.html clones/vcard-portfolio clones/astrowind-landing clones/al-folio-academic _site/clones/
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

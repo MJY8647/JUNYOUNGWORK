@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    // theme.js runs in <head> in the original to avoid a flash of the wrong theme
+    (function () { var s = "system"; try { s = localStorage.getItem("theme") || "system"; } catch (_) {}
+      var d = s === "dark" || (s === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+      var h = document.documentElement; h.setAttribute("data-theme-setting", s);
+      h.setAttribute("data-theme", d ? "dark" : "light"); h.classList.add("no-transition"); })();
+  </script>
+  <link rel="stylesheet" href="assets/folio.css">
+  <title>publications — Hana J. Seo</title>
+  <meta name="description" content="Publications parsed from BibTeX in the browser, grouped by year, searchable.">
+</head>
+<body data-page="publications">
+<div data-header></div>
+<main class="container">
+  <header>
+    <h1 class="post-title">publications</h1>
+    <p class="desc">publications by categories in reversed chronological order. ★ = selected</p>
+  </header>
+  <input type="search" id="bibsearch" class="bib-search" placeholder="Type to filter (e.g. Seo, CVPR, 2025)" aria-label="Search publications">
+  <div class="bib-count" data-bib-count aria-live="polite"></div>
+  <div class="publications" data-publications></div>
+</main>
+<div data-footer></div>
+<script src="assets/data.js"></script>
+<script src="assets/folio.js"></script>
+</body>
+</html>
