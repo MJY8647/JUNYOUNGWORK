@@ -188,8 +188,8 @@
     // 샹드마르스 잔디 두 줄 (가운데 산책길)
     var lawnM = new T.MeshStandardMaterial({ color: 0x8faa6e, roughness: 1 });
     [-1, 1].forEach(function (sd) { var l = new T.Mesh(new T.BoxGeometry(44, .3, 340), lawnM); l.position.set(sd * 33, .15, 260); l.receiveShadow = true; g.add(l); });
-    // 노점: 사람이 다니는 곳에만, 예전의 절반
-    var n = 120, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
+    // 잡화 노점(열쇠고리·기념품): 사람이 다니는 곳에만
+    var n = 90, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
     var roof = new T.InstancedMesh(new T.BoxGeometry(3.1, .35, 2.4), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .7 }), n);
     var q = new T.Quaternion(), e = new T.Euler(), sc = new T.Vector3(1, 1, 1);
     for (var i = 0; i < n; i++) {
@@ -422,11 +422,30 @@
     var metal = std(0x55595e, .4);
     [-3.1, 3.1].forEach(function (x) { var post = rbox(.14, 4.6, .14, .05, metal); post.position.set(x, 2.3, -1.7); g.add(post); });
     var bar = rbox(6.3, .1, .1, .04, metal); bar.position.set(0, 4.5, -1.7); g.add(bar);
+    var counter = rbox(5.6, 1.1, 1.1, .08, std(0x9fa1a3, .7)); counter.position.set(0, .55, 1.55); g.add(counter);
+    var top = rbox(5.8, .08, 1.3, .03, std(0xe6e7e8, .3)); top.position.set(0, 1.14, 1.55); g.add(top);
+    if (id === "x") { // 폰팔이가 아닌 노점: 열쇠고리·엽서·베레모 같은 기념품 잡화
+      var gold = std(0xc9a43a, .35), silver = std(0xc5c7cf, .3), mini = new T.ConeGeometry(.11, .42, 4);
+      for (var h2 = 0; h2 < 9; h2++) { // 봉에 걸린 에펠탑 열쇠고리
+        var kr = new T.Mesh(mini, h2 % 2 ? gold : silver); kr.position.set(-2.8 + h2 * .7, 4.12, -1.68); g.add(kr);
+        var ring = new T.Mesh(new T.TorusGeometry(.07, .015, 4, 10), silver); ring.position.set(-2.8 + h2 * .7, 4.4, -1.68); g.add(ring);
+      }
+      for (var k3 = 0; k3 < 6; k3++) { // 뒷판 엽서·에코백
+        var card = rbox(.7, k3 % 2 ? .9 : .55, .04, .03, std(PASTEL[(k3 * 2 + Math.floor(r() * 7)) % 7], .6));
+        card.position.set(-2.5 + k3 * 1, 2.4 + (k3 % 2) * .2, -1.74); g.add(card);
+      }
+      for (var b3 = 0; b3 < 3; b3++) { // 카운터 위 베레모
+        var beret = new T.Mesh(new T.SphereGeometry(.26, 10, 6), std([0x22252a, 0xb33a3a, 0x2d4a8a][b3], .8)); beret.scale.y = .32; beret.position.set(-2.2 + b3 * .62, 1.24, 1.5); g.add(beret);
+      }
+      for (var t3 = 0; t3 < 5; t3++) { // 카운터 위 미니 에펠탑 기념품
+        var fig = new T.Mesh(new T.ConeGeometry(.13, .62, 4), t3 % 2 ? gold : std(0x6b5a4a, .5)); fig.position.set(.3 + t3 * .45, 1.49, 1.55); g.add(fig);
+      }
+      g.traverse(function (o) { if (o.isMesh) o.receiveShadow = true; });
+      return g;
+    }
     for (var h = 0; h < 7; h++) { // 위 봉에 걸린 상품 (케이스·파우치)
       var hang = rbox(.4, .64, .06, .05, std(PASTEL[(h * 3 + Math.floor(r() * 7)) % 7], .5)); hang.position.set(-2.7 + h * .9, 4.05, -1.68); g.add(hang);
     }
-    var counter = rbox(5.6, 1.1, 1.1, .08, std(0x9fa1a3, .7)); counter.position.set(0, .55, 1.55); g.add(counter);
-    var top = rbox(5.8, .08, 1.3, .03, std(0xe6e7e8, .3)); top.position.set(0, 1.14, 1.55); g.add(top);
     for (var k = 0; k < 10; k++) { // 뒷판 진열 (폰 케이스 모양)
       var item = rbox(.42, .74, .07, .07, std(PASTEL[(k + Math.floor(r() * 7)) % 7], .45));
       var left = k < 5; item.position.set((left ? -2.7 : 1.1) + (k % 5 % 3) * .52, 2.6 - Math.floor((k % 5) / 3) * .9, -1.74); g.add(item);
@@ -499,14 +518,14 @@
       ch.traverse(function (o) { if (o.isMesh) self.hitTargets.push(o); });
       obs.add(p.x, p.z, 4);
     });
-    for (var i = 0; i < 13; i++) { // 탑 밑 둘레 노점 (예전의 절반)
-      var a = i / 13 * Math.PI * 2 + .12, rad = 17 + (i % 3) * 2.2;
+    for (var i = 0; i < 10; i++) { // 탑 밑 둘레 기념품 노점 (폰은 여섯 폰팔이만 팖)
+      var a = i / 10 * Math.PI * 2 + .12, rad = 17 + (i % 3) * 2.2;
       if (Math.abs(Math.cos(2 * a)) < .45) continue; // 다리 자리 비우기
       var b = buildBooth("x", PASTEL[i % 7], r); b.scale.setScalar(.75);
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
       obs.add(b.position.x, b.position.z, 3.1);
     }
-    this.crowd = buildCrowd(r, this.lite ? 650 : 1300, obs); scene.add(this.crowd);
+    this.crowd = buildCrowd(r, this.lite ? 490 : 975, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
     this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
