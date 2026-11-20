@@ -1,5 +1,8 @@
 /* 폰파리 가게 — 1mm STORE v6 판매 흐름 + v6 상품·지원금 계산(catalog.js) + 폰팔이별 셀링포인트
- * 폰(제조사 → 카테고리 → 모델 → 색·용량) → [셀링포인트] → 상담 → 견적 → 계약 → 배송 → 완료
+ * 구매 단계는 여섯 폰팔이 모두 똑같음 (건너뛰는 단계 없음):
+ *   폰(제조사 → 카테고리 → 모델 → 색·용량) → ★ → 상담(통신사 → 결합 → 데이터) → 견적(사는 방법 → 할인·할부)
+ *   → 계약(멤버십 → 도장·서명) → 배송(받는 방법 → 받는 분 → 확인 → 결제) → 완료
+ * 폰팔이마다 다른 건 ★에서 고르는 것, 그 선택이 계산서·기본 선택·영수증에 남기는 흔적, 말투뿐
  */
 (function () {
   "use strict";
@@ -9,18 +12,18 @@
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var byId = function (list, id) { return list.filter(function (x) { return x.id === id; })[0]; };
 
-  var POINT_LABEL = { designer: "폰꾸", quick: "받는 법", price: "우선순위", safe: "보호", used: "중고 고르기", allinone: "맡기기" };
+  var POINT_LABEL = { designer: "폰꾸", quick: "받는 법", price: "우선순위", safe: "보호", used: "검수", allinone: "맡기기" };
   var MISSION = function (d) { return [["📱", "폰"], ["★", POINT_LABEL[d]], ["💬", "상담"], ["🧾", "견적"], ["✍️", "계약"], ["📦", "배송"], ["🎉", "완료"]]; };
   var CURS = [["skt", "SKT"], ["kt", "KT"], ["lgu", "LG U+"], ["mvno", "알뜰폰"], ["mvno2", "자급제폰"], ["none", "새로 개통"]];
   var DATA_OPTS = [[0, "적게", "카톡·검색", "▁"], [1, "적당히", "영상 가끔", "▃"], [2, "넉넉히", "영상 자주", "▅"], [5, "무제한", "다 써도 5Mbps", "█"]];
 
-  var G, CUR, HIST, typing, opts = {};
+  var G, CUR, HIST, TRAIL = [], typing, opts = {};
   function fresh(dealer) {
     return {
       dealer: dealer, brand: "apple", tab: null, md: null, si: 0, ci: 0,
       deco: { case: "clear", keyring: "none", back: "none" },
       quick: { speed: "now", open: "after" }, focus: "monthly",
-      safe: { case: true, film: true, care: true }, stamps: {}, usedId: null, auto: false,
+      safe: { case: true, film: true, care: true }, stamps: {}, usedId: null, jobs: { open: true, move: true, old: false },
       cur: null, bundle: "free", tier: null, pick: null, con: null, months: 24,
       member: false, agree: {}, signed: false, ink: 0, ship: null, f: { name: "", phone: "", addr: "" }, err: {}, no: null,
     };
@@ -54,25 +57,23 @@
       if (it.price) { today += it.price; lines.push([it.name, it.price]); }
       if (it.monthly) { monthly += it.monthly; lines.push([it.name + " (월)", it.monthly, true]); }
     });
+    if (G.dealer === "allinone") K.allinoneJobs.forEach(function (o) { if (G.jobs[o.id]) lines.push([o.name, 0]); }); // 맡긴 일은 0원으로 계산서에
     return { today: today, monthly: monthly, lines: lines };
   }
   function ways() {
     sync();
-    var s = sto(), cur = curKey(), x = extras(), out = [], t = G.tier == null ? 5 : G.tier;
-    if (G.dealer !== "used") {
-      var by = {};
-      C.calcOptions(s, cur, t, 24, "best").forEach(function (o) { var k = o.id.split("-")[0]; if (!by[k] || o.grand < by[k].grand) by[k] = o; });
-      Object.keys(by).forEach(function (k) {
-        var o = by[k];
-        out.push({ id: "c:" + k, kind: "carrier", k: k, title: o.carrier + " " + o.way, sub: (o.con === "sub" ? "공시지원금" : "선택약정 25%") + " · " + o.planName, o: o,
-          support: o.saved, monthly: o.monthly + x.monthly, today: o.upfront + x.today, grand: o.grand + x.today + x.monthly * 24 });
-      });
-      var sp = C.selfPlan(t, cur), price = Math.max(0, s.price - (G.member ? C.MEMBER_DC : 0)), dev = C.monthlyInstall(price, 24);
-      out.push({ id: "self", kind: "self", title: "자급제 새 폰", sub: "약정 없음 · " + sp.label, sp: sp, price: price,
-        support: G.member ? C.MEMBER_DC : 0, monthly: dev + sp.fee + x.monthly, today: x.today, grand: (dev + sp.fee) * 24 + x.today + x.monthly * 24 });
-    }
+    var s = sto(), cur = curKey(), x = extras(), out = [], t = G.tier == null ? 5 : G.tier, by = {};
+    // 사는 방법 목록은 폰팔이 누구든 같음: 3사 + 자급제 새 폰 + 1mm 중고(재고 있을 때)
+    C.calcOptions(s, cur, t, 24, "best").forEach(function (o) { var k = o.id.split("-")[0]; if (!by[k] || o.grand < by[k].grand) by[k] = o; });
+    Object.keys(by).forEach(function (k) {
+      var o = by[k];
+      out.push({ id: "c:" + k, kind: "carrier", k: k, title: o.carrier + " " + o.way, sub: (o.con === "sub" ? "공시지원금" : "선택약정 25%") + " · " + o.planName, o: o,
+        support: o.saved, monthly: o.monthly + x.monthly, today: o.upfront + x.today, grand: o.grand + x.today + x.monthly * 24 });
+    });
+    var sp0 = C.selfPlan(t, cur), price0 = Math.max(0, s.price - (G.member ? C.MEMBER_DC : 0)), dev = C.monthlyInstall(price0, 24);
+    out.push({ id: "self", kind: "self", title: "자급제 새 폰", sub: "약정 없음 · " + sp0.label, sp: sp0, price: price0,
+      support: G.member ? C.MEMBER_DC : 0, monthly: dev + sp0.fee + x.monthly, today: x.today, grand: (dev + sp0.fee) * 24 + x.today + x.monthly * 24 });
     usedUnits(G.md).forEach(function (u) {
-      if (G.dealer === "used" && G.usedId && u.id !== G.usedId) return;
       var sp = C.selfPlan(t, cur), price = Math.max(0, u.price - (G.member ? C.MEMBER_DC : 0)), d = C.monthlyInstall(price, 24);
       out.push({ id: "u:" + u.id, kind: "used", it: u, title: "1mm 중고 " + u.grade + "급", sub: u.gb + " · 배터리 " + u.battery + "% · " + C.stock(u) + "대", sp: sp, price: price,
         support: sto().price - u.price + (G.member ? C.MEMBER_DC : 0), monthly: d + sp.fee + x.monthly, today: x.today, grand: (d + sp.fee) * 24 + x.today + x.monthly * 24 });
@@ -80,7 +81,12 @@
     var key = G.dealer === "price" ? G.focus : "monthly";
     return out.sort(function (a, b) { return key === "today" ? (a.today - b.today) || (a.monthly - b.monthly) : key === "total" ? a.grand - b.grand : a.monthly - b.monthly; });
   }
-  function curWay() { var L = ways(); return L.filter(function (w) { return w.id === G.pick; })[0] || L[0]; }
+  // 견적에서 처음 눌려 있는 줄: 보통은 제일 싼 줄, 중고폰팔이는 ★에서 고른 것(중고 한 대 / 새 폰)
+  function defaultPick(L) {
+    if (G.dealer === "used") { var hit = L.filter(function (w) { return G.usedId ? w.id === "u:" + G.usedId : w.kind !== "used"; })[0]; if (hit) return hit; }
+    return L[0];
+  }
+  function curWay() { var L = ways(); return L.filter(function (w) { return w.id === G.pick; })[0] || defaultPick(L); }
   function carrierQ(con) { var w = curWay(); sync(); return C.calcOptions(sto(), curKey(), G.tier == null ? 5 : G.tier, G.months, con).filter(function (o) { return o.id === w.k + "-" + con; })[0]; }
   function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
   function fmtD(d) { return (d.getMonth() + 1) + "/" + d.getDate(); }
@@ -100,12 +106,11 @@
     var h = '<div class="brands">' + [["apple", "Apple"], ["samsung", "Samsung"]].map(function (b) { return '<button class="' + (G.brand === b[0] ? "on" : "") + '" data-act="brand" data-v="' + b[0] + '">' + b[1] + '</button>'; }).join("") + '</div>';
     h += '<div class="ctabs">' + tabsOf(G.brand).map(function (t) { return '<button class="' + (t[0] === tab[0] ? "on" : "") + '" data-act="tab" data-v="' + t[0] + '">' + esc(t[2]) + '</button>'; }).join("") + '</div>';
     h += '<div class="shelf">' + ms.map(function (m) {
-      var s = m.storages[0], b = bestSupport(m), used = usedUnits(m).length, dis = G.dealer === "used" && !used;
-      var pay = Math.max(0, s.price - b.t);
-      return '<button class="pk' + (dis ? " dis" : "") + '" data-act="model" data-v="' + esc(m.name) + '"' + (dis ? " disabled" : "") + '><span class="im"><img src="' + img(m, 0) + '" alt="" loading="lazy"></span><span class="tag"><b>' + esc(m.name) + '</b>' +
-        (G.dealer === "used" ? '<span>' + (used ? "중고 " + man(Math.min.apply(null, usedUnits(m).map(function (u) { return u.price; }))) + "~" : "재고 없음") + '</span>' :
-          '<s>' + man(s.price) + '</s><span>' + (pay ? man(pay) : "0원") + '</span><em>지원 ' + man(b.t) + '</em>') + '</span></button>';
-    }).join("") + '</div><div class="foot">' + (G.dealer === "used" ? "1mm 검수 중고 재고" : "번호이동 · 무제한 요금제 · 공시지원금 기준 할부원금 · 지원 = 공시 + 추가 + 1mm 매장 지원") + '</div>';
+      var s = m.storages[0], b = bestSupport(m), us = usedUnits(m), pay = Math.max(0, s.price - b.t);
+      return '<button class="pk" data-act="model" data-v="' + esc(m.name) + '"><span class="im"><img src="' + img(m, 0) + '" alt="" loading="lazy"></span><span class="tag"><b>' + esc(m.name) + '</b>' +
+        '<s>' + man(s.price) + '</s><span>' + (pay ? man(pay) : "0원") + '</span><em>지원 ' + man(b.t) + '</em>' +
+        (G.dealer === "used" && us.length ? '<em class="ub">검수 중고 ' + man(Math.min.apply(null, us.map(function (u) { return u.price; }))) + '~</em>' : "") + '</span></button>';
+    }).join("") + '</div><div class="foot">번호이동 · 무제한 요금제 · 공시지원금 기준 할부원금 · 지원 = 공시 + 추가 + 1mm 매장 지원' + (G.dealer === "used" ? " · 검수 중고 = 1mm 중고 재고" : "") + '</div>';
     return h;
   };
   P.spec = function () {
@@ -149,13 +154,17 @@
     } else if (id === "safe") {
       h += '<div class="tl">지킬 것 고르기</div><div class="veh">' + K.safeItems.map(function (o) { return '<button class="' + (G.safe[o.id] ? "on" : "") + '" data-act="safe" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + (o.price ? won(o.price) : "월 " + won(o.monthly)) + '</span></button>'; }).join("") + '</div>';
       h += '<div class="tl">약속 도장<small>눌러서 확인</small></div><div class="paper">' + K.safePromises.map(function (t, i) { return '<button class="cl' + (G.stamps[i] ? " on" : "") + '" data-act="stamp" data-v="' + i + '"><span class="st">' + (G.stamps[i] ? "약속" : "") + '</span><span>' + esc(t) + '</span></button>'; }).join("") + '</div>';
-    } else if (id === "used") {
+    } else if (id === "used") { // 새 폰이든 중고든 검수해서: 고른 것이 견적에서 미리 선택됨
       var units = usedUnits(G.md);
-      h += '<div class="tl">재고에서 한 대 고르기<small>' + units.length + '종</small></div><div class="ways">' + units.map(function (u) {
-        return '<button class="way' + (G.usedId === u.id ? " on" : "") + '" data-act="unit" data-v="' + u.id + '"><span class="n">' + u.grade + '</span><span>' + esc(u.name) + ' ' + u.gb + '<em>배터리 ' + u.battery + '% · ' + u.colors.filter(function (c) { return c.qty; }).map(function (c) { return c.name; }).join(" · ") + '</em></span><strong>' + man(u.price) + '<small>새 폰보다 -' + man(sto().price - u.price) + '</small></strong></button>';
-      }).join("") + '</div><div class="paper"><div class="tl dark">1mm 검수표</div>' + K.usedChecks.map(function (t) { return '<div class="ck">✓ ' + esc(t) + '</div>'; }).join("") + '</div>';
-    } else {
-      h += '<div class="auto"><b>모델만 골랐어요</b><span>통신사·요금제·지원금·할부는<br>가장 싼 조건으로 맞출게요</span></div>';
+      h += '<div class="tl">새 폰 또는 검수 중고<small>' + (units.length ? "중고 " + units.length + "대" : "중고 재고 없음") + '</small></div><div class="ways">' +
+        '<button class="way' + (!G.usedId ? " on" : "") + '" data-act="unit" data-v=""><span class="n">새</span><span>' + esc(G.md.name) + ' ' + sto().gb + '<em>미개봉 새 폰 · 개봉 검수 영상</em></span><strong>' + man(sto().price) + '<small>출고가</small></strong></button>' +
+        units.map(function (u) {
+          return '<button class="way' + (G.usedId === u.id ? " on" : "") + '" data-act="unit" data-v="' + u.id + '"><span class="n">' + u.grade + '</span><span>' + esc(u.name) + ' ' + u.gb + '<em>배터리 ' + u.battery + '% · ' + u.colors.filter(function (c) { return c.qty; }).map(function (c) { return c.name; }).join(" · ") + '</em></span><strong>' + man(u.price) + '<small>새 폰보다 -' + man(sto().price - u.price) + '</small></strong></button>';
+        }).join("") + '</div><div class="paper"><div class="tl dark">' + (G.usedId ? "1mm 중고 검수표" : "1mm 개봉 검수") + '</div>' + (G.usedId ? K.usedChecks : K.newChecks).map(function (t) { return '<div class="ck">✓ ' + esc(t) + '</div>'; }).join("") + '</div>';
+      if (!units.length) h += '<div class="memo">이 모델은 지금 중고 재고가 없어요 · 새 폰을 검수해서 보내요</div>';
+    } else { // 올인원: 맡길 일을 고르면 개통·데이터·쓰던 폰까지 대신 처리 (모두 0원)
+      h += '<div class="tl">맡길 일 고르기<small>모두 0원</small></div><div class="veh">' + K.allinoneJobs.map(function (o) { return '<button class="' + (G.jobs[o.id] ? "on" : "") + '" data-act="job" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + o.sub + '</span></button>'; }).join("") + '</div>';
+      h += '<div class="memo">상담·견적은 똑같이 거치고, 제일 싼 조건을 미리 골라 둘게요</div>';
     }
     return h;
   };
@@ -241,8 +250,8 @@
     if (id === "quick") return byId(K.quickSpeed, G.quick.speed).name + " · " + byId(K.quickOpen, G.quick.open).name;
     if (id === "price") return byId(K.priceFocus, G.focus).name;
     if (id === "safe") return K.safeItems.filter(function (o) { return G.safe[o.id]; }).map(function (o) { return o.name; }).join(" + ") || "선택 안 함";
-    if (id === "used") { var u = curWay().it; return u ? u.grade + "급 · 배터리 " + u.battery + "%" : "-"; }
-    return "최저 조건 자동";
+    if (id === "used") { var u = curWay().it; return u ? "중고 " + u.grade + "급 · 배터리 " + u.battery + "% · 4단계 검수" : "새 폰 · 개봉 검수 영상"; }
+    return K.allinoneJobs.filter(function (o) { return G.jobs[o.id]; }).map(function (o) { return o.name; }).join(" · ") || "맡긴 일 없음";
   }
   function orderLines() {
     var w = curWay(), cs = colors(), ship = byId(K.ship, G.ship) || {}, today, mon;
@@ -269,19 +278,15 @@
 
   /* ---------- 대본: 폰팔이마다 자기 말투 (content.js의 say) ---------- */
   function line(key, vars) {
-    var say = D.dealers[G.dealer].say || {}, t = say[key] || (key === "quoteAuto" ? say.quote : "") || "";
+    var say = D.dealers[G.dealer].say || {}, t = say[key] || "";
     return t.replace(/\{(\w+)\}/g, function (_, k) { return vars && vars[k] != null ? vars[k] : ""; });
   }
   // 폰팔이 얼굴 아바타 (CSS로 그린 몸 + 마우스를 따라보는 눈)
   function ava(id, cls) { return '<i class="ava' + (cls ? " " + cls : "") + '" data-d="' + id + '" aria-hidden="true"><i class="eye"><i></i></i><i class="eye"><i></i></i></i>'; }
   var STEPS = {
     model: { q: 0, t: function () { return line("model"); }, panel: "model" },
-    spec: { q: 0, t: function () { return line("spec", { model: esc(G.md.name) }); }, panel: "spec", ch: function () { return [["이걸로", function () { G.usedId = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
-    point: { q: 1, t: function () { return line("point"); }, panel: "point", ch: function () {
-      if (G.dealer === "allinone") return [["🙌 알아서 해 줘", function () { G.auto = true; G.cur = "mvno"; G.bundle = "free"; G.tier = 5; G.months = 24; G.pick = null; G.con = null; go("calc"); }, "go"], ["내가 고를래", function () { G.auto = false; go("cur"); }]];
-      if (G.dealer === "used") return [["이 중고로", function () { if (!G.usedId) { var u = usedUnits(G.md)[0]; G.usedId = u && u.id; } go("cur"); }, "go"]];
-      return [["좋아, 다음", function () { go("cur"); }, "go"]];
-    } },
+    spec: { q: 0, t: function () { return line("spec", { model: esc(G.md.name) }); }, panel: "spec", ch: function () { return [["이걸로", function () { var u = G.dealer === "used" && usedUnits(G.md)[0]; G.usedId = u ? u.id : null; G.pick = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
+    point: { q: 1, t: function () { return line("point"); }, panel: "point", ch: function () { return [["좋아, 다음", function () { go("cur"); }, "go"]]; } },
     cur: { q: 2, t: function () { return line("cur"); }, panel: "cur", grid: true, ch: function () {
       return CURS.map(function (c) { return [c[1], function () { G.cur = c[0]; go(C.CARRIERS[curKey()] ? "bundle" : "data"); }]; });
     } },
@@ -290,10 +295,7 @@
     } },
     data: { q: 2, t: function () { return line("data"); }, panel: "data" },
     calc: { q: 3, t: function () { return line("calc"); }, panel: "calc", auto: 1300, next: "quote" },
-    quote: { q: 3, t: function () {
-      var L = ways(); if (G.auto) { G.pick = L[0].id; G.con = L[0].o ? L[0].o.con : null; }
-      return line(G.auto ? "quoteAuto" : "quote", { best: esc(L[0].title) });
-    }, panel: "quote", ch: function () { return [[G.auto ? "이대로 할게" : "이 방법으로", function () { if (!G.pick) G.pick = ways()[0].id; go(G.auto ? "join" : "cond"); }, "go"]]; } },
+    quote: { q: 3, t: function () { return line("quote", { best: esc(ways()[0].title) }); }, panel: "quote", ch: function () { return [["이 방법으로", function () { if (!G.pick) G.pick = curWay().id; go("cond"); }, "go"]]; } },
     cond: { q: 3, t: function () { return line(curWay().kind === "carrier" ? "condCarrier" : "condPhone"); }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
     join: { q: 4, t: function () { return line("join", { dc: man(C.MEMBER_DC) }); }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
     joined: { q: 4, t: function () { return line("joined", { dc: man(C.MEMBER_DC) }); }, panel: "join", auto: 1200, next: "agree" },
@@ -324,7 +326,7 @@
   function go(id, back) {
     timers.forEach(clearTimeout); timers = [];
     if (!back && CUR && CUR !== id && !STEPS[CUR].auto) HIST.push(CUR);
-    CUR = id; if (id !== "agree" && id !== "ship") G.err = {};
+    CUR = id; TRAIL.push(id); if (id !== "agree" && id !== "ship") G.err = {};
     var st = STEPS[id];
     renderMission(st.q);
     $("#shopBack").hidden = !HIST.length || id === "done";
@@ -369,7 +371,7 @@
   function renderMission(q) {
     var ol = $("#mission"); ol.innerHTML = "";
     MISSION(G.dealer).forEach(function (m, i) {
-      var li = document.createElement("li"); li.className = (i < q ? "on" : "") + (i === q ? " now" : "") + (i === 2 && G.auto && q > 2 ? " skip" : "");
+      var li = document.createElement("li"); li.className = (i < q ? "on" : "") + (i === q ? " now" : "");
       li.innerHTML = "<i>" + m[0] + "</i><span>" + m[1] + "</span>"; ol.appendChild(li);
     });
   }
@@ -401,7 +403,8 @@
     if (a === "focus") G.focus = v;
     if (a === "safe") G.safe[v] = !G.safe[v];
     if (a === "stamp") G.stamps[v] = !G.stamps[v];
-    if (a === "unit") G.usedId = v;
+    if (a === "unit") { G.usedId = v || null; G.pick = null; }
+    if (a === "job") G.jobs[v] = !G.jobs[v];
     if (a === "tier") { G.tier = +v; go("calc"); return; }
     if (a === "way") { G.pick = v; G.con = null; }
     if (a === "con") G.con = v;
@@ -413,7 +416,7 @@
   }
 
   function open(dealer) {
-    G = fresh(dealer); HIST = []; CUR = null;
+    G = fresh(dealer); HIST = []; TRAIL = []; CUR = null;
     var d = D.dealers[dealer], sec = $("#shop");
     sec.hidden = false; sec.style.setProperty("--c", d.color); sec.style.setProperty("--dk", d.ink || "#202529"); sec.dataset.dealer = dealer;
     $("#shopDlg").dataset.emote = d.emote || "";
@@ -437,7 +440,7 @@
   }
   window.PPShop = {
     init: init, open: open, close: close, go: go, repaint: repaint,
-    state: function () { return G; }, step: function () { return CUR; },
+    state: function () { return G; }, step: function () { return CUR; }, trail: function () { return TRAIL.slice(); },
     setDeco: function (deco) { if (G) { Object.assign(G.deco, deco); if (CUR === "point") repaint(); } },
     methods: function () { return ways(); }, way: function () { return curWay(); }, ava: ava,
   };

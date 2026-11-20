@@ -281,7 +281,6 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
 .mission li.now i { filter: none; opacity: 1; background: var(--dk); border-color: var(--dk); transform: scale(1.12); animation: nowRing 1.8s infinite; }
 .mission li.now span { color: var(--ink); font-weight: 900; }
 .mission li.on span { color: var(--ink2); }
-.mission li.skip span { text-decoration: line-through; }
 @keyframes nowRing { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 65%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
 @keyframes popIn { from { transform: scale(0); } }
 
@@ -341,7 +340,7 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
 .pk .tag s { font-size: 10.5px; color: var(--muted); }
 .pk .tag span { font-size: 15px; font-weight: 900; letter-spacing: -.02em; }
 .pk .tag em { justify-self: start; margin-top: 3px; font-style: normal; font-size: 10.5px; font-weight: 800; color: var(--green); background: #e7f6ed; border-radius: 6px; padding: 1px 6px; }
-.pk.dis { opacity: .42; filter: grayscale(.7); cursor: not-allowed; }
+.pk .tag em.ub { color: var(--dk); background: color-mix(in srgb, var(--c) 18%, #fff); }
 /* 실측 3D 폰 */
 .pv3d { position: relative; height: 232px; margin: 0 0 10px; border-radius: 20px; background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 26%, #fff), transparent 72%), linear-gradient(180deg, var(--soft2), #fff); display: grid; place-items: center; overflow: hidden; }
 .pv3d .pvimg { max-height: 200px; max-width: 70%; object-fit: contain; filter: drop-shadow(0 14px 16px rgba(0,0,0,.25)); }
@@ -402,8 +401,6 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
 @keyframes stamp { from { transform: rotate(-12deg) scale(2); opacity: 0; } }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .ck { font-size: 13px; padding: 5px 0; color: var(--green); font-weight: 700; }
-.auto { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 22px 12px; border-radius: 18px; background: radial-gradient(circle at 50% 0, color-mix(in srgb, var(--c) 30%, #fff), #fff 70%); border: 1px solid var(--line2); }
-.auto b { font-size: 18px; } .auto span { color: var(--muted); font-size: 13px; }
 .loading { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 30px 0; color: var(--muted); font-weight: 700; font-size: 13px; }
 .loading span { width: 100%; text-align: center; }
 .loading i { width: 10px; height: 10px; border-radius: 50%; background: var(--dk); animation: dot 1s infinite; }
@@ -497,9 +494,9 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
   .brands button:hover { color: var(--ink); }
   .ctabs button:hover { color: var(--ink); }
   .ctabs button:hover:not(.on)::after { transform: scaleX(.35); }
-  .pk:not(.dis):hover { transform: translateY(-5px); box-shadow: var(--sh-2); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
-  .pk:not(.dis):hover::before { opacity: 1; }
-  .pk:not(.dis):hover .im img { transform: rotate(-7deg) scale(1.09) translateY(-3px); }
+  .pk:hover { transform: translateY(-5px); box-shadow: var(--sh-2); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+  .pk:hover::before { opacity: 1; }
+  .pk:hover .im img { transform: rotate(-7deg) scale(1.09) translateY(-3px); }
   .chips2 button:hover { transform: scale(1.16); }
   .pbox:hover { transform: translateY(-4px); }
   .pbox:hover .lid { transform: rotateX(-40deg) translateY(-2px); }

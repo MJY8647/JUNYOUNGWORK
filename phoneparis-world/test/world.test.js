@@ -48,6 +48,7 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
 
     const say = async (t) => { await p.click("#shopDlg"); await p.locator("#shopCh .say", { hasText: t }).first().click(); };
     const step = () => p.evaluate(() => PPShop.step());
+    const trails = {};
     async function buy(dealer, point, opt = {}) {
       await p.evaluate((d) => { PPShop.close(); }, dealer);
       await stop(p, { designer: 3, quick: 4, price: 5, safe: 6, used: 7, allinone: 8 }[dealer]);
@@ -57,25 +58,21 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       await p.click("#shopDlg");
       const tabs = await p.locator("#shopPanel .ctabs button").allInnerTexts();
       ok(tabs.join(",") === "DUO,Pro,일반,Air · SE", `[${dealer}] Apple 카테고리 같음`);
-      if (dealer === "used") ok((await p.locator("#shopPanel .ctabs button.on").innerText()) === "Pro" && await p.locator("#shopPanel .pk:not(.dis)").count() > 0, "[used] 재고 있는 카테고리로 시작");
-      if (dealer !== "used") ok((await p.locator("#shopPanel .pk .tag em").first().innerText()).startsWith("지원"), `[${dealer}] 진열대에 지원금 표시`);
-      await p.locator("#shopPanel .pk:not(.dis)").nth(opt.model || 0).click();
+      if (dealer === "used") ok((await p.locator("#shopPanel .ctabs button.on").innerText()) === "Pro" && await p.locator("#shopPanel .pk .ub").count() > 0, "[used] 중고 재고 있는 카테고리로 시작 · 중고 표시");
+      ok(await p.locator("#shopPanel .pk.dis").count() === 0 && (await p.locator("#shopPanel .pk .tag em").first().innerText()).startsWith("지원"), `[${dealer}] 진열대 같음 (모든 폰 선택 가능 · 지원금 표시)`);
+      await p.locator(opt.modelSel || "#shopPanel .pk").nth(opt.model || 0).click();
       await say("이걸로");
       ok(await step() === "point", `[${dealer}] 폰 → 셀링포인트 단계`);
       await point();
-      if (dealer === "allinone") await say("알아서 해 줘");
-      else {
-        await say(dealer === "used" ? "이 중고로" : "좋아, 다음");
-        await say("SKT"); await say("없어 · 최저가");
-        await p.click("#shopDlg"); await p.locator("#shopPanel .veh button", { hasText: "넉넉히" }).click();
-      }
+      // 여기부터는 여섯 폰팔이 모두 같은 단계·같은 버튼
+      await say("좋아, 다음");
+      await say("SKT"); await say("없어 · 최저가");
+      await p.click("#shopDlg"); await p.locator("#shopPanel .veh button", { hasText: "넉넉히" }).click();
       await p.waitForFunction(() => PPShop.step() === "quote", null, { timeout: 20000 });
       if (opt.quote) await opt.quote();
-      await say(dealer === "allinone" ? "이대로 할게" : "이 방법으로");
-      if (dealer !== "allinone") {
-        if (opt.cond) await opt.cond();
-        await say("좋아");
-      }
+      await say("이 방법으로");
+      if (opt.cond) await opt.cond();
+      await say("좋아");
       ok(await step() === "join", `[${dealer}] 견적 → 멤버십`);
       await p.click("#shopDlg"); await p.locator("#shopPanel .social .k").click();
       await p.waitForFunction(() => PPShop.step() === "agree", null, { timeout: 20000 });
@@ -91,6 +88,7 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       if (await p.locator("#f_addr").count()) await p.fill("#f_addr", "서울 중구 세종대로 110");
       await say("주문 내역 확인"); await say("결제하기");
       ok(await step() === "done", `[${dealer}] 결제 → 영수증`);
+      trails[dealer] = (await p.evaluate(() => PPShop.trail())).join(" → ");
       return await p.locator("#shopPanel").innerText();
     }
 
@@ -131,11 +129,22 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
     }, { cond: async () => { const t = await p.locator("#shopPanel").innerText(); ok(t.includes("휴대폰 보험") && !t.includes("강화 필름"), "[safe] 고른 보호 조합만 계산서에"); } });
     ok(rc.includes("강화 케이스 + 휴대폰 보험"), "[safe] 영수증에 보호 조합");
 
-    rc = await buy("used", async () => { await p.locator("#shopPanel .way").first().click(); },
-      { quote: async () => { const t = await p.locator("#shopPanel .ways").innerText(); ok(await p.locator("#shopPanel .way").count() === 1 && t.includes("1mm 중고"), "[used] 고른 중고 한 대로 견적"); } });
+    rc = await buy("used", async () => {
+      ok((await p.locator("#shopPanel .way.on").innerText()).includes("배터리"), "[used] 중고 재고가 있으면 중고 한 대가 먼저 골라져 있음");
+      await p.locator("#shopPanel .way", { hasText: "배터리" }).first().click();
+    }, { modelSel: "#shopPanel .pk:has(.ub)", quote: async () => {
+      const t = await p.locator("#shopPanel .ways").innerText();
+      ok(t.includes("번호이동") && t.includes("자급제") && t.includes("1mm 중고"), "[used] 견적 목록은 다른 폰팔이와 같음 (3사 + 자급제 + 중고)");
+      ok((await p.locator("#shopPanel .way.on").innerText()).includes("1mm 중고"), "[used] ★에서 고른 중고가 견적에서 미리 선택");
+    } });
+    ok(rc.includes("중고 S급") && rc.includes("4단계 검수"), "[used] 영수증에 검수 내용");
 
-    rc = await buy("allinone", async () => {}, {});
-    ok(await p.locator("#mission li.skip").count() === 1, "[allinone] 상담 단계 생략 표시");
+    rc = await buy("allinone", async () => { await p.locator("#shopPanel .veh button", { hasText: "쓰던 폰 정리" }).click(); },
+      { cond: async () => { const t = await p.locator("#shopPanel").innerText(); ok(t.includes("개통 대행") && t.includes("쓰던 폰 정리"), "[allinone] 맡긴 일이 계산서에 0원으로"); } });
+    ok(rc.includes("개통 대행 · 데이터 옮기기 · 쓰던 폰 정리"), "[allinone] 영수증에 맡긴 일");
+    ok(await p.locator("#mission li.skip").count() === 0, "[allinone] 건너뛰는 단계 없음");
+    const ids = Object.keys(trails), base = trails.designer;
+    ok(ids.length === 6 && ids.every((d) => trails[d] === base), "여섯 폰팔이 모두 같은 구매 단계: " + base + (ids.every((d) => trails[d] === base) ? "" : " | " + ids.map((d) => d + ": " + trails[d]).join(" | ")));
     if (shots) await p.screenshot({ path: shots + "/desktop-receipt.png" });
     // 접는 폰: 접은 상태 / 펼친 상태 3D
     for (const [brand, tab, name] of [["Samsung", "Z폴드", "Galaxy Z Fold8"], ["Samsung", "Z플립", "Galaxy Z Flip8"], ["Apple", "DUO", "iPhone Duo"]]) {
