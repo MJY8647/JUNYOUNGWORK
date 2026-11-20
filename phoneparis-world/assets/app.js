@@ -66,6 +66,7 @@
   function onScroll() {
     if (shopping()) return;
     var s = progress(), i = Math.round(s), near = Math.abs(s - i);
+    $("#parisBg").style.opacity = Math.max(0, 1 - s * 1.6).toFixed(3); // 첫 장면에선 실사 사진, 스크롤하면 3D 광장으로 넘어감
     if (world) world.setProgress(s);
     else { var img = $("#fallbackImg"), src = "assets/fallback/" + FALLBACK[i] + ".webp"; if (img.getAttribute("src") !== src) img.src = src; }
     $("#progress").style.width = (s / (N - 1) * 100) + "%";
@@ -327,11 +328,19 @@
     b.appendChild(s); setTimeout(function () { s.remove(); }, 650);
   });
 
-  /* ---------- 파리 실사 사진: 지금 시각(보는 사람 기기 기준)에 맞춰 낮 06–18시 / 밤 ---------- */
+  /* ---------- 파리 실사 사진: 파리 현지 시각 기준 낮 06:00–18:59 / 밤 (로딩 화면 + 첫 장면 배경) ---------- */
   var PARIS = { day: ["assets/img/paris/day-1.webp", "assets/img/paris/day-2.webp"], night: ["assets/img/paris/night-1.webp", "assets/img/paris/night-2.webp"] };
-  function parisPhoto(now) { var h = (now || new Date()).getHours(), set = h >= 6 && h < 19 ? "day" : "night"; return { time: set, src: PARIS[set][Math.floor(Math.random() * 2)] }; }
-  function applyParis() { var p = parisPhoto(), l = $("#loader"); if (l && l.dataset.time !== p.time) { l.dataset.time = p.time; l.style.setProperty("--photo", "url(" + p.src + ")"); } }
-  applyParis(); setInterval(applyParis, 60000); // 1분마다 낮·밤이 바뀌었는지 확인
+  var parisFmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Europe/Paris" });
+  function parisPhoto(now) {
+    var hm = parisFmt.format(now || new Date()), h = +hm.slice(0, 2), set = h >= 6 && h < 19 ? "day" : "night";
+    return { time: set, clock: hm, src: PARIS[set][Math.floor(Math.random() * 2)] };
+  }
+  function applyParis() {
+    var p = parisPhoto();
+    $("#parisClock").textContent = "파리 지금 " + p.clock + " · " + (p.time === "day" ? "낮" : "밤");
+    [$("#loader"), $("#parisBg")].forEach(function (el) { if (el && el.dataset.time !== p.time) { el.dataset.time = p.time; el.style.setProperty("--photo", 'url("' + new URL(p.src, location.href).href + '")'); /* 절대 주소: var() 안 url은 CSS 파일 기준으로 풀리므로 */ } });
+  }
+  applyParis(); setInterval(applyParis, 30000); // 30초마다 파리 시각·낮밤 확인
 
   /* ---------- 시작 ---------- */
   function ready() { document.body.classList.add("ready"); }

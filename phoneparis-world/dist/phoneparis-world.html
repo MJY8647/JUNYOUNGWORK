@@ -62,6 +62,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .top-cta { position: relative; overflow: hidden; margin-left: auto; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); transition: transform .3s var(--spring), box-shadow .3s; }
 
 /* 로더 */
+/* 첫 장면 배경: 파리 현지 시각에 맞춘 실사 사진, 스크롤하면 사라지며 3D로 */
+#parisBg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: var(--photo, none) center / cover no-repeat; transition: opacity .25s linear; }
+#parisBg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.08), transparent 30%, transparent 70%, rgba(0,0,0,.18)); }
+#parisClock { position: absolute; z-index: 1; right: 20px; bottom: 88px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.85); color: var(--ink); font-size: 12px; font-weight: 800; }
+#parisBg[data-time="night"] #parisClock { background: rgba(14,20,40,.7); color: #fff; }
+@media (max-width: 760px) { #parisClock { right: 12px; bottom: 24px; } }
 #loader { position: fixed; inset: 0; z-index: 50; isolation: isolate; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
 #loader::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--photo, none) center / cover no-repeat; }
 #loader::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.35)); }
@@ -676,6 +682,7 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
   </header>
 
   <canvas id="world" aria-label="에펠탑 광장 3D 장면" role="img"></canvas>
+  <div id="parisBg" aria-hidden="true"><span id="parisClock"></span></div>
   <div id="fallback" hidden><img id="fallbackImg" alt=""></div>
 
   <div id="loader" role="status"><b>phone<span>paris</span></b><small>광장으로 들어가는 중…</small><i></i></div>
@@ -2940,6 +2947,7 @@ window.PV3D = {
   function onScroll() {
     if (shopping()) return;
     var s = progress(), i = Math.round(s), near = Math.abs(s - i);
+    $("#parisBg").style.opacity = Math.max(0, 1 - s * 1.6).toFixed(3); // 첫 장면에선 실사 사진, 스크롤하면 3D 광장으로 넘어감
     if (world) world.setProgress(s);
     else { var img = $("#fallbackImg"), src = "assets/fallback/" + FALLBACK[i] + ".webp"; if (img.getAttribute("src") !== src) img.src = src; }
     $("#progress").style.width = (s / (N - 1) * 100) + "%";
@@ -3201,11 +3209,19 @@ window.PV3D = {
     b.appendChild(s); setTimeout(function () { s.remove(); }, 650);
   });
 
-  /* ---------- 파리 실사 사진: 지금 시각(보는 사람 기기 기준)에 맞춰 낮 06–18시 / 밤 ---------- */
+  /* ---------- 파리 실사 사진: 파리 현지 시각 기준 낮 06:00–18:59 / 밤 (로딩 화면 + 첫 장면 배경) ---------- */
   var PARIS = { day: ["assets/img/paris/day-1.webp", "assets/img/paris/day-2.webp"], night: ["assets/img/paris/night-1.webp", "assets/img/paris/night-2.webp"] };
-  function parisPhoto(now) { var h = (now || new Date()).getHours(), set = h >= 6 && h < 19 ? "day" : "night"; return { time: set, src: PARIS[set][Math.floor(Math.random() * 2)] }; }
-  function applyParis() { var p = parisPhoto(), l = $("#loader"); if (l && l.dataset.time !== p.time) { l.dataset.time = p.time; l.style.setProperty("--photo", "url(" + p.src + ")"); } }
-  applyParis(); setInterval(applyParis, 60000); // 1분마다 낮·밤이 바뀌었는지 확인
+  var parisFmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Europe/Paris" });
+  function parisPhoto(now) {
+    var hm = parisFmt.format(now || new Date()), h = +hm.slice(0, 2), set = h >= 6 && h < 19 ? "day" : "night";
+    return { time: set, clock: hm, src: PARIS[set][Math.floor(Math.random() * 2)] };
+  }
+  function applyParis() {
+    var p = parisPhoto();
+    $("#parisClock").textContent = "파리 지금 " + p.clock + " · " + (p.time === "day" ? "낮" : "밤");
+    [$("#loader"), $("#parisBg")].forEach(function (el) { if (el && el.dataset.time !== p.time) { el.dataset.time = p.time; el.style.setProperty("--photo", 'url("' + new URL(p.src, location.href).href + '")'); /* 절대 주소: var() 안 url은 CSS 파일 기준으로 풀리므로 */ } });
+  }
+  applyParis(); setInterval(applyParis, 30000); // 30초마다 파리 시각·낮밤 확인
 
   /* ---------- 시작 ---------- */
   function ready() { document.body.classList.add("ready"); }
