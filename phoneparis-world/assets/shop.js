@@ -105,8 +105,10 @@
     return h;
   };
   P.spec = function () {
-    var cs = colors(), s = sto();
-    var h = '<div class="pick-row"><img src="' + img(G.md, G.ci) + '" alt=""><span><b>' + esc(G.md.name) + '</b><em>' + esc((cs[G.ci] || {}).n || "") + ' · 출고가 ' + won(s.price) + '</em></span></div>';
+    var cs = colors(), s = sto(), fold = window.PV3D && PV3D.foldable(G.md);
+    var h = '<div class="pv3d" id="pvHost"><img class="pvimg" src="' + img(G.md, G.ci) + '" alt=""></div>';
+    if (fold) h += '<div class="foldseg"><button class="' + (G.open === false ? "on" : "") + '" data-act="fold" data-v="0">📕 접은 상태</button><button class="' + (G.open !== false ? "on" : "") + '" data-act="fold" data-v="1">📖 펼친 상태</button></div>';
+    h += '<div class="pick-row"><img src="' + img(G.md, G.ci) + '" alt=""><span><b>' + esc(G.md.name) + '</b><em>' + esc((cs[G.ci] || {}).n || "") + ' · 출고가 ' + won(s.price) + '</em></span></div>';
     if (cs.length > 1) h += '<div class="tl">🎨 색상<small>' + esc(cs[G.ci].n) + '</small></div><div class="chips2">' + cs.map(function (c, i) { return '<button class="' + (G.ci === i ? "on" : "") + '" style="background:' + c.h + '" aria-label="' + esc(c.n) + '" data-act="ci" data-v="' + i + '"></button>'; }).join("") + '</div>';
     h += '<div class="tl">📦 용량<small>상자를 골라 주세요</small></div><div class="boxes">' + G.md.storages.map(function (st, i) {
       return '<button class="pbox' + (G.si === i ? " on" : "") + '" data-act="sto" data-v="' + i + '"><span class="lid"></span><span class="bd"><b>' + st.gb + '</b><span>' + won(st.price) + '</span></span></button>';
@@ -316,14 +318,20 @@
     renderMission(st.q);
     $("#shopBack").hidden = !HIST.length || id === "done";
     var panel = $("#shopPanel");
-    if (st.panel) { panel.hidden = false; panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); }
+    if (st.panel) { panel.hidden = false; panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); mount3D(); }
     else panel.hidden = true;
     $("#shopCh").innerHTML = ""; $("#shopCh").className = "sch" + (st.grid ? " grid" : "");
     type(st.t());
     if (st.auto) timers.push(setTimeout(function () { go(st.next); }, st.auto));
   }
   function back() { var p = HIST.pop(); if (p) go(p, true); }
-  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); } }
+  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); mount3D(); } }
+  // 실측 3D 폰: 색·용량 단계에서 띄우고, 접는 폰은 접은/펼친 상태 전환
+  function mount3D() {
+    var host = $("#pvHost");
+    if (!host || !window.PV3D) { if (window.PV3D) PV3D.hide(); return; }
+    if (PV3D.show(G.md, G.ci, host)) { host.classList.add("live"); PV3D.setOpen(G.open !== false); }
+  }
   var full = "";
   function type(html) {
     var p = $("#shopTxt"); full = html; var plain = html.replace(/<[^>]+>/g, ""), i = 0;
@@ -365,8 +373,9 @@
     var a = b.dataset.act, v = b.dataset.v;
     if (a === "brand") { G.brand = v; G.tab = null; }
     if (a === "tab") G.tab = v;
-    if (a === "model") { var x = C.mmModelOf(v); G.md = x.m; G.si = 0; G.ci = 0; go("spec"); return; }
+    if (a === "model") { var x = C.mmModelOf(v); G.md = x.m; G.si = 0; G.ci = 0; G.open = true; go("spec"); return; }
     if (a === "ci") G.ci = +v;
+    if (a === "fold") { G.open = v === "1"; if (window.PV3D) PV3D.setOpen(G.open); b.parentNode.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); }); return; }
     if (a === "sto") G.si = +v;
     if (a === "deco") { G.deco[b.dataset.k] = v; }
     if (a === "studio") { if (opts.openStudio) opts.openStudio(G); return; }
@@ -396,7 +405,7 @@
   }
   function close() {
     timers.forEach(clearTimeout); if (typing) clearInterval(typing); typing = null;
-    $("#shop").hidden = true; document.documentElement.classList.remove("shopping");
+    $("#shop").hidden = true; document.documentElement.classList.remove("shopping"); if (window.PV3D) PV3D.hide();
     if (opts.onClose) opts.onClose();
   }
   function init(o) {

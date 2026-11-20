@@ -135,6 +135,19 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
     rc = await buy("allinone", async () => {}, {});
     ok(await p.locator("#mission li.skip").count() === 1, "[allinone] 상담 단계 생략 표시");
     if (shots) await p.screenshot({ path: shots + "/desktop-receipt.png" });
+    // 접는 폰: 접은 상태 / 펼친 상태 3D
+    for (const [brand, tab, name] of [["Samsung", "Z폴드", "Galaxy Z Fold8"], ["Samsung", "Z플립", "Galaxy Z Flip8"], ["Apple", "DUO", "iPhone Duo"]]) {
+      await p.evaluate(() => PPShop.go("model")); await p.click("#shopDlg");
+      await p.locator("#shopPanel .brands button", { hasText: brand }).click();
+      await p.locator("#shopPanel .ctabs button", { hasText: tab }).click();
+      await p.locator("#shopPanel .pk", { hasText: name }).first().click();
+      ok(await p.locator("#pvHost.live canvas").count() === 1 && await p.locator(".foldseg button").count() === 2, `[${name}] 실측 3D + 접기/펼치기 버튼`);
+      await p.locator(".foldseg button", { hasText: "접은" }).click();
+      await p.waitForFunction(() => PV3D.folded() > .95, null, { timeout: 30000 });
+      await p.locator(".foldseg button", { hasText: "펼친" }).click();
+      await p.waitForFunction(() => PV3D.folded() < .05, null, { timeout: 30000 });
+      ok(true, `[${name}] 접은 상태 ↔ 펼친 상태 전환`);
+    }
     await p.click("#shopExit");
     ok(await p.locator("#shop").isHidden(), "가게 닫으면 광장으로");
 
