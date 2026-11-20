@@ -19,6 +19,9 @@
   .title h1 { margin: 0; font-size: clamp(26px, 5vw, 52px); line-height: 1.15; letter-spacing: -.03em; font-weight: 900; }
   .meter { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.88); font: 700 12px/1 system-ui, sans-serif; }
   .bar { position: fixed; left: 0; bottom: 0; height: 3px; width: 0; background: #ff6a23; }
+  .sets { position: fixed; right: 16px; top: 16px; display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.9); box-shadow: 0 6px 18px -10px rgba(0,0,0,.4); z-index: 5; }
+  .sets button { border: 0; background: none; font: 800 12px system-ui, sans-serif; padding: 8px 12px; border-radius: 999px; cursor: pointer; color: #555; }
+  .sets button[aria-pressed="true"] { background: #1c2024; color: #fff; }
   #loading { position: fixed; inset: 0; display: grid; place-items: center; background: #cfd8dc; font-weight: 800; transition: opacity .4s; }
   #loading.done { opacity: 0; pointer-events: none; }
   @media (prefers-reduced-motion: reduce) { .title { transition: none; } }
@@ -26,10 +29,12 @@
 </head>
 <body>
 <div class="stage" aria-hidden="true">
-  <video id="idleA" src="v/a-idle.mp4" muted playsinline loop preload="auto"></video>
-  <video id="move" src="v/ab-move.mp4" muted playsinline preload="auto"></video>
-  <video id="idleB" src="v/b-idle.mp4" muted playsinline loop preload="auto"></video>
+  <video id="idleA" muted playsinline loop preload="auto"></video>
+  <video id="move" muted playsinline preload="auto"></video>
+  <video id="idleB" muted playsinline loop preload="auto"></video>
 </div>
+<!-- 영상 세트 전환: pv = 사이트 3D로 뽑은 프리비즈, v = Higgsfield AI 실사 (주소 ?set=v 로도 고정 가능) -->
+<div class="sets" role="group" aria-label="영상 세트"><button data-set="pv">3D 프리비즈</button><button data-set="v">AI 실사</button></div>
 <div class="title" id="t0"><small>PHONEPARIS · 에펠탑 광장</small><h1>에펠탑 광장에<br>폰 시장이 열렸다.</h1></div>
 <div class="title off" id="t1"><small>PHONEPARIS</small><h1>광장 위로,<br>천천히 내려가 볼까.</h1></div>
 <div class="meter" id="meter">스크롤해 보세요 ↓</div>
@@ -68,6 +73,13 @@
     if (!seeking && Math.abs(M.currentTime - t) > 1 / 30) { seeking = true; M.currentTime = t; }
   })();
   addEventListener("scroll", onScroll, { passive: true });
+  function useSet(set) {
+    A.src = set + "/a-idle.mp4"; M.src = set + "/ab-move.mp4"; B.src = set + "/b-idle.mp4";
+    document.querySelectorAll(".sets button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.set === set ? "true" : "false"); });
+    mode = ""; onScroll();
+  }
+  document.querySelectorAll(".sets button").forEach(function (b) { b.onclick = function () { useSet(b.dataset.set); }; });
+  useSet(/[?&]set=v\b/.test(location.search) ? "v" : "pv");
   var ready = 0; [A, M, B].forEach(function (v) { v.addEventListener("loadeddata", function () { if (++ready === 3) document.getElementById("loading").classList.add("done"); }, { once: true }); });
   setTimeout(function () { document.getElementById("loading").classList.add("done"); }, 6000);
   onScroll();
