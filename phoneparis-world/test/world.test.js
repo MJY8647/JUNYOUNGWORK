@@ -56,6 +56,7 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       await p.click("#shopDlg");
       const tabs = await p.locator("#shopPanel .ctabs button").allInnerTexts();
       ok(tabs.join(",") === "DUO,Pro,일반,Air · SE", `[${dealer}] Apple 카테고리 같음`);
+      if (dealer === "used") ok((await p.locator("#shopPanel .ctabs button.on").innerText()) === "Pro" && await p.locator("#shopPanel .pk:not(.dis)").count() > 0, "[used] 재고 있는 카테고리로 시작");
       if (dealer !== "used") ok((await p.locator("#shopPanel .pk .tag em").first().innerText()).startsWith("지원"), `[${dealer}] 진열대에 지원금 표시`);
       await p.locator("#shopPanel .pk:not(.dis)").nth(opt.model || 0).click();
       await say("이걸로");

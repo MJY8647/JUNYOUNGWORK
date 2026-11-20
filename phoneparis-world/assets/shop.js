@@ -89,7 +89,11 @@
   var P = {};
   function tabsOf(b) { return C.catTabs(b, function (c) { return C.allModels(C.DATA[b].cats[c]).some(function (m) { return !m.soon && m.storages && m.storages.length; }); }); }
   P.model = function () {
-    if (!G.tab) G.tab = tabsOf(G.brand)[0][0];
+    if (!G.tab) { // 중고폰팔이는 재고가 있는 카테고리부터
+      var tl = tabsOf(G.brand), first = tl[0];
+      if (G.dealer === "used") first = tl.filter(function (t) { return t[1].some(function (ck) { return C.allModels(C.DATA[G.brand].cats[ck]).some(function (m) { return usedUnits(m).length; }); }); })[0] || first;
+      G.tab = first[0];
+    }
     var tab = tabsOf(G.brand).filter(function (t) { return t[0] === G.tab; })[0] || tabsOf(G.brand)[0];
     var ms = []; tab[1].forEach(function (ck) { C.allModels(C.DATA[G.brand].cats[ck]).forEach(function (m) { if (!m.soon && m.storages && m.storages.length) ms.push(m); }); });
     if (G.dealer === "price") ms.sort(function (a, b) { var A = bestSupport(a), B = bestSupport(b); return (a.storages[0].price - A.t) - (b.storages[0].price - B.t); });
@@ -108,7 +112,8 @@
     var cs = colors(), s = sto(), fold = window.PV3D && PV3D.foldable(G.md);
     var h = '<div class="pv3d" id="pvHost"><img class="pvimg" src="' + img(G.md, G.ci) + '" alt=""></div>';
     if (fold) h += '<div class="foldseg"><button class="' + (G.open === false ? "on" : "") + '" data-act="fold" data-v="0">📕 접은 상태</button><button class="' + (G.open !== false ? "on" : "") + '" data-act="fold" data-v="1">📖 펼친 상태</button></div>';
-    h += '<div class="pick-row"><img src="' + img(G.md, G.ci) + '" alt=""><span><b>' + esc(G.md.name) + '</b><em>' + esc((cs[G.ci] || {}).n || "") + ' · 출고가 ' + won(s.price) + '</em></span></div>';
+    var own = cs[G.ci] && cs[G.ci].img; // 그 색의 실제 사진이 없으면 대표 사진임을 표시
+    h += '<div class="pick-row"><img src="' + img(G.md, G.ci) + '" alt=""><span><b>' + esc(G.md.name) + '</b><em>' + esc((cs[G.ci] || {}).n || "") + ' · 출고가 ' + won(s.price) + (cs.length && !own ? ' <i class="src">대표 사진</i>' : "") + '</em></span></div>';
     if (cs.length > 1) h += '<div class="tl">🎨 색상<small>' + esc(cs[G.ci].n) + '</small></div><div class="chips2">' + cs.map(function (c, i) { return '<button class="' + (G.ci === i ? "on" : "") + '" style="background:' + c.h + '" aria-label="' + esc(c.n) + '" data-act="ci" data-v="' + i + '"></button>'; }).join("") + '</div>';
     h += '<div class="tl">📦 용량<small>상자를 골라 주세요</small></div><div class="boxes">' + G.md.storages.map(function (st, i) {
       return '<button class="pbox' + (G.si === i ? " on" : "") + '" data-act="sto" data-v="' + i + '"><span class="lid"></span><span class="bd"><b>' + st.gb + '</b><span>' + won(st.price) + '</span></span></button>';
