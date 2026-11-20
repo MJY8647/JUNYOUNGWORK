@@ -100,7 +100,7 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       if (shots) { await p.waitForTimeout(400); await p.screenshot({ path: shots + "/desktop-studio.png" }); }
       await p.keyboard.press("Escape");
       ok((await p.evaluate(() => PPShop.state().deco.keyring)) === "ball", "[designer] 3D에서 고른 키링이 가게로 돌아옴");
-    }, { cond: async () => {
+    }, { quote: async () => { await p.locator("#shopPanel .way", { hasText: "번호이동" }).first().click(); }, cond: async () => {
       const t = await p.locator("#shopPanel").innerText();
       ok(t.includes("케이스 · 코발트"), "[designer] 폰꾸 비용이 계산서에");
       ok(t.includes("추가지원금") && t.includes("1mm 매장 지원") && (t.includes("공시지원금") || t.includes("선택약정")), "[designer] 각종 지원금 내역 표시");
