@@ -3204,7 +3204,7 @@ window.PV3D = {
   /* ---------- 파리 실사 사진: 지금 시각(보는 사람 기기 기준)에 맞춰 낮 06–18시 / 밤 ---------- */
   var PARIS = { day: ["assets/img/paris/day-1.webp", "assets/img/paris/day-2.webp"], night: ["assets/img/paris/night-1.webp", "assets/img/paris/night-2.webp"] };
   function parisPhoto(now) { var h = (now || new Date()).getHours(), set = h >= 6 && h < 19 ? "day" : "night"; return { time: set, src: PARIS[set][Math.floor(Math.random() * 2)] }; }
-  function applyParis() { var p = parisPhoto(), l = $("#loader"); if (l && l.dataset.time !== p.time) { l.dataset.time = p.time; l.style.setProperty("--photo", "url(" + p.src + ")"); } }
+  function applyParis() { var p = parisPhoto(), l = $("#loader"); if (l && l.dataset.time !== p.time) { l.dataset.time = p.time; l.style.setProperty("--photo", 'url("' + new URL(p.src, location.href).href + '")'); /* 절대 주소: var() 안 url은 CSS 파일 기준으로 풀림 */ } }
   applyParis(); setInterval(applyParis, 60000); // 1분마다 낮·밤이 바뀌었는지 확인
 
   /* ---------- 시작 ---------- */
