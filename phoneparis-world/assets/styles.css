@@ -54,7 +54,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .top-cta { position: relative; overflow: hidden; margin-left: auto; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); transition: transform .3s var(--spring), box-shadow .3s; }
 
 /* 로더 */
-#loader { position: fixed; inset: 0; z-index: 50; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
+#loader { position: fixed; inset: 0; z-index: 50; isolation: isolate; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
+#loader::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--photo, none) center / cover no-repeat; }
+#loader::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.35)); }
+#loader[data-time="night"]::after { background: linear-gradient(rgba(10,14,30,.35), rgba(10,14,30,.55)); }
+#loader[data-time="night"] b, #loader[data-time="night"] small { color: #fff; }
 #loader b { font-family: var(--brand); font-size: 40px; letter-spacing: -.05em; }
 #loader b span { color: var(--blue); }
 #loader small { color: var(--muted); }

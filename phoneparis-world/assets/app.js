@@ -327,10 +327,16 @@
     b.appendChild(s); setTimeout(function () { s.remove(); }, 650);
   });
 
+  /* ---------- 파리 실사 사진: 지금 시각(보는 사람 기기 기준)에 맞춰 낮 06–18시 / 밤 ---------- */
+  var PARIS = { day: ["assets/img/paris/day-1.webp", "assets/img/paris/day-2.webp"], night: ["assets/img/paris/night-1.webp", "assets/img/paris/night-2.webp"] };
+  function parisPhoto(now) { var h = (now || new Date()).getHours(), set = h >= 6 && h < 19 ? "day" : "night"; return { time: set, src: PARIS[set][Math.floor(Math.random() * 2)] }; }
+  function applyParis() { var p = parisPhoto(), l = $("#loader"); if (l && l.dataset.time !== p.time) { l.dataset.time = p.time; l.style.setProperty("--photo", "url(" + p.src + ")"); } }
+  applyParis(); setInterval(applyParis, 60000); // 1분마다 낮·밤이 바뀌었는지 확인
+
   /* ---------- 시작 ---------- */
   function ready() { document.body.classList.add("ready"); }
   if (world) { var w0 = Date.now(); (function wait() { if (world.frames > 2 || Date.now() - w0 > 6000) ready(); else requestAnimationFrame(wait); })(); }
   else { var im = $("#fallbackImg"); im.onload = ready; setTimeout(ready, 2500); }
   onScroll();
-  window.PP = { world: function () { return world; }, go: go, state: function () { return { cur: cur, cardOpen: cardOpen, studio: sState, step: sStep }; } };
+  window.PP = { world: function () { return world; }, go: go, parisPhoto: parisPhoto, state: function () { return { cur: cur, cardOpen: cardOpen, studio: sState, step: sStep }; } };
 })();

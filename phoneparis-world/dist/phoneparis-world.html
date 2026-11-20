@@ -62,7 +62,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .top-cta { position: relative; overflow: hidden; margin-left: auto; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 6px 18px -8px rgba(0,0,0,.5); transition: transform .3s var(--spring), box-shadow .3s; }
 
 /* 로더 */
-#loader { position: fixed; inset: 0; z-index: 50; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
+#loader { position: fixed; inset: 0; z-index: 50; isolation: isolate; background: var(--sky); display: grid; place-content: center; justify-items: center; gap: 10px; transition: opacity .6s var(--ease), visibility .6s; }
+#loader::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--photo, none) center / cover no-repeat; }
+#loader::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.35)); }
+#loader[data-time="night"]::after { background: linear-gradient(rgba(10,14,30,.35), rgba(10,14,30,.55)); }
+#loader[data-time="night"] b, #loader[data-time="night"] small { color: #fff; }
 #loader b { font-family: var(--brand); font-size: 40px; letter-spacing: -.05em; }
 #loader b span { color: var(--blue); }
 #loader small { color: var(--muted); }
@@ -3197,12 +3201,18 @@ window.PV3D = {
     b.appendChild(s); setTimeout(function () { s.remove(); }, 650);
   });
 
+  /* ---------- 파리 실사 사진: 지금 시각(보는 사람 기기 기준)에 맞춰 낮 06–18시 / 밤 ---------- */
+  var PARIS = { day: ["assets/img/paris/day-1.webp", "assets/img/paris/day-2.webp"], night: ["assets/img/paris/night-1.webp", "assets/img/paris/night-2.webp"] };
+  function parisPhoto(now) { var h = (now || new Date()).getHours(), set = h >= 6 && h < 19 ? "day" : "night"; return { time: set, src: PARIS[set][Math.floor(Math.random() * 2)] }; }
+  function applyParis() { var p = parisPhoto(), l = $("#loader"); if (l && l.dataset.time !== p.time) { l.dataset.time = p.time; l.style.setProperty("--photo", "url(" + p.src + ")"); } }
+  applyParis(); setInterval(applyParis, 60000); // 1분마다 낮·밤이 바뀌었는지 확인
+
   /* ---------- 시작 ---------- */
   function ready() { document.body.classList.add("ready"); }
   if (world) { var w0 = Date.now(); (function wait() { if (world.frames > 2 || Date.now() - w0 > 6000) ready(); else requestAnimationFrame(wait); })(); }
   else { var im = $("#fallbackImg"); im.onload = ready; setTimeout(ready, 2500); }
   onScroll();
-  window.PP = { world: function () { return world; }, go: go, state: function () { return { cur: cur, cardOpen: cardOpen, studio: sState, step: sStep }; } };
+  window.PP = { world: function () { return world; }, go: go, parisPhoto: parisPhoto, state: function () { return { cur: cur, cardOpen: cardOpen, studio: sState, step: sStep }; } };
 })();
 
 </script>
