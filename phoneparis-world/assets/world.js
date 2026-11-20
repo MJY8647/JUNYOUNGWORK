@@ -188,8 +188,8 @@
     // 샹드마르스 잔디 두 줄 (가운데 산책길)
     var lawnM = new T.MeshStandardMaterial({ color: 0x8faa6e, roughness: 1 });
     [-1, 1].forEach(function (sd) { var l = new T.Mesh(new T.BoxGeometry(44, .3, 340), lawnM); l.position.set(sd * 33, .15, 260); l.receiveShadow = true; g.add(l); });
-    // 잡화 노점(열쇠고리·기념품): 사람이 다니는 곳에만
-    var n = 90, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
+    // 노점은 여섯 폰팔이만 둠 (잡화 노점 없음)
+    var n = 0, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
     var roof = new T.InstancedMesh(new T.BoxGeometry(3.1, .35, 2.4), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .7 }), n);
     var q = new T.Quaternion(), e = new T.Euler(), sc = new T.Vector3(1, 1, 1);
     for (var i = 0; i < n; i++) {
@@ -504,7 +504,7 @@
       ch.traverse(function (o) { if (o.isMesh) self.hitTargets.push(o); });
       obs.add(p.x, p.z, 4);
     });
-    for (var i = 0; i < 10; i++) { // 탑 밑 둘레 기념품 노점 (폰은 여섯 폰팔이만 팖)
+    for (var i = 0; i < 0; i++) { // 탑 밑 둘레 기념품 노점: 지금은 두지 않음 (여섯 폰팔이만)
       var a = i / 10 * Math.PI * 2 + .12, rad = 17 + (i % 3) * 2.2;
       if (Math.abs(Math.cos(2 * a)) < .45) continue; // 다리 자리 비우기
       var b = buildBooth("x", PASTEL[i % 7], r); b.scale.setScalar(.75);
