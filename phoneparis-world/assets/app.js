@@ -201,6 +201,7 @@
     if (sheet.open) sheet.close();
     fromShop = G && G.deco ? G : null;
     if (fromShop) { sState.device = devFor(G.md); sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
+    else sStep = 0; // 위 「내 폰 꾸미기」로 열면 늘 기기부터 (가게에서 열었던 단계가 남지 않게)
     $("#studio").showModal();
     if (world) world.paused = true;
     if (!studio && window.PPStudio && window.THREE) { try { studio = new PPStudio($("#studioCanvas")); } catch (e) { console.warn(e); } }

@@ -165,7 +165,8 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
 
     // 장면 버튼으로 이동
     await p.locator("#chapters button").nth(0).click();
-    await p.waitForTimeout(1500);
+    // 부드러운 스크롤: CPU로 그리는 테스트 브라우저에선 10초 넘게 걸리기도 해서 도착할 때까지 기다림
+    await p.waitForFunction(() => scrollY < 50, null, { timeout: 60000 }).catch(() => {});
     ok(await p.evaluate(() => scrollY) < 50, "장면 버튼으로 처음으로 이동");
 
     // 폰꾸 작업실
