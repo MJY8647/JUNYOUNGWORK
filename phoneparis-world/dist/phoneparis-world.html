@@ -831,7 +831,7 @@ window.SITE = {
   /* ---------- 광장 타일, 노점, 군중 ---------- */
   var PASTEL = [0x9fd8cf, 0xf2a7b5, 0xc7b5ea, 0xf4d36b, 0x8fc9e8, 0xb8e0a0, 0xf6b98a];
 
-  function buildPlaza(r) {
+  function buildPlaza(r, obs) {
     var g = new T.Group();
     var ground = new T.Mesh(new T.PlaneGeometry(2400, 2400), new T.MeshStandardMaterial({ color: 0x8d8c88, roughness: 1 }));
     ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
@@ -856,7 +856,7 @@ window.SITE = {
     for (var i = 0; i < n; i++) {
       var a = r() * Math.PI * 2, rad = 26 + Math.pow(r(), .8) * 92, px = Math.cos(a) * rad, pz = Math.sin(a) * rad;
       e.set(0, r() * Math.PI, 0); q.setFromEuler(e);
-      m.compose(new T.Vector3(px, .85, pz), q, sc); base.setMatrixAt(i, m);
+      m.compose(new T.Vector3(px, .85, pz), q, sc); base.setMatrixAt(i, m); obs.add(px, pz, 1.9);
       e.set(.18, e.y, 0); q.setFromEuler(e);
       m.compose(new T.Vector3(px, 1.9, pz), q, sc); roof.setMatrixAt(i, m);
       var col = PASTEL[i % PASTEL.length];
@@ -866,18 +866,44 @@ window.SITE = {
     return g;
   }
 
-  function buildCrowd(r, n) {
-    var geo = new T.CylinderGeometry(.24, .3, 1.7, 6); geo.translate(0, .85, 0);
-    var mesh = new T.InstancedMesh(geo, new T.MeshStandardMaterial({ color: 0xffffff, roughness: .9 }), n);
-    var people = [], c = new T.Color(), tones = [0x30343a, 0x3d4148, 0x585c63, 0x2a2d31, 0x6c6258, 0x45505c];
+  // 장애물(노점·부스·탑 다리) 격자: 사람이 통과하지 않도록
+  function Obstacles() { this.cells = {}; this.size = 12; }
+  Obstacles.prototype.key = function (cx, cz) { return cx + "," + cz; };
+  Obstacles.prototype.add = function (x, z, r) {
+    var o = { x: x, z: z, r: r }, S = this.size;
+    for (var cx = Math.floor((x - r) / S); cx <= Math.floor((x + r) / S); cx++)
+      for (var cz = Math.floor((z - r) / S); cz <= Math.floor((z + r) / S); cz++) (this.cells[this.key(cx, cz)] = this.cells[this.key(cx, cz)] || []).push(o);
+  };
+  Obstacles.prototype.hit = function (x, z, pad) {
+    var list = this.cells[this.key(Math.floor(x / this.size), Math.floor(z / this.size))]; if (!list) return null;
+    for (var i = 0; i < list.length; i++) { var o = list[i], dx = x - o.x, dz = z - o.z, rr = o.r + pad; if (dx * dx + dz * dz < rr * rr) return o; }
+    return null;
+  };
+
+  // 군중: 몸통 + 머리 (사람 모양), 장애물을 피해 걸음
+  function buildCrowd(r, n, obs) {
+    var bodyG = new T.CylinderGeometry(.19, .25, 1.18, 8); bodyG.translate(0, .62, 0);
+    var headG = new T.SphereGeometry(.17, 10, 8); headG.translate(0, 1.42, 0);
+    var mat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .85 });
+    var bodies = new T.InstancedMesh(bodyG, mat, n), heads = new T.InstancedMesh(headG, mat, n);
+    var people = [], c = new T.Color();
+    var clothes = [0x2c3036, 0x3b4048, 0x565b63, 0x23262a, 0x6c6258, 0x45505c, 0x7a8a9c, 0x8c4a4a, 0xc9b79c, 0x4e6b5a];
+    var skins = [0xf1c9a5, 0xe0ac85, 0xc68863, 0x9a6648, 0xf6d8bf];
     for (var i = 0; i < n; i++) {
-      var a = r() * Math.PI * 2, rad = 15 + Math.pow(r(), .7) * 110;
-      people.push({ x: Math.cos(a) * rad, z: Math.sin(a) * rad, h: r() * Math.PI * 2, v: .6 + r() * .9, s: .9 + r() * .25 });
-      mesh.setColorAt(i, c.setHex(tones[i % tones.length]));
+      var x, z, tries = 0;
+      do { var a = r() * Math.PI * 2, rad = 15 + Math.pow(r(), .7) * 110; x = Math.cos(a) * rad; z = Math.sin(a) * rad; tries++; } while (obs.hit(x, z, .5) && tries < 20);
+      people.push({ x: x, z: z, h: r() * Math.PI * 2, v: .6 + r() * .9, s: .88 + r() * .25, turn: 0 });
+      bodies.setColorAt(i, c.setHex(clothes[i % clothes.length]));
+      heads.setColorAt(i, c.setHex(skins[i % skins.length]));
     }
-    mesh.userData.people = people;
-    mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
-    return mesh;
+    var m = new T.Matrix4(), q = new T.Quaternion();
+    people.forEach(function (p, k) { // 움직임 줄이기 설정에서도 제자리에 서 있도록 처음 위치를 기록
+      m.compose(new T.Vector3(p.x, 0, p.z), q.setFromAxisAngle(UP, -p.h), new T.Vector3(1, p.s, 1)); bodies.setMatrixAt(k, m); heads.setMatrixAt(k, m);
+    });
+    bodies.instanceMatrix.setUsage(T.DynamicDrawUsage); heads.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    var g = new T.Group(); g.add(bodies, heads);
+    g.userData = { people: people, bodies: bodies, heads: heads };
+    return g;
   }
 
   /* ---------- 폰팔이 캐릭터 (영상처럼 둥근 모서리·광택 눈·소품) ---------- */
@@ -1043,8 +1069,9 @@ window.SITE = {
     scene.add(new T.AmbientLight(0xffffff, .06));
 
     this.tower = buildTower(); scene.add(this.tower);
-    scene.add(buildPlaza(r));
-    this.crowd = buildCrowd(r, this.mobile ? 1300 : 2600); scene.add(this.crowd);
+    var obs = new Obstacles(); this.obstacles = obs;
+    scene.add(buildPlaza(r, obs));
+    [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(function (s2) { obs.add(s2[0] * 17.6, s2[1] * 17.6, 5.4); }); // 탑 다리
 
     // 탑 아래 장터: 폰팔이 여섯 + 이름 없는 노점
     this.dealers = {}; this.hitTargets = [];
@@ -1056,13 +1083,16 @@ window.SITE = {
       scene.add(holder);
       self.dealers[id] = { group: ch, holder: holder, index: i };
       ch.traverse(function (o) { if (o.isMesh) self.hitTargets.push(o); });
+      obs.add(p.x, p.z, 4);
     });
     for (var i = 0; i < 26; i++) { // 탑 밑 둘레 노점
       var a = i / 26 * Math.PI * 2 + .12, rad = 17 + (i % 3) * 2.2;
       if (Math.abs(Math.cos(2 * a)) < .45) continue; // 다리 자리 비우기
       var b = buildBooth("x", PASTEL[i % 7], r); b.scale.setScalar(.75);
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
+      obs.add(b.position.x, b.position.z, 3.1);
     }
+    this.crowd = buildCrowd(r, this.mobile ? 1300 : 2600, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
     var v = function (a) { return new T.Vector3().fromArray(a); };
@@ -1125,19 +1155,21 @@ window.SITE = {
 
   World.prototype.animate = function (dt, time) {
     if (this.reduced) return;
-    // 군중 걷기
-    var crowd = this.crowd, ppl = crowd.userData.people, m = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pos = new T.Vector3();
+    // 군중 걷기: 다음 걸음이 장애물에 닿으면 멈추고 방향을 틂
+    var cd = this.crowd.userData, ppl = cd.people, obs = this.obstacles, m = new T.Matrix4(), q = new T.Quaternion(), sc = new T.Vector3(), pos = new T.Vector3();
     for (var i = 0; i < ppl.length; i++) {
       var p = ppl[i];
-      p.h += (Math.sin(time * .3 + i) * .4) * dt;
-      p.x += Math.cos(p.h) * p.v * dt; p.z += Math.sin(p.h) * p.v * dt;
-      var d = Math.hypot(p.x, p.z);
-      if (d < 14 || d > 130) p.h += Math.PI;
-      var bob = Math.abs(Math.sin(time * 6 * p.v + i)) * .06;
+      if (p.turn > 0) { p.h += p.turnDir * 2.4 * dt; p.turn -= dt; }
+      else p.h += Math.sin(time * .3 + i) * .4 * dt;
+      var nx = p.x + Math.cos(p.h) * p.v * dt, nz = p.z + Math.sin(p.h) * p.v * dt, d = Math.hypot(nx, nz);
+      if (d < 14 || d > 130) { p.h += Math.PI; }
+      else if (obs.hit(nx, nz, .35)) { if (p.turn <= 0) { p.turn = .5 + Math.random() * .6; p.turnDir = Math.random() < .5 ? -1 : 1; } }
+      else { p.x = nx; p.z = nz; }
+      var bob = Math.abs(Math.sin(time * 6 * p.v + i)) * .05;
       q.setFromAxisAngle(UP, -p.h); sc.set(1, p.s, 1); pos.set(p.x, bob, p.z);
-      crowd.setMatrixAt(i, m.compose(pos, q, sc));
+      m.compose(pos, q, sc); cd.bodies.setMatrixAt(i, m); cd.heads.setMatrixAt(i, m);
     }
-    crowd.instanceMatrix.needsUpdate = true;
+    cd.bodies.instanceMatrix.needsUpdate = true; cd.heads.instanceMatrix.needsUpdate = true;
     // 캐릭터: 숨쉬기, 눈 깜빡임, 시선
     var px = this.pointer.x, py = this.pointer.y;
     for (var id in this.dealers) {
