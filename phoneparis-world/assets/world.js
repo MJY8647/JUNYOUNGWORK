@@ -589,13 +589,16 @@
 
   World.prototype.loop = function () {
     requestAnimationFrame(this.loop);
-    var pf = this.perf, now = performance.now(), gap = (now - pf.last) / 1000; pf.last = now;
-    if (document.hidden || this.paused) return;
-    // 느린 기기: 2초 평균이 30fps 아래면 해상도를 한 단계(0.25배)씩 낮춤, 1배 아래로는 안 내림
-    if (gap > 0 && gap < .25 && this.clock.elapsedTime > 3) {
+    var pf = this.perf, now = performance.now();
+    if (document.hidden || this.paused) { pf.last = 0; return; } // 숨겨졌던 시간은 재지 않음
+    var gap = pf.last ? (now - pf.last) / 1000 : 0; pf.last = now;
+    // 느린 기기: 2초 구간 평균이 30fps 아래인 구간이 두 번 이어지면 해상도를 한 단계(0.25배)씩 낮춤, 1배 아래로는 안 내림
+    // (한 번 끊기는 것만으로는 안 내림. 아주 느린 기기도 재도록 프레임 간격 상한은 2초)
+    if (gap > 0 && gap < 2 && this.clock.elapsedTime > 3) {
       pf.t += gap; pf.n++;
       if (pf.t > 2) {
-        if (pf.t / pf.n > 1 / 30 && this.dpr > 1) { this.dpr = Math.max(1, this.dpr - .25); this.renderer.setPixelRatio(this.dpr); this.resize(); this.slow = true; }
+        pf.bad = pf.t / pf.n > 1 / 30 ? (pf.bad || 0) + 1 : 0;
+        if (pf.bad >= 2 && this.dpr > 1) { this.dpr = Math.max(1, this.dpr - .25); this.renderer.setPixelRatio(this.dpr); this.resize(); this.slow = true; pf.bad = 0; }
         pf.t = 0; pf.n = 0;
       }
     }

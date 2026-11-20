@@ -154,9 +154,10 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       await p.locator("#shopPanel .pk", { hasText: name }).first().click();
       ok(await p.locator("#pvHost.live canvas").count() === 1 && await p.locator(".foldseg button").count() === 2, `[${name}] 실측 3D + 접기/펼치기 버튼`);
       await p.locator(".foldseg button", { hasText: "접은" }).click();
-      await p.waitForFunction(() => PV3D.folded() > .95, null, { timeout: 30000 });
+      // 접기 애니메이션은 프레임 수 기준: CPU로 3D를 그리는 테스트 브라우저(초당 1프레임 안팎)에서는 오래 걸려 넉넉히 기다림
+      await p.waitForFunction(() => PV3D.folded() > .95, null, { timeout: 120000 });
       await p.locator(".foldseg button", { hasText: "펼친" }).click();
-      await p.waitForFunction(() => PV3D.folded() < .05, null, { timeout: 30000 });
+      await p.waitForFunction(() => PV3D.folded() < .05, null, { timeout: 120000 });
       ok(true, `[${name}] 접은 상태 ↔ 펼친 상태 전환`);
     }
     await p.click("#shopExit");
