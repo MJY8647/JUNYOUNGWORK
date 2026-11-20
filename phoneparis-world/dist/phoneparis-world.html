@@ -402,6 +402,24 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
   .opts3 { grid-template-columns: repeat(4, 1fr); }
 }
 
+/* v6 상품 진열: 제조사 → 카테고리 탭 → 실제 사진 */
+.brands { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.brands button { padding: 9px; border-radius: 12px; background: rgba(255,255,255,.55); font-weight: 900; font-size: 14px; color: #5a4532; }
+.brands button.on { background: var(--pi); color: #fff; }
+.ctabs { display: flex; gap: 6px; margin-bottom: 8px; overflow-x: auto; scrollbar-width: none; }
+.ctabs::-webkit-scrollbar { display: none; }
+.ctabs button { flex: none; border-radius: 8px 8px 3px 3px; padding: 6px 12px; font-weight: 900; font-size: 12.5px; background: rgba(255,255,255,.3); color: #5a4532; }
+.ctabs button.on { background: var(--paper); color: var(--pi); box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+.pk .im img { max-width: 84px; max-height: 96px; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(0,0,0,.3)); }
+.pk .tag s { display: block; font-size: 10px; color: var(--pm); }
+.pk.dis { opacity: .4; cursor: not-allowed; }
+.pick-row img { width: 48px; height: 56px; object-fit: contain; }
+.sup { background: var(--paper); border-radius: 10px; padding: 10px 12px; margin-top: 12px; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+.src { font-style: normal; font-size: 10px; font-weight: 700; color: #1d4ed8; background: #e6eeff; border-radius: 5px; padding: 0 5px; margin-left: 2px; white-space: nowrap; }
+.way em.sv { color: #14714c; font-weight: 800; }
+.veh.four { grid-template-columns: repeat(4, 1fr); }
+.big { flex-wrap: wrap; gap: 6px; }
+
 </style>
 <header class="top">
     <a class="brand" href="#" id="brand" aria-label="폰파리 처음으로">phone<span>paris</span><i>✳</i></a>
@@ -486,7 +504,6 @@ window.SITE = {
     hours: "평일 09–18시",
     kakao: "",                   // TODO: 카카오톡 채널 링크
   },
-  priceNote: "예시 가격 · 요금제·가입 유형에 따라 달라져요",
 
   // 스크롤 장면(카메라 위치는 world.js의 SHOTS와 같은 순서)
   chapters: [
@@ -502,41 +519,10 @@ window.SITE = {
     { id: "finish", nav: "마무리", title: "여섯 명 다 둘러봤다.\n이제 폰만 고르면 돼.", sub: "" },
   ],
 
-  // 상품: price = 영상 속 1mm 기기값(공시지원금·매장지원 반영, SKT 번호이동 기준 예시)
-  // list = 출고가 (아이폰17/에어/18프로는 영상, 17프로·폴드8·S26은 2026-11 출고가 보도 기준)
-  products: {
-    ip17:   { name: "아이폰17 NEW", list: 1452000, price: 552000, color: "#d9cdf2", colors: [["라벤더", "#d9cdf2"], ["세이지", "#c9d6c2"], ["블랙", "#2b2d30"]] },
-    ip17a:  { name: "아이폰17에어", list: 1584000, price: 484000, color: "#dfe9f2", colors: [["스카이 블루", "#cfe1f2"], ["클라우드 화이트", "#f1f1ee"], ["스페이스 블랙", "#26272b"]] },
-    ip18p:  { name: "아이폰18 프로", list: 1990000, price: 1391000, color: "#6e2a33", colors: [["버건디", "#6e2a33"], ["실버", "#dadbd8"], ["블랙", "#2a2b2e"]] },
-    ip17p:  { name: "아이폰17프로", list: 1790000, price: 932000, color: "#f07a2c", colors: [["코스믹 오렌지", "#f07a2c"], ["실버", "#dadbd8"], ["딥 블루", "#2c3c5c"]] },
-    zf8:    { name: "Z폴드8(와이드형)", list: 2278100, price: 1378000, color: "#b9b2c9", colors: [["실버 섀도", "#b9b2c9"], ["블루 섀도", "#4d5c7c"], ["제트 블랙", "#1f2023"]] },
-    s26:    { name: "갤럭시 S26", list: 1403600, price: 203600, color: "#9cc7d6", colors: [["스카이 블루", "#9cc7d6"], ["코발트 바이올렛", "#7a6ab0"], ["블랙", "#25262a"]] },
-    a17:    { name: "갤럭시 A17", list: 319000, price: 0, color: "#a9d3ea", tag: "공짜폰", colors: [["라이트 블루", "#a9d3ea"], ["블랙", "#25262a"]] },
-    folder: { name: "클래식 폴더", list: 205700, price: 0, color: "#1d1f22", tag: "공짜폰", folder: true, colors: [["블랙", "#1d1f22"]] },
-  },
-  storageAdd: { "256GB": 0, "512GB": 300000 },   // 용량 올리면 출고가·기기값에 더함 (예시)
-
   /* ---------- 구매 프로세스 (1mm STORE v6 판매 흐름) ---------- */
+  // 상품·지원금·요금제는 catalog.js (1mm STORE v6 데이터)
   shop: {
-    memberDc: 30000,           // 1mm 멤버십 즉시 할인 (v6)
-    rate: 0.059,               // 할부 연 5.9% 가정
     keepDays: 183,             // 고가 요금제 유지 기준
-    carriers: [
-      { id: "skt", name: "SKT", add: 0 },
-      { id: "kt", name: "KT", add: 40000 },
-      { id: "lgu", name: "LG U+", add: 20000 },
-    ],
-    curs: [["skt", "SKT"], ["kt", "KT"], ["lgu", "LG U+"], ["mvno", "알뜰폰"]],
-    chgAdd: 120000,            // 기기변경이면 번호이동보다 기기값 + (예시)
-    bundleDc: 11000,           // 결합 유지 시 월 할인 (예시)
-    tiers: [
-      { id: "low", label: "적게", sub: "~7GB", fee: { skt: 49000, kt: 47000, lgu: 47000 }, mvno: 16500 },
-      { id: "mid", label: "보통", sub: "~30GB", fee: { skt: 62000, kt: 61000, lgu: 59000 }, mvno: 29000 },
-      { id: "high", label: "많이", sub: "무제한", fee: { skt: 89000, kt: 90000, lgu: 85000 }, mvno: 39000 },
-    ],
-    selRate: 0.25,             // 선택약정 25%
-    selSupportRate: 0.12,      // 선택약정일 때 매장지원 (출고가 대비, 예시)
-    months: [0, 12, 24, 36],
     ship: [
       { id: "quick", icon: "🛵", name: "퀵", sub: "오늘 도착" },
       { id: "parcel", icon: "🚚", name: "택배", sub: "1~2일 · 무료" },
@@ -548,11 +534,6 @@ window.SITE = {
       { id: "a3", t: "주문 내용·배송 조건 확인" },
       { id: "a4", t: "개인정보 수집·이용 동의", d: "이름·연락처·주소" },
     ],
-    usedGrades: [
-      { id: "S", name: "S급", d: "사용감 거의 없음", rate: 0.62 },
-      { id: "U", name: "미개봉급", d: "개봉만 한 수준", rate: 0.74 },
-    ],
-    usedBattery: [{ id: "85", name: "85% 이상", add: 0 }, { id: "90", name: "90% 이상", add: 40000 }],
     usedChecks: ["IMEI 분실·도난 조회", "통화·카메라·Wi-Fi", "충전·배터리 측정", "초기화·계정 잠금 해제"],
     safeItems: [
       { id: "case", icon: "▣", name: "강화 케이스", price: 19000 },
@@ -581,9 +562,6 @@ window.SITE = {
       name: "디자이너폰팔이", short: "디자이너", color: "#b7a6dc", ink: "#4b3a7a",
       quote: "케이스 + 키링 + 그립톡 or 마그네틱 지갑. 폰꾸도 해야겠지?",
       title: "폰 고르면, 폰꾸까지 한 번에",
-      chips: ["케이스", "키링", "그립톡", "마그네틱 지갑"],
-      products: ["ip17", "ip17a", "ip18p"],
-      cta: "3D로 폰꾸 하기", action: "studio",
       points: ["폰꾸 세트", "3D로 미리 보기", "폰+케이스 한 번에"],
       pitch: "폰꾸 세트, 같이 골라 봐.",
     },
@@ -591,24 +569,13 @@ window.SITE = {
       name: "퀵퀵이폰팔이", short: "퀵퀵이", color: "#f08a2c", ink: "#8a3c00",
       quote: "폰은 알아서 잘 고를 거잖아? 근데 받는 건 지금 바로!",
       title: "고르는 건 당신이, 보내는 건 지금 바로",
-      steps: [
-        { t: "급하면 퀵배송·방문 수령", d: "카카오톡 채널이나 1533-3364로 말씀하시면 퀵으로 보내드려요." },
-        { t: "평일 16시까지 신청하면 당일 발송", d: "신청하고 해피콜까지 끝나면 그날 바로 출발해요." },
-        { t: "미개봉 새 제품 그대로", d: "제조사 미개봉 단말기와 사은품을 함께 포장해요. 택배는 제주 외 1일 이내, 제주 2일." },
-        { t: "받고 나서 개통도 OK", d: "배송 후 개통을 원하면 미리 요청해 주세요. 기기변경이면 개통 후에도 쓰던 폰을 계속 쓸 수 있어요." },
-      ],
-      cta: "퀵으로 받기", action: "pick",
       points: ["오늘 퀵 도착", "16시 전 당일 발송", "받고 나서 개통"],
       pitch: "언제, 어떻게 받을래?",
-      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     price: {
       name: "자린고비폰팔이", short: "자린고비", color: "#9c9e6c", ink: "#4d4f22",
       quote: "삼시세끼 라면 먹고 살 거야? 싼 게 제일 중요하지!",
       title: "싼 게 제일 중요하지. 0원부터",
-      products: ["a17", "folder", "s26", "ip17a", "ip17"],
-      sort: true,
-      cta: "최저가 상담", action: "pick",
       points: ["0원폰", "최저 조건 자동 비교", "2년 총액까지"],
       pitch: "뭐가 제일 중요해? 돈 얘기만 하자.",
     },
@@ -616,40 +583,20 @@ window.SITE = {
       name: "세이프티폰팔이", short: "세이프티", color: "#3f4f7d", ink: "#1f2a4d",
       quote: "케어는 나한테 맡겨!",
       title: "개통 전부터 개통 후까지, 케어는 맡겨",
-      steps: [
-        { t: "미개봉 정품만", d: "제조사에서 받은 미개봉 새 제품으로 보내드려요." },
-        { t: "KT 공식인증 대리점", d: "사전승낙서·온라인 공식 인증서를 받은 공식 판매점이에요." },
-        { t: "의무 부가서비스·필수 요금제 없음", d: "원하는 요금제로 가입할 수 있어요." },
-        { t: "할인은 개통 즉시 반영", d: "공식신청서에 안 보여도 걱정 마세요. 개통 후 마이케이티 앱에서 확인돼요." },
-        { t: "막히면 1:1로", d: "실명 인증·요금제 선택에서 막히면 1533-3364(평일 09–18시)로 바로 도와드려요." },
-      ],
-      combo: ["강화 케이스", "강화 필름", "휴대폰 보험"],
-      cta: "안심 상담", action: "consult",
       points: ["미개봉 정품", "보호 3종 세트", "공식인증 대리점"],
       pitch: "지킬 거 골라. 약속은 도장으로.",
-      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     used: {
       name: "중고폰팔이", short: "중고폰", color: "#9c3a55", ink: "#5e1529",
       quote: "진짜 S급! 미개봉 급! 우리 중고폰 관리 잘하는 거 알지?",
       title: "관리 잘된 중고폰, 상담으로 골라 드려요",
-      grades: [
-        { id: "S", name: "S급", d: "사용감 거의 없음" },
-        { id: "U", name: "미개봉급", d: "개봉만 한 수준" },
-      ],
-      note: "재고는 수시로 바뀌어서 상담으로 안내해요.",
-      cta: "중고폰으로 상담 받기", action: "consult",
       points: ["S급·미개봉급", "배터리 보장", "4단계 검수"],
       pitch: "등급이랑 배터리, 네가 정해.",
-      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     allinone: {
       name: "올인원 뷰저폰팔이", short: "올인원", color: "#bdb9a8", ink: "#55513f",
       quote: "폰 사는 데 무슨 고민을 그렇게 해. 그냥 원하는 모델만 말해봐.",
       title: "원하는 모델만 골라 주세요",
-      products: ["ip17", "ip17p", "zf8", "ip18p", "ip17a", "s26"],
-      grid: true,
-      cta: "이 모델로 상담", action: "pick",
       points: ["모델만 고르면 끝", "상담 질문 생략", "최저 조건 자동"],
       pitch: "나머진 내가 알아서 할게. 괜찮지?",
     },
@@ -1386,41 +1333,353 @@ window.SITE = {
 
 </script>
   <script>
-/* 폰파리 가게 — 1mm STORE v6 판매 흐름 + 폰팔이별 셀링포인트 결정
- * 폰 → [셀링포인트] → 상담 → 견적 → 계약 → 배송 → 완료
- * 폰팔이가 말하고(대사창), 소비자는 말풍선 버튼과 테이블 위 물건을 눌러 넘어갑니다.
+/* 1mm STORE v6 상품·지원금 계산 (사용자 본인의 1mm STORE v6 아티팩트에서 옮김, 2026-11-20)
+ * - DATA: Apple/Samsung 전 모델 · 카테고리(CAT_TABS) · 용량별 출고가
+ * - OFFICIAL: SKT 공시지원금(T 다이렉트샵 2026-11-17), KT 공통지원금(KT초이스 2026-11-19)
+ * - MARKET: 모요 휴대폰 성지 공개 목록(2026-11-18) → 번호이동 추가지원금
+ * - MM_SUPPORT: 1mm 매장 지원금, MEMBER_DC: 멤버십, BUNDLE_RULE: 결합 할인, 선택약정 25%
+ * 이미지 경로는 assets/img/ 로 바꿈.
+ */
+(function () {
+const sz=(gb,price,subsidy,est=false)=>({gb,price,subsidy,est});
+const m=(name,gen,c,storages,opt={})=>({name,gen,c,storages,...opt});
+const SOON={soon:true};
+const DATA={
+  apple:{label:"Apple",cats:{
+    duo:{label:"DUO",sub:"애플 첫 폴더블 · 2026.10 출시",art:"fold",c:["#e9e4dc","#9b948a"],img:"assets/img/iphone-duo-white.webp",wide:true,series:[
+      {key:"duo",label:"아이폰 듀오",older:g=>`아이폰 듀오 ${g}세대 이하`,models:[
+        m("iPhone Duo",1,["#e9e4dc","#9b948a"],[sz("256GB",3290000,200000),sz("512GB",3590000,200000,true),sz("1TB",3890000,200000,true)],{img:"assets/img/iphone-duo-white.webp",try3d:"duo"}),
+      ]}]},
+    pro:{label:"Pro",sub:"Pro · Pro Max",art:"pro",c:["#f4b285","#bf5a22"],img:"assets/img/iphone-18-pro.webp",series:[
+      {key:"pro",label:"아이폰 Pro 시리즈",older:g=>`아이폰 ${g} Pro 이하`,models:[
+        m("iPhone 18 Pro",18,["#8d7bb8","#3e3361"],[sz("256GB",1990000,150000),sz("512GB",2290000,150000,true),sz("1TB",2690000,150000,true),sz("2TB",3790000,150000)],{img:"assets/img/iphone-18-pro.webp"}),
+        m("iPhone 18 Pro Max",18,["#e6e2da","#99938a"],[sz("256GB",2190000,150000),sz("512GB",2490000,150000,true),sz("1TB",2890000,150000,true),sz("2TB",3990000,150000)],{img:"assets/img/iphone-18-pro-max.webp"}),
+        m("iPhone 17 Pro",17,["#f4b285","#bf5a22"],[sz("256GB",1790000,250000),sz("512GB",2090000,250000),sz("1TB",2390000,250000)],{img:"assets/img/iphone-17-pro.webp"}),
+        m("iPhone 17 Pro Max",17,["#f4b285","#bf5a22"],[sz("256GB",1990000,280000),sz("512GB",2290000,280000),sz("1TB",2590000,280000),sz("2TB",3290000,280000)],{img:"assets/img/iphone-17-pro.webp"}),
+        m("iPhone 16 Pro",16,["#d9c8b1","#8c7556"],[sz("128GB",1550000,350000),sz("256GB",1700000,350000),sz("512GB",2000000,350000),sz("1TB",2300000,350000)],{img:"assets/img/iphone-16-pro.webp"}),
+        m("iPhone 16 Pro Max",16,["#d9c8b1","#8c7556"],[sz("256GB",1900000,380000),sz("512GB",2200000,380000),sz("1TB",2500000,380000)],{img:"assets/img/iphone-16-pro.webp"}),
+        m("iPhone 15 Pro",15,["#cfc9bd","#7f786c"],[sz("128GB",1550000,450000),sz("256GB",1700000,450000),sz("512GB",2000000,450000)],{img:"assets/img/iphone-15-pro.webp"}),
+        m("iPhone 15 Pro Max",15,["#cfc9bd","#7f786c"],[sz("256GB",1900000,480000),sz("512GB",2200000,480000),sz("1TB",2500000,480000)],{img:"assets/img/iphone-15-pro.webp"}),
+      ]}]},
+    basic:{label:"일반",sub:"기본 · Plus · e",art:"basic",c:["#dacff1","#9884c8"],img:"assets/img/iphone-17.webp",series:[
+      {key:"basic",label:"아이폰 일반 시리즈",older:g=>`아이폰 ${g} 이하`,models:[
+        m("iPhone 17",17,["#dacff1","#9884c8"],[sz("256GB",1290000,300000),sz("512GB",1590000,300000)],{img:"assets/img/iphone-17.webp"}),
+        m("iPhone 17e",17,["#f6d3dc","#c98ea0"],[sz("256GB",990000,350000),sz("512GB",1290000,350000,true)],{img:"assets/img/iphone-17e.webp"}),
+        m("iPhone 16",16,["#9aa6f2","#3f4fc4"],[sz("128GB",1250000,400000),sz("256GB",1400000,400000),sz("512GB",1700000,400000)],{img:"assets/img/iphone-16.webp"}),
+        m("iPhone 16 Plus",16,["#9aa6f2","#3f4fc4"],[sz("128GB",1350000,400000),sz("256GB",1500000,400000),sz("512GB",1800000,400000)],{img:"assets/img/iphone-16.webp"}),
+        m("iPhone 16e",16,["#5a5c62","#1e1f23"],[sz("128GB",990000,450000),sz("256GB",1150000,450000)],{img:"assets/img/iphone-16e.webp"}),
+        m("iPhone 15",15,["#f6cfd9","#c88e9e"],[sz("128GB",1250000,500000),sz("256GB",1400000,500000)],{img:"assets/img/iphone-15.webp"}),
+        m("iPhone 15 Plus",15,["#f6cfd9","#c88e9e"],[sz("128GB",1350000,500000),sz("256GB",1500000,500000)],{img:"assets/img/iphone-15.webp"}),
+      ]}]},
+    air:{label:"Air",sub:"초슬림 디자인",art:"air",c:["#d5e5f5","#8daed2"],img:"assets/img/iphone-air.webp",series:[
+      {key:"air",label:"아이폰 Air",older:g=>`아이폰 Air ${g}세대 이하`,models:[
+        m("iPhone Air",1,["#d5e5f5","#8daed2"],[sz("256GB",1590000,270000),sz("512GB",1890000,270000),sz("1TB",2190000,270000)],{img:"assets/img/iphone-air.webp"}),
+      ]}]},
+    se:{label:"SE",sub:"컴팩트 · 홈버튼",art:"se",c:["#3b404b","#15171d"],img:"assets/img/iphone-se-3.webp",series:[
+      {key:"se",label:"아이폰 SE",older:g=>`아이폰 SE ${g}세대 이하`,models:[
+        m("iPhone SE 3",3,["#3b404b","#15171d"],[sz("64GB",590000,400000),sz("128GB",650000,400000)],{img:"assets/img/iphone-se-3.webp"}),
+      ]}]},
+  }},
+  samsung:{label:"Samsung",cats:{
+    flip:{label:"Z플립",sub:"반으로 접는 폴더블",art:"flip",c:["#86a8ea","#3a5dab"],img:"assets/img/galaxy-z-flip8.webp",series:[
+      {key:"flip",label:"갤럭시 Z플립 시리즈",older:g=>`갤럭시 Z플립${g} 이하`,models:[
+        m("Galaxy Z Flip8",8,["#f6c9e0","#c9789f"],[sz("256GB",1683000,450000),sz("512GB",1936000,450000)],{img:"assets/img/galaxy-z-flip8.webp"}),
+        m("Galaxy Z Flip7",7,["#f3a38f","#c9573f"],[sz("256GB",1485000,550000),sz("512GB",1606000,550000)],{img:"assets/img/galaxy-z-flip7.webp"}),
+        m("Galaxy Z Flip7 FE",7,["#eceef1","#b4b9c2"],[sz("128GB",1199000,600000,true),sz("256GB",1320000,600000,true)],{img:"assets/img/galaxy-z-flip7-fe.webp"}),
+        m("Galaxy Z Flip6",6,["#f3e08c","#c2a43c"],[sz("256GB",1485000,650000),sz("512GB",1606000,650000)],{img:"assets/img/galaxy-z-flip6.webp"}),
+      ]}]},
+    fold:{label:"Z폴드",sub:"펼치면 태블릿",art:"fold",c:["#c7cdd8","#7a8394"],img:"assets/img/galaxy-z-fold8.webp",series:[
+      {key:"fold",label:"갤럭시 Z폴드 시리즈",older:g=>`갤럭시 Z폴드${g} 이하`,models:[
+        m("Galaxy Z Fold8 Ultra",8,["#3e4554","#171a21"],[sz("256GB",2577300,400000,true),sz("512GB",2850000,400000,true),sz("1TB",3451800,400000)],{img:"assets/img/galaxy-z-fold8-ultra.webp"}),
+        m("Galaxy Z Fold8",8,["#dcd3ea","#9b8fb8"],[sz("256GB",2270000,450000,true),sz("512GB",2530000,450000,true),sz("1TB",3152600,450000)],{img:"assets/img/galaxy-z-fold8.webp"}),
+        m("Galaxy Z Fold7",7,["#5a6ea8","#1f2b5c"],[sz("256GB",2379300,500000),sz("512GB",2537700,500000),sz("1TB",2932600,500000)],{img:"assets/img/galaxy-z-fold7.webp"}),
+        m("Galaxy Z Fold6",6,["#f1cfd8","#c3889a"],[sz("256GB",2229700,600000),sz("512GB",2388100,600000)],{img:"assets/img/galaxy-z-fold6.webp"}),
+      ]}]},
+    basic:{label:"일반",sub:"S · S+ · Edge · A",art:"galaxy",c:["#d0e0f1","#84a2c3"],img:"assets/img/galaxy-s26.webp",series:[
+      {key:"s",label:"갤럭시 S시리즈",older:g=>`갤럭시 S${g} 이하`,models:[
+        m("Galaxy S27",27,["#d8dce4","#8a919e"],[],SOON),
+        m("Galaxy S26",26,["#c9c3d6","#8b84a0"],[sz("256GB",1403600,450000),sz("512GB",1557600,450000,true)],{img:"assets/img/galaxy-s26.webp"}),
+        m("Galaxy S26 FE",26,["#cfe9dd","#7aa996"],[sz("256GB",1045000,500000)],{img:"assets/img/galaxy-s26-fe.webp"}),
+        m("Galaxy S26+",26,["#c9c3d6","#8b84a0"],[sz("256GB",1601600,450000),sz("512GB",1755600,450000,true)],{img:"assets/img/galaxy-s26-plus.webp"}),
+        m("Galaxy S25",25,["#d6e3f3","#8ea6c6"],[sz("256GB",1155000,550000),sz("512GB",1270000,550000)],{img:"assets/img/galaxy-s25.webp"}),
+        m("Galaxy S25+",25,["#5b6a8a","#2d3650"],[sz("256GB",1353000,550000),sz("512GB",1479000,550000)],{img:"assets/img/galaxy-s25-plus.webp"}),
+        m("Galaxy S25 Edge",25,["#dbe3f3","#9aa6c2"],[sz("256GB",1496000,550000),sz("512GB",1633000,550000)],{img:"assets/img/galaxy-s25-edge.webp"}),
+        m("Galaxy S24",24,["#7d73b3","#3d3670"],[sz("256GB",1155000,600000)],{img:"assets/img/galaxy-s24.webp"}),
+        m("Galaxy S24 FE",24,["#d3e4f6","#8aa6c8"],[sz("256GB",845000,600000)],{img:"assets/img/galaxy-s24-fe.webp"}),
+      ]},
+      {key:"a",label:"갤럭시 A시리즈",older:g=>`갤럭시 A${g}x 이하`,models:[
+        m("Galaxy A37",7,["#d9dde3","#8f97a3"],[sz("128GB",598400,170000)],{img:"assets/img/kt/c-a37.webp"}),
+        m("Galaxy A17",7,["#cfe3f2","#86a9c8"],[sz("128GB",319000,200000,true)],{img:"assets/img/kt/c-a17.webp"}),
+        m("Galaxy A56",6,["#e3e5e8","#a7abb2"],[sz("128GB",598000,500000),sz("256GB",650000,500000)],{img:"assets/img/galaxy-a56.webp"}),
+        m("Galaxy A36",6,["#55595f","#24272c"],[sz("128GB",499000,450000)],{img:"assets/img/galaxy-a36.webp"}),
+        m("Galaxy A26",6,["#cfe9da","#7fb5a0"],[sz("128GB",429000,400000)],{img:"assets/img/galaxy-a26.webp"}),
+      ]},
+      {key:"folder",label:"폴더폰",older:g=>"폴더폰",models:[
+        m("클래식 폴더",1,["#2b2c30","#111214"],[sz("32GB",205700,150000,true)],{img:"assets/img/kt/c-classic.webp"}),
+      ]}]},
+    ultra:{label:"울트라",sub:"S펜 · 최고 사양",art:"ultra",c:["#cad2dc","#788395"],img:"assets/img/galaxy-s26-ultra.webp",series:[
+      {key:"ultra",label:"갤럭시 S 울트라",older:g=>`갤럭시 S${g} 울트라 이하`,models:[
+        m("Galaxy S27 Ultra",27,["#3a3f4b","#14161c"],[],SOON),
+        m("Galaxy S26 Ultra",26,["#cfe0f0","#7f9cbc"],[sz("256GB",1947000,400000),sz("512GB",2147000,400000,true),sz("1TB",2821500,400000)],{img:"assets/img/galaxy-s26-ultra.webp"}),
+        m("Galaxy S25 Ultra",25,["#c8d0dc","#7b8696"],[sz("256GB",1698400,500000),sz("512GB",1848000,500000),sz("1TB",2147300,500000)],{img:"assets/img/galaxy-s25-ultra.webp"}),
+        m("Galaxy S24 Ultra",24,["#bbb8b1","#6c6860"],[sz("256GB",1698400,600000),sz("512GB",1841400,600000)],{img:"assets/img/galaxy-s24-ultra.webp"}),
+      ]}]},
+  }},
+};
+const OFFICIAL={date:"2026-11-17",skt:{plan:"베스트 109",fee:109000,src:"T 다이렉트샵 공시지원금 조회",list:{"iPhone 15":{"256GB":[1397000,650000],"128GB":[1243000,650000],"512GB":[1694000,650000]},"iPhone Air":{"256GB":[1584000,650000],"512GB":[1881000,650000],"1TB":[2189000,650000]},"iPhone 15 Pro":{"256GB":[1694000,650000],"1TB":[2299000,650000],"512GB":[1991000,650000],"128GB":[1540000,650000]},"Galaxy S24 Ultra":{"256GB":[1544400,630000]},"Galaxy Z Fold8":{"256GB":[2278100,600000],"1TB":[3152600,600000],"512GB":[2531100,600000]},"Galaxy S26 Ultra":{"256GB":[1797400,600000],"512GB":[2050400,600000],"1TB":[2545400,600000]},"Galaxy S26+":{"256GB":[1452000,600000],"512GB":[1705000,600000]},"Galaxy S26":{"256GB":[1254000,600000],"512GB":[1507000,600000]},"Galaxy Z Flip6":{"256GB":[1485000,600000]},"Galaxy S25 Edge":{"256GB":[1254000,580000],"512GB":[1507000,580000]},"Galaxy S26 FE":{"256GB":[1045000,500000]},"Galaxy Z Flip8":{"256GB":[1683000,500000],"512GB":[1936000,500000]},"Galaxy Z Fold8 Ultra":{"256GB":[2577300,500000],"512GB":[2830300,500000],"1TB":[3451800,500000]},"Galaxy S25 FE":{"256GB":[946000,500000]},"Galaxy Z Flip7 FE":{"256GB":[1199000,500000]},"Galaxy Z Flip7":{"256GB":[1485000,500000],"512GB":[1643400,500000]},"Galaxy Z Fold7":{"256GB":[2379300,500000],"512GB":[2537700,500000],"1TB":[2933700,500000]},"Galaxy S25 Ultra":{"256GB":[1698400,500000],"1TB":[2127400,500000],"512GB":[1841400,500000]},"Galaxy S25+":{"256GB":[1353000,500000],"512GB":[1496000,500000]},"Galaxy S25":{"256GB":[1155000,500000],"512GB":[1298000,500000]},"iPhone 15 Plus":{"128GB":[1342000,470000],"512GB":[1793000,470000]},"iPhone Duo":{"256GB":[3300000,450000],"512GB":[3597000,450000],"2TB":[5093000,450000],"1TB":[4191000,450000]},"iPhone 17":{"512GB":[1760000,450000],"256GB":[1452000,450000]},"iPhone 18 Pro":{"256GB":[1991000,450000],"1TB":[2893000,450000],"512GB":[2299000,450000],"2TB":[3795000,450000]},"iPhone 17 Pro":{"256GB":[1782000,450000],"512GB":[2090000,450000],"1TB":[2387000,450000]},"Galaxy A36":{"128GB":[499400,400000]},"Galaxy 퀀텀6":{"128GB":[618200,357000]},"Galaxy 와이드9":{"128GB":[469700,373400]},"Galaxy 퀀텀7":{"128GB":[717200,357000]},"MOTO G86 power":{"256GB":[429000,293400]},"Galaxy 와이드8":{"128GB":[374000,293400]},"iPhone 18 Pro Max":{"1TB":[3091000,220000],"256GB":[2200000,220000],"2TB":[3993000,220000],"512GB":[2497000,220000]},"iPhone 17 Pro Max":{"512GB":[2288000,220000],"256GB":[1980000,220000],"1TB":[2585000,220000]},"iPhone 16e":{"256GB":[1133000,220000],"512GB":[1430000,220000],"128GB":[990000,220000]},"iPhone 16 Pro Max":{"1TB":[2497000,220000],"512GB":[2200000,220000],"256GB":[1892000,220000]},"iPhone 16 Pro":{"128GB":[1540000,220000],"256GB":[1694000,220000],"512GB":[1991000,220000],"1TB":[2299000,220000]},"iPhone 16":{"128GB":[1243000,220000],"256GB":[1397000,220000],"512GB":[1694000,220000]},"Galaxy A37":{"128GB":[598400,170000]},"iPhone 17e":{"256GB":[990000,128000],"512GB":[1287000,128000]},"홍미 14C (4GB RAM)":{"128GB":[149600,125000]}}}};
+const MARKET=/*MARKET*/{"date": "2026-11-18", "src": "모요 휴대폰 성지 공개 목록", "list": {"Galaxy Z Fold8": {"k": "lgu", "total": 1260000, "price": 2278100, "device": 1018100, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 20}, "iPhone 18 Pro": {"k": "skt", "total": 1050000, "price": 1991000, "device": 941000, "seller": "SKT 큰사랑대리점 관악점", "deals": 19}, "Galaxy Z Fold8 Ultra": {"k": "skt", "total": 1180000, "price": 2577300, "device": 1397300, "seller": "SKT 이안대리점 낙성대역점", "deals": 20}, "iPhone 18 Pro Max": {"k": "lgu", "total": 664000, "price": 2200000, "device": 1536000, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 18}, "Galaxy Z Flip8": {"k": "skt", "total": 1180000, "price": 1683000, "device": 503000, "seller": "SKT 이안대리점 낙성대역점", "deals": 20}, "iPhone Duo": {"k": "lgu", "total": 900000, "price": 3300000, "device": 2400000, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 14}, "Galaxy S26": {"k": "lgu", "total": 1254000, "price": 1254000, "device": 0, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 19}, "iPhone 17": {"k": "lgu", "total": 1062500, "price": 1452000, "device": 389500, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 18}, "Galaxy S26 Ultra": {"k": "lgu", "total": 1244500, "price": 1797400, "device": 552900, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 21}, "iPhone 17 Pro": {"k": "lgu", "total": 1050000, "price": 1782000, "device": 732000, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 10}, "Galaxy S26+": {"k": "lgu", "total": 1170000, "price": 1452000, "device": 282000, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 15}, "Galaxy Z Fold7": {"k": "skt", "total": 880000, "price": 2379300, "device": 1499300, "seller": "SKT 이안대리점 낙성대역점", "deals": 2}, "iPhone 17 Pro Max": {"k": "lgu", "total": 704000, "price": 1980000, "device": 1276000, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 13}, "iPhone Air": {"k": "skt", "total": 1400000, "price": 1584000, "device": 184000, "seller": "SKT 큰사랑대리점 관악점", "deals": 21}, "Galaxy S25 Edge": {"k": "skt", "total": 960000, "price": 1496000, "device": 536000, "seller": "SKT 이안대리점 낙성대역점", "deals": 3}, "Galaxy S25": {"k": "kt", "total": 680000, "price": 1155000, "device": 475000, "seller": "KT 친절텔레콤 서울대점", "deals": 6}, "iPhone 16 Pro": {"k": "skt", "total": 220000, "price": 1540000, "device": 1320000, "seller": "SKT 이안대리점 낙성대역점", "deals": 2}, "Galaxy S25 Ultra": {"k": "skt", "total": 720000, "price": 1698400, "device": 978400, "seller": "SKT 이안대리점 낙성대역점", "deals": 9}, "iPhone 16 Pro Max": {"k": "lgu", "total": 900000, "price": 1892000, "device": 992000, "seller": "LGU+ 더끌림컴퍼니 낙성대입구역점", "deals": 6}}}/*END*/;
+for(const b of Object.values(DATA))for(const c of Object.values(b.cats))for(const se of c.series)for(const md of se.models){
+  const m=MARKET.list[md.name];if(m&&md.storages)for(const st of md.storages)st.mkt=m;
+}
+for(const b of Object.values(DATA))for(const c of Object.values(b.cats))for(const se of c.series)for(const md of se.models){
+  const o=OFFICIAL.skt.list[md.name];if(!o||!md.storages)continue;
+  for(const st of md.storages){const v=o[st.gb];if(v){st.price=v[0];st.est=false;st.pub={skt:v[1]};}}
+}
+// KT 공통지원금: KT초이스 공개 페이지 표시값(허락 받음, 2026-11-19 수집) · 베이직 110GB(69,000원) 기준 · 기기 할인가와 월 할부금 계산이 맞아떨어지는 4종만
+OFFICIAL.kt={plan:"베이직 110GB",fee:69000,src:"KT초이스 공개 페이지 (2026-11-19)",lbl:"공통지원금(KT초이스 표시)",list:{"iPhone 18 Pro":400000,"iPhone 17":500000,"Galaxy Z Fold8":600000,"iPhone 17 Pro":450000}};
+for(const b of Object.values(DATA))for(const c of Object.values(b.cats))for(const se of c.series)for(const md of se.models){
+  const v=OFFICIAL.kt.list[md.name];if(v&&md.storages)for(const st of md.storages)st.pub=Object.assign(st.pub||{},{kt:v});
+}
+const C=(n,h,i=null)=>({n,h,img:i&&i!=="@"&&!i.startsWith("assets/img/")?`assets/img/col/${i}.webp`:i});
+const COLORS={
+  "iPhone Duo":[C("스타 화이트","#ece8e0","assets/img/iphone-duo-white.webp"),C("나이트 스카이","#2b3140","assets/img/iphone-duo-night.webp")],
+  "iPhone 17 Pro":[C("코스믹 오렌지","#e8823f","@"),C("딥 블루","#2e3b5a"),C("실버","#dfe1e4")],
+  "iPhone 17 Pro Max":[C("코스믹 오렌지","#e8823f","@"),C("딥 블루","#2e3b5a"),C("실버","#dfe1e4")],
+  "iPhone 17":[C("라벤더","#d9c9ea","i17-lavender"),C("미스트 블루","#a9c0dc","i17-mistblue"),C("세이지","#b6c7a0","i17-sage"),C("화이트","#f2f2f2","i17-white"),C("블랙","#2b2b2d","i17-black")],
+  "iPhone Air":[C("스카이 블루","#c9dbee","air-blue"),C("라이트 골드","#ece2cc","air-gold"),C("클라우드 화이트","#f3f3f1","air-white"),C("스페이스 블랙","#2a2a2c","air-black")],
+  "iPhone 16 Pro":[C("데저트 티타늄","#c8ad8a","@"),C("내추럴 티타늄","#bdb6aa"),C("화이트 티타늄","#e8e6e1"),C("블랙 티타늄","#3a3a3c")],
+  "iPhone 16 Pro Max":[C("데저트 티타늄","#c8ad8a","@"),C("내추럴 티타늄","#bdb6aa"),C("화이트 티타늄","#e8e6e1"),C("블랙 티타늄","#3a3a3c")],
+  "iPhone 16":[C("울트라마린","#5a6ee0","@"),C("틸","#a6d3cd"),C("핑크","#f3c1d3"),C("화이트","#f2f2f2"),C("블랙","#2e2e30")],
+  "iPhone 16 Plus":[C("울트라마린","#5a6ee0","@"),C("틸","#a6d3cd"),C("핑크","#f3c1d3"),C("화이트","#f2f2f2"),C("블랙","#2e2e30")],
+  "iPhone 16e":[C("블랙","#2e2e30","@"),C("화이트","#f2f2f2")],
+  "iPhone 15":[C("핑크","#f3d5d8","@"),C("옐로","#f5ebc0"),C("그린","#d9e5cf"),C("블루","#cfe0ea"),C("블랙","#3b3d40")],
+  "iPhone 15 Plus":[C("핑크","#f3d5d8","@"),C("옐로","#f5ebc0"),C("그린","#d9e5cf"),C("블루","#cfe0ea"),C("블랙","#3b3d40")],
+  "iPhone 15 Pro":[C("내추럴 티타늄","#bdb6aa","@"),C("블루 티타늄","#3f4a5c"),C("화이트 티타늄","#e8e6e1"),C("블랙 티타늄","#3a3a3c")],
+  "iPhone 15 Pro Max":[C("내추럴 티타늄","#bdb6aa","@"),C("블루 티타늄","#3f4a5c"),C("화이트 티타늄","#e8e6e1"),C("블랙 티타늄","#3a3a3c")],
+  "iPhone SE 3":[C("미드나이트","#2a2e36"),C("스타라이트","#f0ebe2"),C("(PRODUCT)RED","#c8102e")],
+  "Galaxy Z Flip8":[C("핑크","#f6c9e0","flip8-pink"),C("그린","#cfe8b8","flip8-green"),C("화이트","#f2f2f4","flip8-white"),C("블랙","#2c2d31","flip8-black")],
+  "Galaxy Z Flip7":[C("코랄레드","#f3a38f","flip7-coral"),C("민트","#cfe9e3","flip7-mint"),C("제트블랙","#2a2b2f","flip7-black"),C("블루 섀도우","#3a4f9a")],
+  "Galaxy Z Flip7 FE":[C("화이트","#eceef1","@"),C("블랙","#2a2b2f")],
+  "Galaxy Z Flip6":[C("옐로","#f3e08c","flip6-yellow"),C("블루","#b8c8f0","flip6-blue"),C("민트","#c9ebd8","flip6-mint"),C("실버 섀도우","#c9ccd1","flip6-silver"),C("피치","#f6b49c","flip6-peach"),C("화이트","#f2f2f2","flip6-white"),C("크래프티드 블랙","#2b2c30","flip6-black")],
+  "Galaxy Z Fold8 Ultra":[C("그레이","#3e4554","fold8u-gray"),C("버건디","#4a2232","fold8u-burgundy"),C("그린","#2f3b32","fold8u-green"),C("화이트","#f1f1ef","fold8u-white")],
+  "Galaxy Z Fold8":[C("라벤더","#dcd3ea","fold8-lavender"),C("민트","#cfe3df","fold8-mint"),C("화이트","#f4f4f2","fold8-white"),C("그레이","#3b3f48","fold8-gray")],
+  "Galaxy Z Fold7":[C("블루 섀도우","#2c3e7a","fold7-blue"),C("실버 섀도우","#c4c7cc","fold7-silver"),C("제트블랙","#1f2024","fold7-black"),C("민트","#d5ebe6","fold7-mint")],
+  "Galaxy Z Fold6":[C("핑크","#f1cfd8","fold6-pink"),C("실버 섀도우","#c4c7cc","fold6-silver"),C("네이비","#2f3a55","fold6-navy"),C("크래프티드 블랙","#1f2024","fold6-black"),C("화이트","#f2f2f2","fold6-white")],
+  "Galaxy S26 Ultra":[C("스카이 블루","#c6dbea","s26u-skyblue"),C("바이올렛","#5d5a8f","s26u-violet"),C("화이트","#f2f2f2","s26u-white")],
+  "Galaxy S26 FE":[C("민트","#cfe9da","s26fe-mint"),C("네이비","#33396a","s26fe-navy"),C("그레이","#3a3c42","s26fe-gray")],
+  "Galaxy S25":[C("아이시블루","#c9d9ee","s25-icyblue"),C("민트","#cbe8d9","s25-mint"),C("네이비","#26346a","s25-navy"),C("실버 섀도우","#b9bcc1","s25-silver")],
+  "Galaxy S25+":[C("아이시블루","#c9d9ee","s25p-icyblue"),C("민트","#cbe8d9","s25p-mint"),C("네이비","#26346a","s25p-navy"),C("실버 섀도우","#b9bcc1","s25p-silver")],
+  "Galaxy S25 Ultra":[C("티타늄 실버블루","#9fb0c4","s25u-silverblue"),C("티타늄 그레이","#8c8a85","s25u-gray"),C("티타늄 화이트실버","#e6e4e0","s25u-whitesilver"),C("티타늄 블랙","#2d2f33","s25u-black")],
+  "Galaxy S24":[C("코발트 바이올렛","#6f5fb0","s24-violet"),C("앰버 옐로","#efe2b3","s24-yellow"),C("마블 그레이","#c9c9c9","s24-gray"),C("오닉스 블랙","#2b2c30","s24-black"),C("제이드 그린","#cfe6d2","s24-green"),C("사파이어 블루","#b9c6e6","s24-blue"),C("샌드스톤 오렌지","#e49a6a","s24-orange")],
+  "Galaxy S24 Ultra":[C("티타늄 그레이","#8c8a85","s24u-gray"),C("티타늄 바이올렛","#4b4560","s24u-violet"),C("티타늄 옐로","#e8dcae","s24u-yellow"),C("티타늄 블랙","#2d2f33","s24u-black"),C("티타늄 그린","#cfe2d0","s24u-green"),C("티타늄 블루","#b8c8de","s24u-blue"),C("티타늄 오렌지","#e1915e","s24u-orange")],
+  "Galaxy S24 FE":[C("블루","#cddcf0","@"),C("민트","#cfe9da"),C("옐로","#f2e6a6"),C("그레이","#c9cacc"),C("블랙","#2b2c30")],
+  "Galaxy A56":[C("라이트그레이","#e3e5e8","@"),C("그래파이트","#4b4e56"),C("올리브","#a7b39c"),C("핑크","#ecd3dc")],
+  "Galaxy A36":[C("블랙","#2b2c30","@"),C("화이트","#f2f2f2"),C("라벤더","#ddd3ee"),C("라임","#dfeec2")],
+  "Galaxy A26":[C("민트","#cfe9da","@"),C("블랙","#2b2c30"),C("화이트","#f2f2f2"),C("피치핑크","#f3cfc4")],
+};
+const TIERS=["최소","적당히","넉넉하게","무제한 1Mbps","무제한 3Mbps","무제한 5Mbps","완전 무제한"];
+const INF=Infinity;
+const PLANS={
+  skt:[{n:"라이트39",fee:39000,gb:6,qos:400},{n:"라이트49",fee:49000,gb:11,qos:400},{n:"라이트55",fee:55000,gb:15,qos:1000},
+       {n:"라이트59",fee:59000,gb:24,qos:1000},{n:"라이트69",fee:69000,gb:110,qos:5000,chk:1},
+       {n:"베스트89",fee:89000,gb:INF,qos:0},{n:"베스트Max",fee:129000,gb:INF,qos:0}],
+  kt:[{n:"베이직 600MB",fee:28900,gb:0.6,qos:400},{n:"베이직 1.4GB",fee:33000,gb:1.4,qos:400},{n:"베이직 4GB",fee:37000,gb:4,qos:400},
+      {n:"베이직 7GB",fee:45000,gb:7,qos:400},{n:"베이직 10GB",fee:50000,gb:10,qos:400},{n:"베이직 14GB",fee:55000,gb:14,qos:1000},
+      {n:"베이직 30GB",fee:61000,gb:30,qos:1000},{n:"베이직 50GB",fee:63000,gb:50,qos:1000},{n:"베이직 110GB",fee:69000,gb:110,qos:5000},
+      {n:"초이스90",fee:90000,gb:INF,qos:0},{n:"초이스110",fee:110000,gb:INF,qos:0}],
+  lgu:[{n:"데이터플랜 300MB",fee:28000,gb:0.3,qos:400},{n:"데이터플랜 9GB",fee:47000,gb:9,qos:400},{n:"데이터플랜 14GB",fee:55000,gb:14,qos:1000},
+       {n:"데이터플랜 95GB",fee:68000,gb:95,qos:3000},{n:"데이터플랜 125GB",fee:70000,gb:125,qos:5000},{n:"데이터플랜 150GB",fee:75000,gb:150,qos:5000},
+       {n:"데이터플랜MAX",fee:85000,gb:INF,qos:0},{n:"플러스플랜95",fee:95000,gb:INF,qos:0}],
+};
+const TIER_RULE=[p=>true, p=>p.gb>=10, p=>p.gb>=50, p=>p.qos>=1000||p.qos===0, p=>p.qos>=3000||p.qos===0, p=>p.qos>=5000||p.qos===0, p=>p.qos===0];
+const pickPlan=(k,t)=>PLANS[k].filter(TIER_RULE[t]).sort((a,b)=>a.fee-b.fee)[0];
+const gbText=p=>p.gb===INF?"무제한":p.gb<1?Math.round(p.gb*1000)+"MB":p.gb+"GB";
+const qosText=p=>p.qos===0?"속도 제한 없음":p.qos>=1000?`다 쓰면 ${p.qos/1000}Mbps`:`다 쓰면 ${p.qos}Kbps`;
+const QOS_PLAN=n=>{for(const k in PLANS){const p=PLANS[k].find(x=>x.n===n);if(p)return p;}return null;};
+const qTag=n=>{const p=typeof n==="string"?QOS_PLAN(n):n;return p&&[1000,3000,5000].includes(p.qos)?`<span class="qtag q${p.qos/1000}">다 쓰면 ${p.qos/1000}Mbps</span>`:"";};
+const planLine=p=>`${p.n}${p.n.includes(gbText(p))?"":" · "+gbText(p)}${p.qos?" · 다 쓰면 "+qosText(p).replace("다 쓰면 ",""):" · 속도 제한 없음"}`;
+const CARRIERS={
+  skt:{name:"SKT",color:"#ea5b1e",sub:1.0},
+  kt:{name:"KT",color:"#e2242c",sub:1.1},
+  lgu:{name:"LG U+",color:"#d6177d",sub:1.2},
+};
+for(const k in CARRIERS)CARRIERS[k].plans=TIERS.map((_,t)=>t).map(t=>pickPlan(k,t).fee);
+const EXTRA={"번호이동":200000,"기기변경":50000,"신규":120000};
+const MM_SUPPORT=50000;
+const INSTALL_RATE=0.059;
+const inv=(id,brand,name,art,gb,grade,battery,price,colors)=>({id,brand,name,art,gb,grade,battery,price,colors});
+const col=(name,hex,qty)=>({name,hex,qty});
+const USED=[
+  inv("u1","apple","iPhone 17 Pro","pro","256GB","S",100,1450000,[col("코스믹 오렌지","#e8823f",2),col("실버","#dfe1e4",1),col("딥 블루","#2e3b5a",0)]),
+  inv("u2","apple","iPhone 16 Pro","pro","256GB","A",91,1050000,[col("데저트 티타늄","#c8ad8a",3),col("블랙 티타늄","#3a3a3c",2)]),
+  inv("u3","apple","iPhone 16","basic","128GB","A",94,790000,[col("울트라마린","#5a6ee0",1),col("화이트","#f2f2f2",2),col("핑크","#f3c1d3",0)]),
+  inv("u4","apple","iPhone 15 Pro Max","pro","256GB","B",86,920000,[col("내추럴 티타늄","#bdb6aa",2),col("블루 티타늄","#3f4a5c",1)]),
+  inv("u5","apple","iPhone 15","basic","128GB","A",89,620000,[col("블랙","#3b3d40",3),col("블루","#cfe0ea",1)]),
+  inv("u6","samsung","Galaxy S25 Ultra","ultra","256GB","S",99,1190000,[col("티타늄 실버블루","#9fb0c4",2),col("티타늄 블랙","#2d2f33",1)]),
+  inv("u7","samsung","Galaxy S24 Ultra","ultra","256GB","A",90,850000,[col("티타늄 그레이","#8c8a85",2),col("티타늄 바이올렛","#8c7fa8",1)]),
+  inv("u8","samsung","Galaxy Z Fold6","fold","256GB","B",87,1090000,[col("실버 섀도우","#bfc3c9",1),col("네이비","#2f3a55",0)]),
+  inv("u9","samsung","Galaxy Z Flip6","flip","256GB","A",92,720000,[col("블루","#9bb4e0",1),col("실버 섀도우","#c9ccd1",2)]),
+  inv("u10","samsung","Galaxy S24","galaxy","256GB","A",93,580000,[col("앰버 옐로","#e8cc6a",1),col("코발트 바이올렛","#6f5fb0",2)]),
+];
+const stock=it=>it.colors.reduce((a,c)=>a+c.qty,0);
+const won=n=>Math.round(n).toLocaleString("ko-KR")+"원";
+const man=n=>(Math.round(n/1000)/10).toLocaleString("ko-KR")+"만원";
+const monthlyInstall=(p,months)=>{const r=INSTALL_RATE/12;return p<=0?0:Math.round(p*r*Math.pow(1+r,months)/(Math.pow(1+r,months)-1));};
+const colorsOf=md=>typeof COLORS!=="undefined"&&COLORS[md.name]||[];
+const curCol=md=>{const L=colorsOf(md);return L[Math.min(S.mcol||0,L.length-1)]||null;};
+const mdImg=md=>{const c=curCol(md);return c&&c.img?(c.img==="@"?md.img:c.img):md.img;};
+const S={screen:"home",mode:null,brand:null,cat:null,bucket:null,model:null,storageIdx:0,cur:null,tier:5,months:24,pick:null,w:{cur:null,budget:100000,tier:5,brand:"any",kind:"all"},
+  pay:"full",con:"best",ub:"all",used:null,colorIdx:0,cart:null,track:null,errors:{},
+  f:{name:"",phone:"",birth:"",sido:"",sigungu:"",detail:"",remote:false,req:"문 앞에 놓아주세요",ship:null,a1:false,a2:false,
+     q:"",road:"",jibun:"",zip:"",manual:false,picked:false}};
+const cat=()=>DATA[S.brand].cats[S.cat];
+const allModels=c=>c.series.flatMap(s=>s.models);
+const R=[];
+const ref=x=>{R.push(x);return R.length-1;};
+function mmModels(){const o=[];for(const [b,B] of Object.entries(DATA))for(const [ck,c] of Object.entries(B.cats))for(const se of c.series)for(const m of se.models)if(!m.soon&&m.storages&&m.storages.length)o.push({b,ck,c,m});return o;}
+const mmUsed=name=>USED.filter(u=>u.name===name&&stock(u)>0).sort((a,b)=>a.price-b.price);
+const mmModelOf=name=>mmModels().find(x=>x.m.name===name);
+const MM_WORDS=[["아이폰","iphone"],["애플","iphone"],["갤럭시","galaxy"],["삼성","galaxy"],["폴드","fold"],["플립","flip"],["울트라","ultra"],["프로맥스","promax"],["프로","pro"],["맥스","max"],["플러스","plus"],["에어","air"],["듀오","duo"],["엣지","edge"],["에스","s"],["에이","a"],["+","plus"]];
+function mmNorm(t){t=t.toLowerCase();for(const [k,v] of MM_WORDS)t=t.split(k).join(v);return t.replace(/\s+/g,"").replace(/iphone|galaxy/g,"").replace(/z(?=fold|flip)/g,"");}
+function mmFind(q){
+  const n=mmNorm(q);if(!n)return [];
+  return mmModels().map(x=>{const k=mmNorm(x.m.name);const i=k.indexOf(n);return i<0?null:{x,score:(i===0?0:10)+(k.length-n.length)};}).filter(Boolean)
+    .sort((a,b)=>a.score-b.score||(b.x.m.gen||0)-(a.x.m.gen||0)).slice(0,6).map(r=>r.x);
+}
+const MM_HOT=["iPhone 18 Pro","iPhone Duo","iPhone 17","Galaxy Z Fold8","Galaxy S26 Ultra","Galaxy Z Flip8","iPhone 18 Pro Max","Galaxy S26"];
+const MVNO_PLANS=[13200,22000,29700,22000,29700,33000,39000];
+const keepBundle=cur=>S.bundle==="keep"&&!!CARRIERS[cur];
+const BUNDLE_RULE={
+  kt:{name:"프리미엄 가족결합",f:fee=>fee>=77000?Math.round(fee*.25/10)*10:5500},
+  skt:{name:"요즘가족결합",f:fee=>fee>=69000?11000:5500},
+  lgu:{name:"참 쉬운 가족결합",f:fee=>fee>=65890?11000:5500}};
+const bundleDc=(k,fee)=>BUNDLE_RULE[k]?BUNDLE_RULE[k].f(fee):0;
+function selfPlan(tier,cur){
+  const mv={fee:MVNO_PLANS[tier],label:"알뜰폰 요금"};
+  // 결합 유지: 알뜰폰으로 옮기면 결합이 깨지니 지금 통신사 요금(선택약정 25%)으로
+  if(keepBundle(cur)){const f=CARRIERS[cur].plans[tier],b=bundleDc(cur,f);return {fee:Math.max(0,Math.round(f*.75)-b),bdc:b,label:`${CARRIERS[cur].name} 선택약정 · 결합 -${won(b)}`};}
+  if(CARRIERS[cur]){const k=Math.round(CARRIERS[cur].plans[tier]*.75);if(k<mv.fee)return {fee:k,label:`${CARRIERS[cur].name} 선택약정 요금`};}
+  return mv;
+}
+const CAT_TABS={apple:[["duo",["duo"],"DUO"],["pro",["pro"],"Pro"],["basic",["basic"],"일반"],["airse",["air","se"],"Air · SE"]],
+  samsung:[["fold",["fold"],"Z폴드"],["flip",["flip"],"Z플립"],["basic",["basic"],"일반"],["ultra",["ultra"],"울트라"]]};
+function catTabs(b,has){return CAT_TABS[b].map(([k,cs,l])=>[k,cs.filter(c=>DATA[b].cats[c]&&(!has||has(c))),l]).filter(t=>t[1].length);}
+const CMP_MONTHS=24;
+const instLabel=m=>m?m+"개월 할부":"일시불";
+const CON_NAME={sub:"공시지원금",sel24:"선택약정 24개월",sel12:"선택약정 12개월"};
+function pubSub(s,k,pp){
+  const o=s.pub&&s.pub[k],ref=OFFICIAL[k];
+  if(o&&ref){const r=Math.min(1,pp.fee/ref.fee);return {amt:Math.round(o*r/1000)*1000,src:r>=1?"official":"scaled",label:`${CARRIERS[k].name} ${ref.lbl||"공식"}`+(r>=1?"":` ${man(o)}에서 요금 비례`)};}
+  // 공식 데이터가 없는 통신사: SKT 공식값(없으면 기본 예시값)을 같은 요금 비례로 적용한 추정치
+  const base=(s.pub&&s.pub.skt)||s.subsidy,r=Math.min(1,pp.fee/OFFICIAL.skt.fee);
+  return {amt:Math.round(base*r/1000)*1000,src:"sample",label:"예시"};
+}
+function mktExtra(s,k,way,fee){
+  const m=s.mkt;if(!m||m.k!==k||way!=="번호이동")return 0;
+  const top=(s.pub&&s.pub[k])||(s.pub&&s.pub.skt)||s.subsidy;
+  const ex=Math.max(0,m.total-top-MM_SUPPORT);
+  return Math.round(ex*Math.min(1,fee/OFFICIAL.skt.fee)/1000)*1000;
+}
+const qosLabel=q=>q===0?"속도 줄지 않음":q>=5000?"5Mbps · 영상 1080p":q>=3000?"3Mbps · 영상 720p":q>=1000?"1Mbps · 영상 360p":`${q}Kbps · 카톡·검색`;
+function tierInfo(t){
+  const ps=Object.keys(CARRIERS).map(k=>planFor(k,t)),gbs=ps.map(p=>p.gb===INF?Infinity:p.gb),lo=Math.min(...gbs),hi=Math.max(...gbs),qos=Math.min(...ps.map(p=>p.qos));
+  if(lo===Infinity)return {base:"무제한",after:"속도 줄지 않음",video:"영상 시간 제한 없음",unl:true};
+  return {base:lo===hi?`${Math.round(lo)}GB`:`${Math.round(lo)}~${Math.round(hi)}GB`,after:qosLabel(qos),video:`HD 영상 약 ${Math.round(lo/1.5)}시간`,unl:false};
+}
+function planFor(k,t){const n=S.planSel&&S.planSel[k];return (n&&PLANS[k].find(p=>p.n===n))||pickPlan(k,t);}
+function calcOptions(s,cur,t,months,con="best"){
+  const out=[];
+  for(const [k,c] of Object.entries(CARRIERS)){
+    if(keepBundle(cur)&&k!==cur)continue; // 결합 유지: 지금 통신사 기기변경만
+    const way=cur==="none"?"신규":cur===k?"기기변경":"번호이동",pp=planFor(k,t),plan=pp.fee,ps=pubSub(s,k,pp),subsidy=ps.amt,mx=mktExtra(s,k,way,plan),extra=Math.max(EXTRA[way],mx),extraSrc=mx>EXTRA[way]?"market":"sample";
+    for(const m of con==="best"?["sub","sel24"]:[con]){
+      const sel=m!=="sub", discMon=m==="sel12"?12:CMP_MONTHS;
+      const sub=sel?0:subsidy, mem=memDc(), principal=Math.max(0,s.price-sub-extra-MM_SUPPORT-mem);
+      // months=기기값 결제 방식(0=일시불, 12·24·36=할부). 비교는 약정 기준 24개월 총 비용으로 통일
+      const bdc=keepBundle(cur)&&k===cur?bundleDc(k,plan):0; // 결합 유지 할인
+      const deviceMonthly=months?monthlyInstall(principal,months):0, planMonthly=Math.max(0,plan-(sel?Math.round(plan*.25):0)-bdc);
+      const deviceTotal=months?deviceMonthly*months:principal, interest=deviceTotal-principal;
+      out.push({id:k+"-"+m,con:m,pubSrc:ps.src,pubLabel:ps.label,extraSrc,carrier:c.name,color:c.color,way,planName:pp.n,planLine:planLine(pp),planChk:!!pp.chk,
+        method:sel?`${CON_NAME[m]} (요금 25% 할인)`:"공시지원금 (기기값 할인)",
+        price:s.price,subsidy:sub,extra,principal,deviceMonthly,planMonthly,planDiscount:sel?Math.round(plan*.25):0,
+        inst:months,deviceTotal,interest,upfront:months?0:principal,
+        monthly:deviceMonthly+planMonthly,grand:deviceTotal+plan*CMP_MONTHS-(sel?Math.round(plan*.25)*discMon:0)-bdc*CMP_MONTHS,
+        bundleDc:bdc,bundleName:bdc?BUNDLE_RULE[k].name:"",mem,saved:sub+extra+MM_SUPPORT+mem+bdc*CMP_MONTHS+(sel?Math.round(plan*.25)*discMon:0)});
+    }
+  }
+  return out.sort((a,b)=>a.grand-b.grand);
+}
+S.planSel=S.planSel||{};
+function refundRules(mode){
+  if(mode==="used")return [["no","사용 시작 후 단순 변심 반품 불가","유심을 끼우면 사용 시작"],["ok","받은 그대로면 7일 안 반품",""],["ok","기기 결함은 7일 안 교환·환불",""]];
+  return [["no",(mode==="carrier"?"개봉·개통":"개봉")+" 후 단순 변심 반품 불가","비닐을 뜯는 순간 중고가 돼요"],["ok","미개봉이면 7일 안 반품",""],["ok","불량은 개봉 후에도 7일 안 교환·환불",""]];
+}
+function finCalc(f,m){
+  const dev=m?monthlyInstall(f.principal,m):0,devTotal=m?dev*m:f.principal;
+  return {m,up:m?0:f.principal,dev,interest:devTotal-f.principal,mon:dev+f.planMonthly,
+    total:devTotal+f.planFee*CMP_MONTHS-f.planDisc*f.discMon-(f.bundleDc||0)*CMP_MONTHS};
+}
+const MEMBER_DC=30000;
+const memDc=()=>S.member?MEMBER_DC:0;
+const selfPrice=s=>Math.max(0,s.price-memDc());
+const kpF=d=>`${String(d.getFullYear()).slice(2)}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`;
+const KEEP={days:183,months:6,alerts:[[30,"1개월 전"],[14,"2주 전"],[7,"1주 전"],[0,"당일"]]};
+const DOW="일월화수목금토";
+const kAddD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const kAddM=(d,m)=>{const x=new Date(d);const day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+m);x.setDate(Math.min(day,new Date(x.getFullYear(),x.getMonth()+1,0).getDate()));return x;};
+function keepDates(start,conM=24){return {start,cal:kAddM(start,KEEP.months),safe:kAddD(start,KEEP.days),con:kAddM(start,conM)};}
+S.planSel = {};
+window.CAT = { DATA, OFFICIAL, MARKET, COLORS, PLANS, CARRIERS, TIERS, EXTRA, MM_SUPPORT, MEMBER_DC, USED, BUNDLE_RULE, CAT_TABS, S,
+  calcOptions, selfPlan, pickPlan, planFor, planLine, pubSub, catTabs, allModels, colorsOf, monthlyInstall, stock, keepDates, mmModels, mmUsed, mmModelOf, qosText, gbText,
+  imgOf: function (md, ci) { var c = colorsOf(md)[ci || 0]; return c && c.img ? (c.img === "@" ? md.img : c.img) : md.img; } };
+})();
+
+</script>
+  <script>
+/* 폰파리 가게 — 1mm STORE v6 판매 흐름 + v6 상품·지원금 계산(catalog.js) + 폰팔이별 셀링포인트
+ * 폰(제조사 → 카테고리 → 모델 → 색·용량) → [셀링포인트] → 상담 → 견적 → 계약 → 배송 → 완료
  */
 (function () {
   "use strict";
-  var D = window.SITE, K = D.shop, $ = function (s) { return document.querySelector(s); };
+  var D = window.SITE, K = D.shop, C = window.CAT, $ = function (s) { return document.querySelector(s); };
   var won = function (n) { return Math.round(n).toLocaleString("ko-KR") + "원"; };
   var man = function (n) { n = Math.round(n / 1000) * 1000; if (Math.abs(n) < 10000) return won(n); var m = n / 10000; return (Number.isInteger(m) ? m : m.toFixed(1)) + "만"; };
-  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var byId = function (list, id) { return list.filter(function (x) { return x.id === id; })[0]; };
 
-  var POINT_LABEL = { designer: "폰꾸", quick: "받는 법", price: "우선순위", safe: "보호", used: "등급", allinone: "맡기기" };
+  var POINT_LABEL = { designer: "폰꾸", quick: "받는 법", price: "우선순위", safe: "보호", used: "중고 고르기", allinone: "맡기기" };
   var MISSION = function (d) { return [["📱", "폰"], ["★", POINT_LABEL[d]], ["💬", "상담"], ["🧾", "견적"], ["✍️", "계약"], ["📦", "배송"], ["🎉", "완료"]]; };
+  var CURS = [["skt", "SKT"], ["kt", "KT"], ["lgu", "LG U+"], ["mvno", "알뜰폰"], ["mvno2", "자급제폰"], ["none", "새로 개통"]];
+  var DATA_OPTS = [[0, "적게", "카톡·검색", "▁"], [1, "적당히", "영상 가끔", "▃"], [2, "넉넉히", "영상 자주", "▅"], [5, "무제한", "다 써도 5Mbps", "█"]];
 
   var G, CUR, HIST, typing, opts = {};
   function fresh(dealer) {
     return {
-      dealer: dealer, model: null, ci: 0, sto: "256GB",
+      dealer: dealer, brand: "apple", tab: null, md: null, si: 0, ci: 0,
       deco: { case: "clear", keyring: "none", back: "none" },
       quick: { speed: "now", open: "after" }, focus: "monthly",
-      safe: { case: true, film: true, care: true }, stamps: {},
-      used: { grade: "S", bat: "85" }, auto: false,
-      cur: null, bundle: "free", tier: null, method: null, con: null, months: 24,
+      safe: { case: true, film: true, care: true }, stamps: {}, usedId: null, auto: false,
+      cur: null, bundle: "free", tier: null, pick: null, con: null, months: 24,
       member: false, agree: {}, signed: false, ink: 0, ship: null, f: { name: "", phone: "", addr: "" }, err: {}, no: null,
     };
   }
+  function sync() { C.S.member = G.member; C.S.bundle = G.bundle; C.S.planSel = {}; }
+  var curKey = function () { return G.cur === "mvno2" ? "mvno" : G.cur; };
+  var sto = function () { return G.md.storages[G.si]; };
+  var colors = function () { return C.colorsOf(G.md); };
+  var img = function (md, ci) { return C.imgOf(md, ci); };
 
-  /* ---------- 계산 ---------- */
-  function prod() {
-    var p = D.products[G.model], add = (D.storageAdd || {})[G.sto] || 0;
-    return { name: p.name, list: p.list + add, price: p.price + add, p: p };
+  /* ---------- 지원금 요약 (진열대 가격표용) ---------- */
+  function bestSupport(md) { // 3사 중 가장 큰 기기값 지원 (공시 + 추가 + 1mm 매장 지원), 번호이동 · 무제한 기준
+    var s = md.storages[0]; sync();
+    var L = C.calcOptions(s, "mvno", 5, 24, "sub");
+    var best = L.reduce(function (a, o) { var t = o.subsidy + o.extra + C.MM_SUPPORT; return t > a.t ? { t: t, o: o } : a; }, { t: 0, o: null });
+    return best;
   }
-  function inst(principal, n) { if (!n || principal <= 0) return 0; var r = K.rate / 12; return principal * r / (1 - Math.pow(1 + r, -n)); }
-  function extras() { // 폰팔이 셀링포인트로 붙는 비용
+  function usedUnits(md) { return C.USED.filter(function (u) { return u.name === md.name && C.stock(u) > 0; }); }
+
+  /* ---------- 사는 방법 (v6 waysList + 폰팔이별 비용) ---------- */
+  function extras() {
     var today = 0, monthly = 0, lines = [];
     if (G.dealer === "designer") {
       var st = D.studio;
@@ -1435,77 +1694,78 @@ window.SITE = {
     });
     return { today: today, monthly: monthly, lines: lines };
   }
-  function tier() { return byId(K.tiers, G.tier || "mid"); }
-  function priced(m, con, months) { // 방법 하나의 금액
-    var P = prod(), t = tier(), x = extras(), dev, plan;
-    if (m.kind === "carrier") {
-      var c = byId(K.carriers, m.carrier), chg = m.join === "chg";
-      var fee = t.fee[c.id] - (G.bundle === "keep" && chg ? K.bundleDc : 0);
-      if (con === "sel") { dev = P.list - Math.round(P.list * K.selSupportRate / 1000) * 1000; plan = Math.round(fee * (1 - K.selRate)); }
-      else { dev = P.price + c.add + (chg ? K.chgAdd : 0); plan = fee; }
-    } else if (m.kind === "self") { dev = P.list; plan = t.mvno; }
-    else { var gr = byId(K.usedGrades, G.used.grade), bt = byId(K.usedBattery, G.used.bat); dev = Math.round(P.list * gr.rate / 1000) * 1000 + bt.add; plan = t.mvno; }
-    if (G.member) dev -= K.memberDc;
-    dev = Math.max(0, dev);
-    var n = months == null ? G.months : months, mi = inst(dev, n);
-    var today = (n ? 0 : dev) + x.today, monthly = mi + plan + x.monthly;
-    var total = dev + (mi * n - (n ? dev : 0)) + (plan + x.monthly) * 24 + x.today;
-    return { dev: dev, plan: plan, inst: mi, today: today, monthly: monthly, total: total, con: con, extras: x };
-  }
-  function methods() {
-    var L = [];
-    if (G.dealer === "used") L.push({ id: "used", kind: "used", title: "중고 " + byId(K.usedGrades, G.used.grade).name, sub: "1mm 검수 · 배터리 " + byId(K.usedBattery, G.used.bat).name });
-    else {
-      var keep = G.bundle === "keep" && byId(K.carriers, G.cur);
-      K.carriers.forEach(function (c) {
-        if (keep && c.id !== G.cur) return;
-        var join = G.cur === c.id ? "chg" : "mnp";
-        L.push({ id: c.id, kind: "carrier", carrier: c.id, join: join, title: c.name + " " + (join === "chg" ? "기기변경" : "번호이동"), sub: tier().label + " 요금제 " + man(tier().fee[c.id]) });
+  function ways() {
+    sync();
+    var s = sto(), cur = curKey(), x = extras(), out = [], t = G.tier == null ? 5 : G.tier;
+    if (G.dealer !== "used") {
+      var by = {};
+      C.calcOptions(s, cur, t, 24, "best").forEach(function (o) { var k = o.id.split("-")[0]; if (!by[k] || o.grand < by[k].grand) by[k] = o; });
+      Object.keys(by).forEach(function (k) {
+        var o = by[k];
+        out.push({ id: "c:" + k, kind: "carrier", k: k, title: o.carrier + " " + o.way, sub: (o.con === "sub" ? "공시지원금" : "선택약정 25%") + " · " + o.planName, o: o,
+          support: o.saved, monthly: o.monthly + x.monthly, today: o.upfront + x.today, grand: o.grand + x.today + x.monthly * 24 });
       });
-      L.push({ id: "self", kind: "self", title: "자급제 + 알뜰폰", sub: "약정 없음 · 요금 " + man(tier().mvno) });
+      var sp = C.selfPlan(t, cur), price = Math.max(0, s.price - (G.member ? C.MEMBER_DC : 0)), dev = C.monthlyInstall(price, 24);
+      out.push({ id: "self", kind: "self", title: "자급제 새 폰", sub: "약정 없음 · " + sp.label, sp: sp, price: price,
+        support: G.member ? C.MEMBER_DC : 0, monthly: dev + sp.fee + x.monthly, today: x.today, grand: (dev + sp.fee) * 24 + x.today + x.monthly * 24 });
     }
-    L.forEach(function (m) {
-      if (m.kind === "carrier") { var a = priced(m, "sub"), b = priced(m, "sel"); m.best = a.total <= b.total ? "sub" : "sel"; m.q = m.best === "sub" ? a : b; }
-      else m.q = priced(m, null);
+    usedUnits(G.md).forEach(function (u) {
+      if (G.dealer === "used" && G.usedId && u.id !== G.usedId) return;
+      var sp = C.selfPlan(t, cur), price = Math.max(0, u.price - (G.member ? C.MEMBER_DC : 0)), d = C.monthlyInstall(price, 24);
+      out.push({ id: "u:" + u.id, kind: "used", it: u, title: "1mm 중고 " + u.grade + "급", sub: u.gb + " · 배터리 " + u.battery + "% · " + C.stock(u) + "대", sp: sp, price: price,
+        support: sto().price - u.price + (G.member ? C.MEMBER_DC : 0), monthly: d + sp.fee + x.monthly, today: x.today, grand: (d + sp.fee) * 24 + x.today + x.monthly * 24 });
     });
     var key = G.dealer === "price" ? G.focus : "monthly";
-    L.sort(function (a, b) { return key === "today" ? (a.q.today - b.q.today) || (a.q.monthly - b.q.monthly) : key === "total" ? a.q.total - b.q.total : a.q.monthly - b.q.monthly; });
-    return L;
+    return out.sort(function (a, b) { return key === "today" ? (a.today - b.today) || (a.monthly - b.monthly) : key === "total" ? a.grand - b.grand : a.monthly - b.monthly; });
   }
-  function curMethod() { var L = methods(); return L.filter(function (m) { return m.id === G.method; })[0] || L[0]; }
-  function quoteNow() { var m = curMethod(); return priced(m, m.kind === "carrier" ? (G.con || m.best) : null); }
+  function curWay() { var L = ways(); return L.filter(function (w) { return w.id === G.pick; })[0] || L[0]; }
+  function carrierQ(con) { var w = curWay(); sync(); return C.calcOptions(sto(), curKey(), G.tier == null ? 5 : G.tier, G.months, con).filter(function (o) { return o.id === w.k + "-" + con; })[0]; }
   function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
   function fmtD(d) { return (d.getMonth() + 1) + "/" + d.getDate(); }
 
-  /* ---------- 테이블 위 물건 (패널) ---------- */
-  function phoneIcon(p, col) { return '<span class="ph' + (p.folder ? " folder" : "") + '" style="--c:' + (col || p.color) + '"></span>'; }
+  /* ---------- 테이블 위 물건 ---------- */
   var P = {};
+  function tabsOf(b) { return C.catTabs(b, function (c) { return C.allModels(C.DATA[b].cats[c]).some(function (m) { return !m.soon && m.storages && m.storages.length; }); }); }
   P.model = function () {
-    var d = D.dealers[G.dealer], ids = (d.products || Object.keys(D.products)).slice();
-    if (G.dealer === "price") ids.sort(function (a, b) { return D.products[a].price - D.products[b].price; });
-    return '<div class="tl">📱 폰 고르기<small>' + ids.length + '개</small></div><div class="shelf">' + ids.map(function (id) {
-      var p = D.products[id];
-      return '<button class="pk' + (G.model === id ? " on" : "") + '" data-act="model" data-v="' + id + '"><span class="im">' + phoneIcon(p) + '</span><span class="tag"><b>' + esc(p.name) + '</b><span>' + (p.price ? man(p.price) : "0원") + '</span>' + (p.tag ? '<em>' + p.tag + '</em>' : "") + '</span></button>';
-    }).join("") + '</div>';
+    if (!G.tab) G.tab = tabsOf(G.brand)[0][0];
+    var tab = tabsOf(G.brand).filter(function (t) { return t[0] === G.tab; })[0] || tabsOf(G.brand)[0];
+    var ms = []; tab[1].forEach(function (ck) { C.allModels(C.DATA[G.brand].cats[ck]).forEach(function (m) { if (!m.soon && m.storages && m.storages.length) ms.push(m); }); });
+    if (G.dealer === "price") ms.sort(function (a, b) { var A = bestSupport(a), B = bestSupport(b); return (a.storages[0].price - A.t) - (b.storages[0].price - B.t); });
+    var h = '<div class="brands">' + [["apple", "Apple"], ["samsung", "Samsung"]].map(function (b) { return '<button class="' + (G.brand === b[0] ? "on" : "") + '" data-act="brand" data-v="' + b[0] + '">' + b[1] + '</button>'; }).join("") + '</div>';
+    h += '<div class="ctabs">' + tabsOf(G.brand).map(function (t) { return '<button class="' + (t[0] === tab[0] ? "on" : "") + '" data-act="tab" data-v="' + t[0] + '">' + esc(t[2]) + '</button>'; }).join("") + '</div>';
+    h += '<div class="shelf">' + ms.map(function (m) {
+      var s = m.storages[0], b = bestSupport(m), used = usedUnits(m).length, dis = G.dealer === "used" && !used;
+      var pay = Math.max(0, s.price - b.t);
+      return '<button class="pk' + (dis ? " dis" : "") + '" data-act="model" data-v="' + esc(m.name) + '"' + (dis ? " disabled" : "") + '><span class="im"><img src="' + img(m, 0) + '" alt="" loading="lazy"></span><span class="tag"><b>' + esc(m.name) + '</b>' +
+        (G.dealer === "used" ? '<span>' + (used ? "중고 " + man(Math.min.apply(null, usedUnits(m).map(function (u) { return u.price; }))) + "~" : "재고 없음") + '</span>' :
+          '<s>' + man(s.price) + '</s><span>' + (pay ? man(pay) : "0원") + '</span><em>지원 ' + man(b.t) + '</em>') + '</span></button>';
+    }).join("") + '</div><div class="foot">' + (G.dealer === "used" ? "1mm 검수 중고 재고" : "번호이동 · 무제한 요금제 · 공시지원금 기준 할부원금 · 지원 = 공시 + 추가 + 1mm 매장 지원") + '</div>';
+    return h;
   };
   P.spec = function () {
-    var p = D.products[G.model];
-    var stos = p.folder || G.model === "a17" ? ["256GB"] : Object.keys(D.storageAdd);
-    return '<div class="pick-row">' + phoneIcon(p, p.colors[G.ci][1]) + '<span><b>' + esc(p.name) + '</b><em>' + esc(p.colors[G.ci][0]) + '</em></span></div>' +
-      '<div class="tl">🎨 색상</div><div class="chips2">' + p.colors.map(function (c, i) { return '<button class="' + (G.ci === i ? "on" : "") + '" style="background:' + c[1] + '" aria-label="' + esc(c[0]) + '" data-act="ci" data-v="' + i + '"></button>'; }).join("") + '</div>' +
-      '<div class="tl">📦 용량<small>상자를 골라 주세요</small></div><div class="boxes">' + stos.map(function (s) {
-        var P2 = prod.call(null), add = D.storageAdd[s] - (D.storageAdd[G.sto] || 0);
-        return '<button class="pbox' + (G.sto === s ? " on" : "") + '" data-act="sto" data-v="' + s + '"><span class="lid"></span><span class="bd"><b>' + s.replace("GB", "") + (/TB/.test(s) ? "" : "GB") + '</b><span>' + won(P2.list + add) + '</span></span></button>';
-      }).join("") + '</div>';
+    var cs = colors(), s = sto();
+    var h = '<div class="pick-row"><img src="' + img(G.md, G.ci) + '" alt=""><span><b>' + esc(G.md.name) + '</b><em>' + esc((cs[G.ci] || {}).n || "") + ' · 출고가 ' + won(s.price) + '</em></span></div>';
+    if (cs.length > 1) h += '<div class="tl">🎨 색상<small>' + esc(cs[G.ci].n) + '</small></div><div class="chips2">' + cs.map(function (c, i) { return '<button class="' + (G.ci === i ? "on" : "") + '" style="background:' + c.h + '" aria-label="' + esc(c.n) + '" data-act="ci" data-v="' + i + '"></button>'; }).join("") + '</div>';
+    h += '<div class="tl">📦 용량<small>상자를 골라 주세요</small></div><div class="boxes">' + G.md.storages.map(function (st, i) {
+      return '<button class="pbox' + (G.si === i ? " on" : "") + '" data-act="sto" data-v="' + i + '"><span class="lid"></span><span class="bd"><b>' + st.gb + '</b><span>' + won(st.price) + '</span></span></button>';
+    }).join("") + '</div>';
+    var b = bestSupport(G.md);
+    if (b.o) h += supportBox([["공시지원금", b.o.subsidy, b.o.pubLabel], ["추가지원금", b.o.extra, b.o.extraSrc === "market" ? "성지 시세 반영" : "예시"], ["1mm 매장 지원", C.MM_SUPPORT, "모든 개통"]], b.o.carrier + " 번호이동 · 무제한 기준 최대");
+    return h;
   };
+  function supportBox(rows, title) {
+    var tot = rows.reduce(function (a, r) { return a + r[1]; }, 0);
+    return '<div class="sup"><div class="tl dark">💸 받을 수 있는 지원금<small>' + esc(title) + '</small></div>' + rows.map(function (r) {
+      return '<div class="ln m"><span>' + esc(r[0]) + (r[2] ? ' <i class="src">' + esc(r[2]) + '</i>' : "") + '</span><b>-' + won(r[1]) + '</b></div>';
+    }).join("") + '<div class="ln t"><span>지원 합계</span><b>-' + won(tot) + '</b></div></div>';
+  }
   P.point = function () {
     var id = G.dealer, h = "";
     if (id === "designer") {
       var st = D.studio;
       [["케이스", "case", st.cases], ["키링", "keyring", st.keyrings], ["뒷면", "back", st.backs]].forEach(function (x) {
         h += '<div class="tl">' + x[0] + '</div><div class="opts3">' + x[2].map(function (o) {
-          var on = G.deco[x[1]] === o.id;
-          return '<button class="tok' + (on ? " on" : "") + '" data-act="deco" data-k="' + x[1] + '" data-v="' + o.id + '">' + (o.c ? '<i style="background:' + o.c + '"></i>' : '<i class="none"></i>') + '<b>' + esc(o.name) + '</b><small>' + (o.price ? man(o.price) : "0원") + '</small></button>';
+          return '<button class="tok' + (G.deco[x[1]] === o.id ? " on" : "") + '" data-act="deco" data-k="' + x[1] + '" data-v="' + o.id + '">' + (o.c ? '<i style="background:' + o.c + '"></i>' : '<i class="none"></i>') + '<b>' + esc(o.name) + '</b><small>' + (o.price ? man(o.price) : "0원") + '</small></button>';
         }).join("") + '</div>';
       });
       h += '<button class="wide" data-act="studio">🌀 3D로 돌려 보기</button>';
@@ -1521,63 +1781,80 @@ window.SITE = {
       h += '<div class="tl">지킬 것 고르기</div><div class="veh">' + K.safeItems.map(function (o) { return '<button class="' + (G.safe[o.id] ? "on" : "") + '" data-act="safe" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + (o.price ? won(o.price) : "월 " + won(o.monthly)) + '</span></button>'; }).join("") + '</div>';
       h += '<div class="tl">약속 도장<small>눌러서 확인</small></div><div class="paper">' + K.safePromises.map(function (t, i) { return '<button class="cl' + (G.stamps[i] ? " on" : "") + '" data-act="stamp" data-v="' + i + '"><span class="st">' + (G.stamps[i] ? "약속" : "") + '</span><span>' + esc(t) + '</span></button>'; }).join("") + '</div>';
     } else if (id === "used") {
-      h += '<div class="tl">등급</div><div class="two">' + K.usedGrades.map(function (o) { return '<button class="tok' + (G.used.grade === o.id ? " on" : "") + '" data-act="grade" data-v="' + o.id + '"><b>' + o.name + '</b><small>' + o.d + ' · 출고가 ' + Math.round(o.rate * 100) + '%</small></button>'; }).join("") + '</div>';
-      h += '<div class="tl">배터리</div><div class="two">' + K.usedBattery.map(function (o) { return '<button class="tok' + (G.used.bat === o.id ? " on" : "") + '" data-act="bat" data-v="' + o.id + '"><b>' + o.name + '</b><small>' + (o.add ? "+" + man(o.add) : "기본") + '</small></button>'; }).join("") + '</div>';
-      h += '<div class="paper"><div class="tl dark">1mm 검수표</div>' + K.usedChecks.map(function (t) { return '<div class="ck">✓ ' + esc(t) + '</div>'; }).join("") + '</div>';
+      var units = usedUnits(G.md);
+      h += '<div class="tl">재고에서 한 대 고르기<small>' + units.length + '종</small></div><div class="ways">' + units.map(function (u) {
+        return '<button class="way' + (G.usedId === u.id ? " on" : "") + '" data-act="unit" data-v="' + u.id + '"><span class="n">' + u.grade + '</span><span>' + esc(u.name) + ' ' + u.gb + '<em>배터리 ' + u.battery + '% · ' + u.colors.filter(function (c) { return c.qty; }).map(function (c) { return c.name; }).join(" · ") + '</em></span><strong>' + man(u.price) + '<small>새 폰보다 -' + man(sto().price - u.price) + '</small></strong></button>';
+      }).join("") + '</div><div class="paper"><div class="tl dark">1mm 검수표</div>' + K.usedChecks.map(function (t) { return '<div class="ck">✓ ' + esc(t) + '</div>'; }).join("") + '</div>';
     } else {
-      h += '<div class="auto"><b>모델만 골랐어요</b><span>통신사·요금제·할인·할부는<br>가장 싼 조건으로 맞출게요</span></div>';
+      h += '<div class="auto"><b>모델만 골랐어요</b><span>통신사·요금제·지원금·할부는<br>가장 싼 조건으로 맞출게요</span></div>';
     }
     return h;
   };
-  P.cur = function () { return '<div class="tl">지금 쓰는 통신사</div>' + summaryRow(); };
-  P.bundle = function () { return '<div class="tl">' + esc(byId(K.carriers, G.cur).name) + ' 가족·인터넷 결합</div>' + summaryRow(); };
+  function summaryRow() { var cs = colors(); return '<div class="pick-row"><img src="' + img(G.md, G.ci) + '" alt=""><span><b>' + esc(G.md.name) + ' ' + sto().gb + '</b><em>' + esc((cs[G.ci] || {}).n || "") + ' · 출고가 ' + won(sto().price) + '</em></span></div>'; }
+  P.cur = function () { return summaryRow() + '<div class="tl">지금 쓰는 통신사<small>번호이동·기기변경 지원금이 달라요</small></div>'; };
+  P.bundle = function () { return summaryRow() + '<div class="tl">' + esc(C.CARRIERS[curKey()].name) + ' 가족·인터넷 결합</div>'; };
   P.data = function () {
-    return '<div class="tl">한 달 데이터</div><div class="veh">' + K.tiers.map(function (t) {
-      return '<button class="' + (G.tier === t.id ? "on" : "") + '" data-act="tier" data-v="' + t.id + '"><i>' + { low: "▁", mid: "▃", high: "█" }[t.id] + '</i><b>' + t.label + '</b><span>' + t.sub + '</span></button>';
+    return '<div class="tl">한 달 데이터</div><div class="veh four">' + DATA_OPTS.map(function (d) {
+      return '<button class="' + (G.tier === d[0] ? "on" : "") + '" data-act="tier" data-v="' + d[0] + '"><i>' + d[3] + '</i><b>' + d[1] + '</b><span>' + d[2] + '</span></button>';
     }).join("") + '</div>';
   };
-  P.calc = function () { return '<div class="loading"><i></i><i></i><i></i><span>3사 · 자급제' + (G.dealer === "used" ? " · 중고" : "") + ' 계산 중</span></div>'; };
+  P.calc = function () { return '<div class="loading"><i></i><i></i><i></i><span>3사 공시·추가지원금 · 자급제 · 중고 계산 중</span></div>'; };
   P.quote = function () {
-    var L = methods(), w = curMethod(), key = G.dealer === "price" ? G.focus : "monthly";
+    var L = ways(), w = curWay(), key = G.dealer === "price" ? G.focus : "monthly";
     var lbl = { monthly: "월 납부 싼 순", today: "오늘 내는 돈 순", total: "2년 총액 순" }[key];
-    return '<div class="tl">' + esc(prod().name) + ' · ' + lbl + '</div><div class="ways">' + L.map(function (m, i) {
-      var v = key === "today" ? m.q.today : key === "total" ? m.q.total : m.q.monthly;
-      return '<button class="way' + (m.id === w.id ? " on" : "") + '" data-act="method" data-v="' + m.id + '">' + (i === 0 ? '<i class="best">최저</i>' : "") +
-        '<span class="n">' + (i + 1) + '</span><span>' + esc(m.title) + '<em>' + esc(m.sub) + '</em></span><strong>' + (key === "monthly" ? "월 " : "") + man(v) + '<small>' + (key === "monthly" ? "2년 " + man(m.q.total) : "월 " + man(m.q.monthly)) + '</small></strong></button>';
-    }).join("") + '</div><div class="foot">기기값 할부 연 ' + (K.rate * 100).toFixed(1) + '% 가정 · 예시 정책</div>';
+    return '<div class="tl">' + esc(G.md.name) + ' ' + sto().gb + ' · ' + lbl + '</div><div class="ways">' + L.map(function (m, i) {
+      var v = key === "today" ? m.today : key === "total" ? m.grand : m.monthly;
+      return '<button class="way' + (m.id === w.id ? " on" : "") + '" data-act="way" data-v="' + m.id + '">' + (i === 0 ? '<i class="best">최저</i>' : "") +
+        '<span class="n">' + (i + 1) + '</span><span>' + esc(m.title) + '<em>' + esc(m.sub) + '</em>' + (m.support ? '<em class="sv">지원 ' + man(m.support) + '</em>' : "") + '</span><strong>' + (key === "monthly" ? "월 " : "") + man(v) + '<small>' + (key === "monthly" ? "2년 " + man(m.grand) : "월 " + man(m.monthly)) + '</small></strong></button>';
+    }).join("") + '</div><div class="foot">월 납부 = 기기값 24개월 할부(연 5.9%) + 요금 · 공시지원금 SKT 공식(' + C.OFFICIAL.date + ')·KT 공통지원금(KT초이스), LG U+ 예시 · 추가지원금 성지 시세(' + C.MARKET.date + ')</div>';
   };
   function coins() {
-    return '<div class="coins">' + K.months.map(function (m) { return '<button class="coin' + (G.months === m ? " on" : "") + '" data-act="months" data-v="' + m + '">' + (m ? m + "<small>개월</small>" : "일시불") + '</button>'; }).join("") + '</div>';
+    return '<div class="coins">' + [0, 12, 24, 36].map(function (m) { return '<button class="coin' + (G.months === m ? " on" : "") + '" data-act="months" data-v="' + m + '">' + (m ? m + "<small>개월</small>" : "일시불") + '</button>'; }).join("") + '</div>';
   }
-  function bill(q, m) {
-    var P2 = prod(), h = '<div class="bill"><div class="ln"><span>출고가</span><b>' + won(P2.list) + '</b></div>';
-    var disc = P2.list - q.dev - (G.member ? K.memberDc : 0);
-    if (disc > 0) h += '<div class="ln m"><span>' + (m.kind === "used" ? "중고 할인" : q.con === "sel" ? "매장 지원" : "공시·매장 지원") + '</span><b>-' + won(disc) + '</b></div>';
-    if (G.member) h += '<div class="ln m"><span>1mm 멤버십</span><b>-' + won(K.memberDc) + '</b></div>';
-    h += '<div class="ln t"><span>내는 기기값</span><b>' + won(q.dev) + '</b></div>';
-    h += '<div class="ln"><span>요금제' + (q.con === "sel" ? " (25%↓)" : "") + '</span><b>월 ' + won(q.plan) + '</b></div>';
-    q.extras.lines.forEach(function (l) { h += '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + (l[2] ? "월 " : "") + won(l[1]) + '</b></div>'; });
-    h += '<div class="big"><div><span>오늘</span><b>' + won(q.today) + '</b></div><div><span>매달' + (G.months ? " " + G.months + "개월" : "") + '</span><b>' + won(q.monthly) + '</b></div></div>';
-    if (m.kind === "carrier") h += '<div class="memo">📅 요금제는 ' + fmtD(addDays(new Date(), K.keepDays)) + '부터 바꿔도 돼요 (' + K.keepDays + '일)</div>';
+  function billCarrier(q) {
+    var x = extras(), h = '<div class="bill"><div class="ln"><span>출고가</span><b>' + won(q.price) + '</b></div>';
+    if (q.subsidy) h += '<div class="ln m"><span>공시지원금 <i class="src">' + esc(q.pubLabel) + '</i></span><b>-' + won(q.subsidy) + '</b></div>';
+    h += '<div class="ln m"><span>추가지원금 <i class="src">' + (q.extraSrc === "market" ? "성지 시세 반영" : q.way + " 예시") + '</i></span><b>-' + won(q.extra) + '</b></div>';
+    h += '<div class="ln m"><span>1mm 매장 지원</span><b>-' + won(C.MM_SUPPORT) + '</b></div>';
+    if (q.mem) h += '<div class="ln m"><span>1mm 멤버십</span><b>-' + won(q.mem) + '</b></div>';
+    h += '<div class="ln t"><span>내는 기기값</span><b>' + won(q.principal) + '</b></div>';
+    h += '<div class="ln"><span>요금제 ' + esc(q.planName) + '</span><b>월 ' + won(q.planMonthly + q.planDiscount + q.bundleDc) + '</b></div>';
+    if (q.planDiscount) h += '<div class="ln m"><span>선택약정 25% 요금 할인</span><b>-월 ' + won(q.planDiscount) + '</b></div>';
+    if (q.bundleDc) h += '<div class="ln m"><span>' + esc(q.bundleName) + '</span><b>-월 ' + won(q.bundleDc) + '</b></div>';
+    x.lines.forEach(function (l) { h += '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + (l[2] ? "월 " : "") + won(l[1]) + '</b></div>'; });
+    h += '<div class="big"><div><span>오늘</span><b>' + won(q.upfront + x.today) + '</b></div><div><span>매달' + (G.months ? " " + G.months + "개월" : "") + '</span><b>' + won(q.monthly + x.monthly) + '</b></div><div><span>2년 받는 혜택</span><b>' + man(q.saved) + '</b></div></div>';
+    h += '<div class="memo">📅 요금제는 ' + fmtD(addDays(new Date(), K.keepDays)) + '부터 바꿔도 돼요 (' + K.keepDays + '일)</div>';
     return h + '</div>';
   }
+  function billPhone(w) {
+    var x = extras(), base = w.kind === "used" ? w.it.price : sto().price, price = w.price, n = G.months, mi = n ? C.monthlyInstall(price, n) : 0;
+    var h = '<div class="bill"><div class="ln"><span>' + (w.kind === "used" ? "새 폰 출고가" : "출고가") + '</span><b>' + won(sto().price) + '</b></div>';
+    if (w.kind === "used") h += '<div class="ln m"><span>중고 ' + w.it.grade + '급 가격</span><b>-' + won(sto().price - w.it.price) + '</b></div>';
+    if (G.member) h += '<div class="ln m"><span>1mm 멤버십</span><b>-' + won(C.MEMBER_DC) + '</b></div>';
+    h += '<div class="ln t"><span>폰값</span><b>' + won(price) + '</b></div>';
+    h += '<div class="ln"><span>요금 (' + esc(w.sp.label) + ')</span><b>월 ' + won(w.sp.fee) + '</b></div>';
+    x.lines.forEach(function (l) { h += '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + (l[2] ? "월 " : "") + won(l[1]) + '</b></div>'; });
+    h += '<div class="big"><div><span>오늘</span><b>' + won((n ? 0 : price) + x.today) + '</b></div><div><span>매달</span><b>' + won(mi + w.sp.fee + x.monthly) + '</b></div></div>';
+    if (w.kind === "used") h += '<div class="memo">✓ IMEI 조회 · 통화·카메라·충전 점검 · 초기화 완료</div>';
+    void base; return h + '</div>';
+  }
   P.cond = function () {
-    var m = curMethod();
-    if (m.kind === "carrier") {
-      var a = priced(m, "sub"), b = priced(m, "sel"), win = a.total <= b.total ? "sub" : "sel"; if (!G.con) G.con = win;
-      return '<div class="tl">할인은 하나만</div><div class="cards">' + [["sub", "a", "💳", "공시지원금", "기기값 ↓", a], ["sel", "b", "📉", "선택약정 25%", "요금 ↓", b]].map(function (x) {
-        return '<button class="dcard ' + x[1] + (G.con === x[0] ? " on" : "") + '" data-act="con" data-v="' + x[0] + '">' + (win === x[0] ? '<i class="win">2년 더 쌈</i>' : "") + '<span class="ic">' + x[2] + '</span><b>' + x[3] + '</b><span>' + x[4] + '</span><strong>월 ' + man(x[5].monthly) + '</strong><em>2년 ' + man(x[5].total) + '</em></button>';
-      }).join("") + '</div><div class="tl">기기값 내는 방법</div>' + coins() + bill(G.con === "sub" ? a : b, m);
+    var w = curWay();
+    if (w.kind === "carrier") {
+      var a = carrierQ("sub"), b = carrierQ("sel24"), win = a.grand <= b.grand ? "sub" : "sel24"; if (!G.con) G.con = win;
+      return '<div class="tl">할인은 하나만</div><div class="cards">' + [["sub", "a", "💳", "공시지원금", "기기값 ↓ " + man(a.subsidy), a], ["sel24", "b", "📉", "선택약정 25%", "요금 ↓ 월 " + man(b.planDiscount), b]].map(function (x) {
+        return '<button class="dcard ' + x[1] + (G.con === x[0] ? " on" : "") + '" data-act="con" data-v="' + x[0] + '">' + (win === x[0] ? '<i class="win">2년 더 쌈</i>' : "") + '<span class="ic">' + x[2] + '</span><b>' + x[3] + '</b><span>' + x[4] + '</span><strong>월 ' + man(x[5].monthly) + '</strong><em>2년 ' + man(x[5].grand) + '</em></button>';
+      }).join("") + '</div><div class="tl">기기값 내는 방법</div>' + coins() + billCarrier(G.con === "sub" ? a : b);
     }
-    return '<div class="tl">' + (m.kind === "used" ? "중고폰 값 내는 방법" : "폰값 내는 방법") + '</div>' + coins() + bill(priced(m, null), m);
+    return '<div class="tl">' + (w.kind === "used" ? "중고폰 값 내는 방법" : "폰값 내는 방법") + '</div>' + coins() + billPhone(w);
   };
   P.join = function () {
-    return '<div class="mcard"><span class="l">1mm</span><div><div class="v">-' + man(K.memberDc) + '</div><small>이번 구매 바로 할인 · 약정 끝 알림 · 가입비 0원</small></div></div>' +
+    return '<div class="mcard"><span class="l">1mm</span><div><div class="v">-' + man(C.MEMBER_DC) + '</div><small>이번 구매 바로 할인 · 약정 끝 알림 · 가입비 0원</small></div></div>' +
       '<div class="social"><button class="k" data-act="join">카카오</button><button class="n" data-act="join">네이버</button><button class="g" data-act="join">구글</button></div>';
   };
+  function needAgree() { return K.agree.filter(function (a) { return a.id !== "a2" || curWay().kind === "carrier"; }); }
   P.agree = function () {
-    var need = K.agree.filter(function (a) { return a.id !== "a2" || curMethod().kind === "carrier"; });
-    return '<div class="tl">전자 계약서<small>도장 찍고 서명</small></div><div class="paper">' + need.map(function (a) {
+    return '<div class="tl">전자 계약서<small>도장 찍고 서명</small></div><div class="paper">' + needAgree().map(function (a) {
       return '<button class="cl' + (G.agree[a.id] ? " on" : "") + (G.err[a.id] ? " err" : "") + '" data-act="agree" data-v="' + a.id + '"><span class="st">' + (G.agree[a.id] ? "확인" : "") + '</span><span><b>' + esc(a.t) + '</b>' + (a.d ? "<em>" + esc(a.d) + "</em>" : "") + '</span></button>';
     }).join("") + '<div class="sign' + (G.err.sign ? " err" : "") + '"><span>여기에 손가락으로 서명</span><i class="x">✕</i><canvas id="signPad" aria-label="서명"></canvas></div></div>';
   };
@@ -1589,23 +1866,26 @@ window.SITE = {
       '<div class="tl">받는 분</div>' + fl("name", "이름", "홍길동", 'autocomplete="name"') + fl("phone", "연락처", "010-0000-0000", 'inputmode="numeric" autocomplete="tel" maxlength="13"') +
       (G.ship !== "store" ? fl("addr", "주소", "서울 강남구 …", 'autocomplete="street-address"') : "");
   };
-  function orderLines() {
-    var m = curMethod(), q = quoteNow(), P2 = prod(), p = D.products[G.model], ship = byId(K.ship, G.ship) || {};
-    var L = [["폰", P2.name + " " + G.sto + " · " + p.colors[G.ci][0]], ["사는 방법", m.title + (m.kind === "carrier" ? " · " + (G.con === "sel" ? "선택약정" : "공시지원금") : "") + " · " + (G.months ? G.months + "개월" : "일시불")]];
-    L.push([POINT_LABEL[G.dealer], pointSummary()]);
-    L.push(["오늘", won(q.today)], ["매달", won(q.monthly)]);
-    L.push(["받는 방법", (ship.icon || "") + " " + (ship.name || "")]);
-    if (G.f.name) L.push(["받는 분", G.f.name]);
-    return L;
-  }
   function pointSummary() {
     var id = G.dealer, st = D.studio;
     if (id === "designer") return [byId(st.cases, G.deco.case).name + " 케이스", byId(st.keyrings, G.deco.keyring).name, byId(st.backs, G.deco.back).name].filter(function (x) { return x !== "없음"; }).join(" · ");
     if (id === "quick") return byId(K.quickSpeed, G.quick.speed).name + " · " + byId(K.quickOpen, G.quick.open).name;
     if (id === "price") return byId(K.priceFocus, G.focus).name;
     if (id === "safe") return K.safeItems.filter(function (o) { return G.safe[o.id]; }).map(function (o) { return o.name; }).join(" + ") || "선택 안 함";
-    if (id === "used") return byId(K.usedGrades, G.used.grade).name + " · 배터리 " + byId(K.usedBattery, G.used.bat).name;
+    if (id === "used") { var u = curWay().it; return u ? u.grade + "급 · 배터리 " + u.battery + "%" : "-"; }
     return "최저 조건 자동";
+  }
+  function orderLines() {
+    var w = curWay(), cs = colors(), ship = byId(K.ship, G.ship) || {}, today, mon;
+    if (w.kind === "carrier") { var q = carrierQ(G.con || w.o.con), x = extras(); today = q.upfront + x.today; mon = q.monthly + x.monthly; }
+    else { var x2 = extras(), mi = G.months ? C.monthlyInstall(w.price, G.months) : 0; today = (G.months ? 0 : w.price) + x2.today; mon = mi + w.sp.fee + x2.monthly; }
+    var L = [["폰", G.md.name + " " + (w.kind === "used" ? w.it.gb : sto().gb) + ((cs[G.ci] || {}).n ? " · " + cs[G.ci].n : "")],
+      ["사는 방법", w.title + (w.kind === "carrier" ? " · " + (G.con === "sub" ? "공시지원금" : "선택약정") : "") + " · " + (G.months ? G.months + "개월" : "일시불")],
+      [POINT_LABEL[G.dealer], pointSummary()]];
+    if (w.support) L.push(["받은 지원", man(w.kind === "carrier" ? carrierQ(G.con || w.o.con).saved : w.support)]);
+    L.push(["오늘", won(today)], ["매달", won(mon)], ["받는 방법", (ship.icon || "") + " " + (ship.name || "")]);
+    if (G.f.name) L.push(["받는 분", G.f.name]);
+    return L;
   }
   P.review = function () {
     return '<div class="paper rcpt review"><h3>주문 내역</h3><div class="no">결제 전에 한 번 더 확인</div>' +
@@ -1617,32 +1897,31 @@ window.SITE = {
       orderLines().map(function (l) { return '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join("") +
       '<div class="ln"><span>불량 교환</span><b>받은 날부터 7일</b></div><div class="foot center">문의 ' + D.contact.phone + ' · 프로토타입</div></div>';
   };
-  function summaryRow() { var P2 = prod(), p = D.products[G.model]; return '<div class="pick-row">' + phoneIcon(p, p.colors[G.ci][1]) + '<span><b>' + esc(P2.name) + ' ' + G.sto + '</b><em>' + esc(p.colors[G.ci][0]) + ' · 출고가 ' + won(P2.list) + '</em></span></div>'; }
 
-  /* ---------- 대본 (q = 미션 칸) ---------- */
-  function say(t) { return t; }
+  /* ---------- 대본 ---------- */
   var STEPS = {
     model: { q: 0, t: function () { return "“" + D.dealers[G.dealer].quote + "” 어떤 폰?"; }, panel: "model" },
-    spec: { q: 0, t: function () { return "<b>" + esc(prod().name) + "</b> 좋지! 색이랑 용량 골라."; }, panel: "spec", ch: function () { return [["이걸로", function () { go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
+    spec: { q: 0, t: function () { return "<b>" + esc(G.md.name) + "</b> 좋지! 색이랑 용량 골라. 지원금도 봐 둬."; }, panel: "spec", ch: function () { return [["이걸로", function () { G.usedId = null; go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
     point: { q: 1, t: function () { return D.dealers[G.dealer].pitch; }, panel: "point", ch: function () {
-      if (G.dealer === "allinone") return [["🙌 알아서 해 줘", function () { G.auto = true; G.cur = "mvno"; G.bundle = "free"; G.tier = "mid"; G.months = 24; G.method = null; G.con = null; go("calc"); }, "go"], ["내가 고를래", function () { G.auto = false; go("cur"); }]];
-      return [["좋아, 다음", function () { go(G.dealer === "used" ? "data" : "cur"); }, "go"]];
+      if (G.dealer === "allinone") return [["🙌 알아서 해 줘", function () { G.auto = true; G.cur = "mvno"; G.bundle = "free"; G.tier = 5; G.months = 24; G.pick = null; G.con = null; go("calc"); }, "go"], ["내가 고를래", function () { G.auto = false; go("cur"); }]];
+      if (G.dealer === "used") return [["이 중고로", function () { if (!G.usedId) { var u = usedUnits(G.md)[0]; G.usedId = u && u.id; } go("cur"); }, "go"]];
+      return [["좋아, 다음", function () { go("cur"); }, "go"]];
     } },
     cur: { q: 2, t: function () { return "지금 쓰는 <b>통신사</b>는?"; }, panel: "cur", grid: true, ch: function () {
-      return K.curs.map(function (c) { return [c[1], function () { G.cur = c[0]; go(byId(K.carriers, c[0]) ? "bundle" : "data"); }]; });
+      return CURS.map(function (c) { return [c[1], function () { G.cur = c[0]; go(C.CARRIERS[curKey()] ? "bundle" : "data"); }]; });
     } },
-    bundle: { q: 2, t: function () { return "<b>가족·인터넷 결합</b> 있어?"; }, panel: "bundle", ch: function () {
+    bundle: { q: 2, t: function () { return "<b>가족·인터넷 결합</b> 있어? 유지하면 결합 할인도 계산할게."; }, panel: "bundle", ch: function () {
       return [["있어 · 유지", function () { G.bundle = "keep"; go("data"); }], ["없어 · 최저가", function () { G.bundle = "free"; go("data"); }, "go"]];
     } },
-    data: { q: 2, t: function () { return G.dealer === "used" ? "중고폰엔 알뜰 요금이 잘 맞아. 데이터는 얼마나 써?" : "데이터는 한 달에 얼마나 써?"; }, panel: "data" },
-    calc: { q: 3, t: function () { return "잠깐만, 다 계산해 볼게…"; }, panel: "calc", auto: 1300, next: "quote" },
+    data: { q: 2, t: function () { return "데이터는 한 달에 얼마나 써?"; }, panel: "data" },
+    calc: { q: 3, t: function () { return "잠깐만, 3사 지원금이랑 다 계산해 볼게…"; }, panel: "calc", auto: 1300, next: "quote" },
     quote: { q: 3, t: function () {
-      var L = methods(); if (G.auto) { G.method = L[0].id; G.con = L[0].best || null; }
+      var L = ways(); if (G.auto) { G.pick = L[0].id; G.con = L[0].o ? L[0].o.con : null; }
       return G.auto ? "제일 싼 건 <b>" + esc(L[0].title) + "</b>. 이걸로 맞춰 놨어." : "<b>" + esc(L[0].title) + "</b>이(가) 제일 싸. 다른 줄도 눌러 봐.";
-    }, panel: "quote", ch: function () { return [[G.auto ? "이대로 할게" : "이 방법으로", function () { if (!G.method) G.method = methods()[0].id; go(G.auto ? "join" : "cond"); }, "go"]]; } },
-    cond: { q: 3, t: function () { return curMethod().kind === "carrier" ? "할인은 <b>둘 중 하나</b>. 더 싼 쪽에 표시해 놨어." : "약정 없어. 폰값 낼 방법만 골라."; }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
-    join: { q: 4, t: function () { return "<b>1mm 멤버십</b> 가입하면 지금 " + man(K.memberDc) + " 더 빠져. 3초!"; }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
-    joined: { q: 4, t: function () { return "가입 완료! " + man(K.memberDc) + " 빠졌어."; }, panel: "join", auto: 1200, next: "agree" },
+    }, panel: "quote", ch: function () { return [[G.auto ? "이대로 할게" : "이 방법으로", function () { if (!G.pick) G.pick = ways()[0].id; go(G.auto ? "join" : "cond"); }, "go"]]; } },
+    cond: { q: 3, t: function () { return curWay().kind === "carrier" ? "할인은 <b>둘 중 하나</b>. 지원금 내역 다 적어 놨어." : "약정 없어. 폰값 낼 방법만 골라."; }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
+    join: { q: 4, t: function () { return "<b>1mm 멤버십</b> 가입하면 지금 " + man(C.MEMBER_DC) + " 더 빠져. 3초!"; }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
+    joined: { q: 4, t: function () { return "가입 완료! " + man(C.MEMBER_DC) + " 빠졌어."; }, panel: "join", auto: 1200, next: "agree" },
     agree: { q: 4, t: function () { return "<b>개봉·개통하면</b> 단순 변심 반품은 안 돼. 불량은 7일 안에 교환. 도장 찍고 서명!"; }, panel: "agree", ch: function () { return [["서명 완료", signDone, "go"]]; } },
     ship: { q: 5, t: function () { return "어디로 보낼까?"; }, panel: "ship", ch: function () { return [["주문 내역 확인", function () { if (formOk()) go("review"); else repaint(); }, "go"]]; } },
     review: { q: 5, t: function () { return "<b>주문 내역</b> 확인하고 결제!"; }, panel: "review", ch: function () {
@@ -1651,8 +1930,7 @@ window.SITE = {
     done: { q: 6, t: function () { return "고마워, " + esc(G.f.name) + "! " + (G.ship === "quick" ? "오늘 퀵으로 보낼게." : "잘 챙겨 보낼게.") + " 영수증 받아 가."; }, panel: "done", ch: function () { return [["광장으로", function () { close(); }, "go"], ["처음부터", function () { open(G.dealer); }]]; } },
   };
   function signDone() {
-    var need = K.agree.filter(function (a) { return a.id !== "a2" || curMethod().kind === "carrier"; });
-    G.err = {}; need.forEach(function (a) { if (!G.agree[a.id]) G.err[a.id] = 1; }); if (!G.signed) G.err.sign = 1;
+    G.err = {}; needAgree().forEach(function (a) { if (!G.agree[a.id]) G.err[a.id] = 1; }); if (!G.signed) G.err.sign = 1;
     if (Object.keys(G.err).length) { repaint(); toast(G.err.sign && Object.keys(G.err).length === 1 ? "서명해 주세요" : "항목을 모두 확인해 주세요"); return; }
     if (!G.ship) G.ship = G.dealer === "quick" ? { now: "quick", visit: "store", parcel: "parcel" }[G.quick.speed] : "quick";
     go("ship");
@@ -1671,7 +1949,7 @@ window.SITE = {
   function go(id, back) {
     timers.forEach(clearTimeout); timers = [];
     if (!back && CUR && CUR !== id && !STEPS[CUR].auto) HIST.push(CUR);
-    CUR = id; G.err = id === "agree" || id === "ship" ? G.err : {};
+    CUR = id; if (id !== "agree" && id !== "ship") G.err = {};
     var st = STEPS[id];
     renderMission(st.q);
     $("#shopBack").hidden = !HIST.length || id === "done";
@@ -1681,7 +1959,6 @@ window.SITE = {
     $("#shopCh").innerHTML = ""; $("#shopCh").className = "sch" + (st.grid ? " grid" : "");
     type(st.t());
     if (st.auto) timers.push(setTimeout(function () { go(st.next); }, st.auto));
-    if (opts.onStep) opts.onStep(id);
   }
   function back() { var p = HIST.pop(); if (p) go(p, true); }
   function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); } }
@@ -1705,8 +1982,7 @@ window.SITE = {
   function renderMission(q) {
     var ol = $("#mission"); ol.innerHTML = "";
     MISSION(G.dealer).forEach(function (m, i) {
-      var skip = (i === 2 && (G.auto || false));
-      var li = document.createElement("li"); li.className = (i < q ? "on" : "") + (i === q ? " now" : "") + (skip && q > 2 ? " skip" : "");
+      var li = document.createElement("li"); li.className = (i < q ? "on" : "") + (i === q ? " now" : "") + (i === 2 && G.auto && q > 2 ? " skip" : "");
       li.innerHTML = "<i>" + m[0] + "</i><span>" + m[1] + "</span>"; ol.appendChild(li);
     });
   }
@@ -1722,27 +1998,27 @@ window.SITE = {
     c.onpointerup = function () { last = null; if (G.ink > 40) { G.signed = true; G.sig = c.toDataURL(); if (G.err.sign) { delete G.err.sign; c.parentNode.classList.remove("err"); } } };
   }
 
-  // 테이블 위 물건 누르기
   function onPanel(e) {
-    var b = e.target.closest("[data-act]"); if (!b) return;
+    var b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
     var a = b.dataset.act, v = b.dataset.v;
-    if (a === "model") { G.model = v; G.ci = 0; G.sto = "256GB"; go("spec"); return; }
+    if (a === "brand") { G.brand = v; G.tab = null; }
+    if (a === "tab") G.tab = v;
+    if (a === "model") { var x = C.mmModelOf(v); G.md = x.m; G.si = 0; G.ci = 0; go("spec"); return; }
     if (a === "ci") G.ci = +v;
-    if (a === "sto") G.sto = v;
-    if (a === "deco") { G.deco[b.dataset.k] = v; if (opts.onDeco) opts.onDeco(G); }
+    if (a === "sto") G.si = +v;
+    if (a === "deco") { G.deco[b.dataset.k] = v; }
     if (a === "studio") { if (opts.openStudio) opts.openStudio(G); return; }
     if (a === "qs") G.quick.speed = v;
     if (a === "qo") G.quick.open = v;
     if (a === "focus") G.focus = v;
     if (a === "safe") G.safe[v] = !G.safe[v];
     if (a === "stamp") G.stamps[v] = !G.stamps[v];
-    if (a === "grade") G.used.grade = v;
-    if (a === "bat") G.used.bat = v;
-    if (a === "tier") { G.tier = v; go("calc"); return; }
-    if (a === "method") { G.method = v; G.con = null; }
+    if (a === "unit") G.usedId = v;
+    if (a === "tier") { G.tier = +v; go("calc"); return; }
+    if (a === "way") { G.pick = v; G.con = null; }
     if (a === "con") G.con = v;
     if (a === "months") G.months = +v;
-    if (a === "join") { G.member = true; toast("🎉 -" + man(K.memberDc) + " 멤버십 등록!"); go("joined"); return; }
+    if (a === "join") { G.member = true; toast("🎉 -" + man(C.MEMBER_DC) + " 멤버십 등록!"); go("joined"); return; }
     if (a === "agree") { G.agree[v] = !G.agree[v]; delete G.err[v]; }
     if (a === "ship") G.ship = v;
     repaint();
@@ -1774,7 +2050,7 @@ window.SITE = {
     init: init, open: open, close: close, go: go, repaint: repaint,
     state: function () { return G; }, step: function () { return CUR; },
     setDeco: function (deco) { if (G) { Object.assign(G.deco, deco); if (CUR === "point") repaint(); } },
-    methods: function () { return methods(); }, quote: function () { return quoteNow(); },
+    methods: function () { return ways(); }, way: function () { return curWay(); },
   };
 })();
 
@@ -1927,11 +2203,11 @@ window.SITE = {
   function find(list, id) { return list.filter(function (x) { return x.id === id; })[0] || list[0]; }
   function total() { return find(S.cases, sState.case).price + find(S.keyrings, sState.keyring).price + find(S.backs, sState.back).price; }
   var fromShop = null;
-  var DEV_MAP = { ip18p: "ip18p", ip17p: "ip18p", s26: "s26", zf8: "s26", a17: "s26" };
+  function devFor(md) { var n = md ? md.name : ""; return /Galaxy|폴더/.test(n) ? "s26" : /Pro|Duo/.test(n) ? "ip18p" : "ip17"; }
   function openStudio(G) {
     if (sheet.open) sheet.close();
     fromShop = G && G.deco ? G : null;
-    if (fromShop) { sState.device = DEV_MAP[G.model] || "ip17"; sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
+    if (fromShop) { sState.device = devFor(G.md); sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
     $("#studio").showModal();
     if (world) world.paused = true;
     if (!studio && window.PPStudio && window.THREE) { try { studio = new PPStudio($("#studioCanvas")); } catch (e) { console.warn(e); } }

@@ -145,11 +145,11 @@
   function find(list, id) { return list.filter(function (x) { return x.id === id; })[0] || list[0]; }
   function total() { return find(S.cases, sState.case).price + find(S.keyrings, sState.keyring).price + find(S.backs, sState.back).price; }
   var fromShop = null;
-  var DEV_MAP = { ip18p: "ip18p", ip17p: "ip18p", s26: "s26", zf8: "s26", a17: "s26" };
+  function devFor(md) { var n = md ? md.name : ""; return /Galaxy|폴더/.test(n) ? "s26" : /Pro|Duo/.test(n) ? "ip18p" : "ip17"; }
   function openStudio(G) {
     if (sheet.open) sheet.close();
     fromShop = G && G.deco ? G : null;
-    if (fromShop) { sState.device = DEV_MAP[G.model] || "ip17"; sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
+    if (fromShop) { sState.device = devFor(G.md); sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
     $("#studio").showModal();
     if (world) world.paused = true;
     if (!studio && window.PPStudio && window.THREE) { try { studio = new PPStudio($("#studioCanvas")); } catch (e) { console.warn(e); } }

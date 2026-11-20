@@ -393,3 +393,21 @@ html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shoppi
   .say { padding: 10px 14px; font-size: 14px; }
   .opts3 { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* v6 상품 진열: 제조사 → 카테고리 탭 → 실제 사진 */
+.brands { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.brands button { padding: 9px; border-radius: 12px; background: rgba(255,255,255,.55); font-weight: 900; font-size: 14px; color: #5a4532; }
+.brands button.on { background: var(--pi); color: #fff; }
+.ctabs { display: flex; gap: 6px; margin-bottom: 8px; overflow-x: auto; scrollbar-width: none; }
+.ctabs::-webkit-scrollbar { display: none; }
+.ctabs button { flex: none; border-radius: 8px 8px 3px 3px; padding: 6px 12px; font-weight: 900; font-size: 12.5px; background: rgba(255,255,255,.3); color: #5a4532; }
+.ctabs button.on { background: var(--paper); color: var(--pi); box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+.pk .im img { max-width: 84px; max-height: 96px; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(0,0,0,.3)); }
+.pk .tag s { display: block; font-size: 10px; color: var(--pm); }
+.pk.dis { opacity: .4; cursor: not-allowed; }
+.pick-row img { width: 48px; height: 56px; object-fit: contain; }
+.sup { background: var(--paper); border-radius: 10px; padding: 10px 12px; margin-top: 12px; box-shadow: 0 4px 0 rgba(0,0,0,.15); }
+.src { font-style: normal; font-size: 10px; font-weight: 700; color: #1d4ed8; background: #e6eeff; border-radius: 5px; padding: 0 5px; margin-left: 2px; white-space: nowrap; }
+.way em.sv { color: #14714c; font-weight: 800; }
+.veh.four { grid-template-columns: repeat(4, 1fr); }
+.big { flex-wrap: wrap; gap: 6px; }

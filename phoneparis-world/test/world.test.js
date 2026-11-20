@@ -54,15 +54,18 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       await p.click("#card .primary");
       ok(await p.locator("#shop").isVisible() && await p.locator("#mission li").count() === 7, `[${dealer}] 가게 열림 · 미션 7칸`);
       await p.click("#shopDlg");
-      await p.locator("#shopPanel .pk").nth(opt.model || 0).click();
+      const tabs = await p.locator("#shopPanel .ctabs button").allInnerTexts();
+      ok(tabs.join(",") === "DUO,Pro,일반,Air · SE", `[${dealer}] Apple 카테고리 같음`);
+      if (dealer !== "used") ok((await p.locator("#shopPanel .pk .tag em").first().innerText()).startsWith("지원"), `[${dealer}] 진열대에 지원금 표시`);
+      await p.locator("#shopPanel .pk:not(.dis)").nth(opt.model || 0).click();
       await say("이걸로");
       ok(await step() === "point", `[${dealer}] 폰 → 셀링포인트 단계`);
       await point();
       if (dealer === "allinone") await say("알아서 해 줘");
       else {
-        await say("좋아, 다음");
-        if (dealer !== "used") { await say("SKT"); await say("없어 · 최저가"); }
-        await p.click("#shopDlg"); await p.locator("#shopPanel .veh button", { hasText: "보통" }).click();
+        await say(dealer === "used" ? "이 중고로" : "좋아, 다음");
+        await say("SKT"); await say("없어 · 최저가");
+        await p.click("#shopDlg"); await p.locator("#shopPanel .veh button", { hasText: "넉넉히" }).click();
       }
       await p.waitForFunction(() => PPShop.step() === "quote", null, { timeout: 20000 });
       if (opt.quote) await opt.quote();
@@ -97,7 +100,11 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
       if (shots) { await p.waitForTimeout(400); await p.screenshot({ path: shots + "/desktop-studio.png" }); }
       await p.keyboard.press("Escape");
       ok((await p.evaluate(() => PPShop.state().deco.keyring)) === "ball", "[designer] 3D에서 고른 키링이 가게로 돌아옴");
-    }, { cond: async () => { ok((await p.locator("#shopPanel").innerText()).includes("케이스 · 코발트"), "[designer] 폰꾸 비용이 계산서에"); } });
+    }, { cond: async () => {
+      const t = await p.locator("#shopPanel").innerText();
+      ok(t.includes("케이스 · 코발트"), "[designer] 폰꾸 비용이 계산서에");
+      ok(t.includes("추가지원금") && t.includes("1mm 매장 지원") && (t.includes("공시지원금") || t.includes("선택약정")), "[designer] 각종 지원금 내역 표시");
+    } });
     ok(rc.includes("코발트 케이스"), "[designer] 영수증에 폰꾸 세트");
 
     rc = await buy("quick", async () => { await p.locator("#shopPanel .veh button", { hasText: "방문 수령" }).click(); },
@@ -107,7 +114,7 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
     rc = await buy("price", async () => { await p.locator("#shopPanel .veh button", { hasText: "2년 총액" }).click(); },
       { quote: async () => {
         ok((await p.locator("#shopPanel .tl").first().innerText()).includes("2년 총액 순"), "[price] 견적이 고른 우선순위로 정렬");
-        const tot = await p.evaluate(() => PPShop.methods().map((m) => m.q.total));
+        const tot = await p.evaluate(() => PPShop.methods().map((m) => m.grand));
         ok(tot.every((v, i) => !i || tot[i - 1] <= v), "[price] 2년 총액 오름차순");
         if (shots) await p.screenshot({ path: shots + "/desktop-quote.png" });
       }, cond: async () => {
@@ -122,8 +129,8 @@ const stop = async (p, i) => { await p.evaluate((i) => scrollTo(0, i * innerHeig
     }, { cond: async () => { const t = await p.locator("#shopPanel").innerText(); ok(t.includes("휴대폰 보험") && !t.includes("강화 필름"), "[safe] 고른 보호 조합만 계산서에"); } });
     ok(rc.includes("강화 케이스 + 휴대폰 보험"), "[safe] 영수증에 보호 조합");
 
-    rc = await buy("used", async () => { await p.locator("#shopPanel .tok", { hasText: "미개봉급" }).click(); },
-      { quote: async () => { ok(await p.locator("#shopPanel .way").count() === 1 && (await p.locator("#shopPanel .way").innerText()).includes("중고 미개봉급"), "[used] 상담 질문 없이 중고 견적"); } });
+    rc = await buy("used", async () => { await p.locator("#shopPanel .way").first().click(); },
+      { quote: async () => { const t = await p.locator("#shopPanel .ways").innerText(); ok(await p.locator("#shopPanel .way").count() === 1 && t.includes("1mm 중고"), "[used] 고른 중고 한 대로 견적"); } });
 
     rc = await buy("allinone", async () => {}, {});
     ok(await p.locator("#mission li.skip").count() === 1, "[allinone] 상담 단계 생략 표시");
