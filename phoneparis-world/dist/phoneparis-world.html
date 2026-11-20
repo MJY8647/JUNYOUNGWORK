@@ -252,6 +252,156 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
   html { scroll-behavior: auto; }
 }
 
+/* ===== 폰팔이 가게 (1mm STORE v6 흐름: 미션 → 테이블 → 대사창 → 말풍선) ===== */
+html.shopping { overflow: hidden; scroll-snap-type: none; }
+html.shopping .card, html.shopping .bubble, html.shopping .headline, html.shopping .chapters, html.shopping .scroll-hint, html.shopping .progress, html.shopping .top-note { display: none !important; }
+.shop { position: fixed; inset: 0; z-index: 30; pointer-events: none; --paper: #fffaf0; --pi: #2a2420; --pm: #7b6f62; --navy: #1E2A5A; --gold: #FFC83D; --gold2: #c99a1d; }
+.shop > * { pointer-events: auto; }
+.shop-top { position: absolute; left: 0; right: 0; top: calc(64px + env(safe-area-inset-top, 0px)); display: flex; gap: 8px; align-items: center; padding: 0 max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px)); }
+.sbtn { flex: none; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 4px 12px -6px rgba(0,0,0,.4); font-size: 16px; font-weight: 700; }
+.mission { flex: 1; list-style: none; margin: 0; padding: 6px 8px; display: flex; justify-content: space-between; gap: 2px; background: rgba(255,255,255,.92); border-radius: 16px; border: 1.5px solid var(--c); box-shadow: 0 6px 18px -10px rgba(0,0,0,.5); min-width: 0; max-width: 560px; margin-inline: auto; }
+.mission li { flex: 1; display: grid; justify-items: center; gap: 1px; opacity: .38; filter: grayscale(1); transition: opacity .3s, transform .3s; min-width: 0; }
+.mission li i { font-style: normal; font-size: 15px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; }
+.mission li span { font-size: 10.5px; font-weight: 700; white-space: nowrap; }
+.mission li.on, .mission li.now { opacity: 1; filter: none; }
+.mission li.on i { background: color-mix(in srgb, var(--c) 22%, #fff); }
+.mission li.now i { background: var(--c); color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, #fff); transform: scale(1.1); }
+.mission li.skip span { text-decoration: line-through; }
+.shop-low { position: absolute; right: max(18px, env(safe-area-inset-right, 0px)); top: calc(118px + env(safe-area-inset-top, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 440px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; }
+.table { position: relative; flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; background: linear-gradient(180deg, #ecdcc4, #d9c3a5 14px, #c7ab88); border-radius: 18px; padding: 14px 12px 12px; color: var(--pi); box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 14px 30px -12px rgba(0,0,0,.45); animation: slideup .35s var(--ease); }
+.table::before { content: ""; position: absolute; inset: 0; border-radius: 18px; pointer-events: none; background: repeating-linear-gradient(92deg, rgba(0,0,0,.035) 0 3px, transparent 3px 11px); }
+@keyframes slideup { from { transform: translateY(20px); opacity: 0; } }
+.table > * { position: relative; }
+.tl { font-size: 12px; font-weight: 900; color: #5a4532; margin: 2px 2px 8px; display: flex; justify-content: space-between; gap: 8px; letter-spacing: .02em; }
+.tl small { font-weight: 700; color: #8a7461; }
+.tl.dark { color: var(--pi); }
+.dlg { position: relative; background: rgba(255,255,255,.97); color: #1d1f27; border: 2px solid var(--c); border-radius: 16px; padding: 18px 16px 12px; min-height: 70px; box-shadow: 0 10px 24px -10px rgba(0,0,0,.4); cursor: pointer; }
+.dlg .who { position: absolute; top: -13px; left: 14px; background: var(--c); color: #fff; font-weight: 900; font-size: 12px; border-radius: 8px; padding: 3px 12px; }
+.dlg p { margin: 0; font-size: 16px; line-height: 1.55; min-height: 1.55em; }
+.dlg p b { color: color-mix(in srgb, var(--c) 70%, #000); }
+.sch { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.sch.grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.say { background: #fff; color: var(--navy); border-radius: 18px 18px 4px 18px; padding: 11px 16px; font-weight: 800; font-size: 14.5px; box-shadow: 0 4px 0 #b9c0d8, 0 6px 14px rgba(0,0,0,.2); animation: sayin .3s cubic-bezier(.2, 1.3, .4, 1) backwards; }
+.sch.grid .say { border-radius: 14px; text-align: center; padding: 11px 6px; }
+.say.go { background: var(--c); color: #fff; box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 60%, #000), 0 6px 14px rgba(0,0,0,.2); }
+.say:active { transform: translateY(3px); }
+.say:nth-child(2) { animation-delay: .05s; } .say:nth-child(3) { animation-delay: .1s; } .say:nth-child(4) { animation-delay: .15s; }
+@keyframes sayin { from { transform: translateX(26px); opacity: 0; } }
+
+/* 테이블 위 물건 */
+.shelf { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.shelf::-webkit-scrollbar { display: none; }
+.pk { flex: none; width: 104px; scroll-snap-align: start; display: grid; justify-items: center; gap: 4px; }
+.pk .im { width: 104px; height: 100px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 92%, rgba(0,0,0,.28), transparent 60%); transition: transform .2s; }
+.pk:hover .im, .pk.on .im { transform: translateY(-6px) rotate(-3deg); }
+.pk .tag { background: var(--paper); border-radius: 4px; padding: 4px 6px 5px; box-shadow: 0 3px 0 rgba(0,0,0,.22); text-align: center; width: 100%; }
+.pk .tag b { display: block; font-size: 11.5px; line-height: 1.25; }
+.pk .tag span { font-weight: 900; font-size: 13px; color: var(--red); }
+.pk .tag em { display: block; font-style: normal; font-size: 10px; color: #14a06b; font-weight: 800; }
+.pick-row { display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,.85); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; }
+.pick-row b { display: block; font-size: 14px; } .pick-row em { font-style: normal; font-size: 11.5px; color: var(--pm); }
+.chips2 { display: flex; gap: 10px; margin: 0 2px 12px; }
+.chips2 button { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 3px 0 rgba(0,0,0,.25); transition: transform .15s; }
+.chips2 button.on { transform: scale(1.18); box-shadow: 0 0 0 3px var(--c), 0 3px 0 rgba(0,0,0,.25); }
+.boxes { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.pbox { width: 100px; transition: transform .2s; position: relative; }
+.pbox .lid { display: block; height: 15px; background: #fdfdfd; border-radius: 6px 6px 0 0; box-shadow: inset 0 -2px 0 #e3e3e3; }
+.pbox .bd { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 76px; background: linear-gradient(180deg, #fff, #eef0f4); border-radius: 0 0 8px 8px; box-shadow: 0 5px 0 rgba(0,0,0,.25); }
+.pbox b { font-size: 17px; color: var(--navy); } .pbox .bd span { font-weight: 900; font-size: 11.5px; color: var(--red); }
+.pbox.on { transform: translateY(-8px); } .pbox.on .bd { box-shadow: 0 0 0 3px var(--c), 0 8px 0 rgba(0,0,0,.25); }
+.opts3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.tok { background: var(--paper); border-radius: 12px; padding: 9px 6px; display: grid; justify-items: center; gap: 3px; box-shadow: 0 3px 0 rgba(0,0,0,.2); border: 2px solid transparent; transition: transform .15s; text-align: center; }
+.tok i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+.tok i.none { background: repeating-linear-gradient(45deg, #ddd 0 3px, #fff 3px 6px); }
+.tok b { font-size: 12.5px; } .tok small { font-size: 10.5px; color: var(--pm); }
+.tok.on { border-color: var(--c); transform: translateY(-3px); box-shadow: 0 6px 0 rgba(0,0,0,.2); }
+.wide { width: 100%; padding: 11px; border-radius: 12px; background: var(--pi); color: #fff; font-weight: 800; }
+.veh { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.veh button { background: var(--paper); border: 2px solid transparent; border-radius: 14px; padding: 10px 4px; display: grid; justify-items: center; gap: 2px; box-shadow: 0 3px 0 rgba(0,0,0,.2); transition: transform .15s; }
+.veh i { font-style: normal; font-size: 24px; line-height: 1.2; font-weight: 900; }
+.veh b { font-size: 13px; } .veh span { font-size: 10.5px; color: var(--pm); }
+.veh button.on { border-color: var(--c); transform: translateY(-4px); box-shadow: 0 7px 0 rgba(0,0,0,.2); }
+.memo { background: #fff59d; color: #5a4a00; border-radius: 3px; padding: 7px 10px; font-weight: 700; font-size: 12.5px; transform: rotate(-.6deg); box-shadow: 0 3px 6px rgba(0,0,0,.18); margin-top: 6px; }
+.paper { background: var(--paper); color: var(--pi); border-radius: 6px; padding: 10px 12px; box-shadow: 0 6px 0 rgba(0,0,0,.15); margin-bottom: 8px; }
+.cl { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; border-bottom: 1.5px dashed #e0d5bf; padding: 8px 2px; }
+.cl:last-of-type { border-bottom: 0; }
+.cl .st { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 2px dashed #c9b9a0; display: grid; place-items: center; font-size: 10px; font-weight: 900; color: #b9a88e; }
+.cl.on .st { border: 2.5px solid var(--red); color: var(--red); transform: rotate(-12deg); animation: stamp .3s cubic-bezier(.3, 1.6, .5, 1); }
+.cl.err .st { border-color: var(--red); animation: shake .4s; }
+.cl span:last-child { font-size: 13.5px; line-height: 1.4; } .cl b { font-weight: 700; } .cl em { display: block; font-style: normal; font-size: 11.5px; color: var(--pm); }
+@keyframes stamp { from { transform: rotate(-12deg) scale(2); opacity: 0; } }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.ck { font-size: 13px; padding: 4px 0; color: #14714c; font-weight: 700; }
+.auto { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 18px 10px; background: var(--paper); border-radius: 14px; box-shadow: 0 5px 0 rgba(0,0,0,.18); }
+.auto b { font-size: 18px; } .auto span { color: var(--pm); font-size: 13px; }
+.loading { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 26px 0; color: #5a4532; font-weight: 700; font-size: 13px; }
+.loading span { width: 100%; text-align: center; }
+.loading i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); animation: dot 1s infinite; }
+.loading i:nth-child(2) { animation-delay: .15s; } .loading i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 50% { transform: translateY(-8px); opacity: .4; } }
+.ways { display: grid; gap: 6px; }
+.way { position: relative; display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; background: var(--paper); border: 2px solid transparent; border-radius: 12px; padding: 9px 10px; text-align: left; box-shadow: 0 3px 0 rgba(0,0,0,.15); }
+.way .n { font-weight: 900; color: var(--pm); }
+.way span { font-size: 13.5px; font-weight: 700; min-width: 0; } .way em { display: block; font-style: normal; font-size: 11px; color: var(--pm); font-weight: 500; }
+.way strong { font-size: 15px; text-align: right; white-space: nowrap; } .way strong small { display: block; font-size: 10.5px; color: var(--pm); font-weight: 500; }
+.way.on { border-color: var(--c); }
+.way .best { position: absolute; right: 8px; top: -8px; font-style: normal; font-size: 10px; font-weight: 900; color: #fff; background: var(--red); border-radius: 4px; padding: 1px 6px; transform: rotate(4deg); }
+.foot { font-size: 11px; color: #6b5a48; margin-top: 8px; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.dcard { position: relative; text-align: left; border-radius: 12px; padding: 12px 10px 10px; display: flex; flex-direction: column; gap: 2px; min-height: 128px; color: #fff; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,.25); transition: transform .25s; }
+.dcard.a { background: linear-gradient(160deg, #3a5dab, #1E2A5A); } .dcard.b { background: linear-gradient(160deg, #c94a7a, #7a2350); }
+.dcard .ic { font-size: 20px; } .dcard b { font-size: 14.5px; } .dcard span { font-size: 11px; opacity: .85; }
+.dcard strong { margin-top: auto; font-size: 18px; font-weight: 900; } .dcard em { font-style: normal; font-size: 11px; opacity: .85; }
+.dcard.on { transform: translateY(-8px) rotate(-2deg); box-shadow: 0 0 0 3px var(--gold), 0 12px 0 rgba(0,0,0,.25); }
+.dcard .win { position: absolute; top: -8px; right: -6px; background: var(--gold); color: var(--pi); font-style: normal; font-size: 10px; font-weight: 900; border-radius: 6px; padding: 2px 6px; transform: rotate(6deg); }
+.coins { display: flex; gap: 8px; justify-content: center; margin: 2px 0 12px; }
+.coin { width: 58px; height: 58px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff3c4, #f5c84a 55%, #c99a1d); box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), 0 4px 0 rgba(0,0,0,.3); font-weight: 900; font-size: 13px; color: #5a4100; display: grid; place-content: center; line-height: 1.05; transition: transform .2s; }
+.coin small { font-size: 9.5px; display: block; }
+.coin.on { transform: translateY(-8px) scale(1.06); box-shadow: 0 0 0 3px #fff, inset 0 -4px 0 rgba(0,0,0,.18), 0 10px 0 rgba(0,0,0,.3); }
+.bill { background: var(--paper); border-radius: 10px; padding: 10px 12px; }
+.ln { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; padding: 3px 0; }
+.ln b { text-align: right; } .ln.m b { color: var(--red); }
+.ln.t { border-top: 2px solid var(--pi); margin-top: 4px; padding-top: 6px; font-size: 15px; font-weight: 900; }
+.big { display: flex; justify-content: space-around; text-align: center; margin-top: 8px; background: var(--navy); color: #fff; border-radius: 10px; padding: 8px; }
+.big span { display: block; font-size: 11px; opacity: .75; } .big b { font-size: 18px; font-weight: 900; }
+.mcard { margin: 2px auto 12px; width: min(280px, 100%); aspect-ratio: 1.6; border-radius: 14px; background: linear-gradient(135deg, #1E2A5A, #3a5dab 60%, #FFC83D 160%); color: #fff; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 0 rgba(0,0,0,.25); animation: give .6s cubic-bezier(.2, 1.2, .3, 1); }
+@keyframes give { from { transform: translateY(-50px) rotate(-12deg) scale(.7); opacity: 0; } }
+.mcard .l { font-weight: 900; font-size: 22px; color: var(--gold); font-family: var(--brand); } .mcard .v { font-size: 26px; font-weight: 900; } .mcard small { font-size: 11px; opacity: .85; }
+.social { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.social button { border-radius: 12px; padding: 11px 4px; font-weight: 900; font-size: 13px; box-shadow: 0 4px 0 rgba(0,0,0,.3); }
+.social .k { background: #FEE500; color: #191600; } .social .n { background: #03C75A; color: #fff; } .social .g { background: #fff; color: #1b1d26; }
+.sign { position: relative; margin-top: 8px; border: 2px dashed #c9b9a0; border-radius: 8px; height: 92px; background: #fffdf8; touch-action: none; }
+.sign canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sign span { position: absolute; left: 10px; top: 6px; font-size: 11px; font-weight: 700; color: var(--pm); pointer-events: none; }
+.sign .x { position: absolute; left: 12px; bottom: 12px; font-style: normal; font-weight: 900; font-size: 18px; color: #c9b9a0; pointer-events: none; }
+.sign.err { border-color: var(--red); animation: shake .4s; }
+.fl { position: relative; display: flex; align-items: baseline; gap: 8px; background: var(--paper); border-radius: 10px; padding: 8px 10px 6px; margin-bottom: 6px; border: 1.5px solid transparent; }
+.fl label { flex: none; width: 52px; font-size: 11.5px; font-weight: 800; color: var(--pm); }
+.fl input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: 700 15px var(--font); color: var(--navy); }
+.fl.err { border-color: var(--red); } .fl .e { position: absolute; right: 8px; top: -9px; font-size: 10.5px; font-weight: 700; color: #fff; background: var(--red); border-radius: 4px; padding: 0 5px; }
+.rcpt { background: #fff; position: relative; padding: 14px 14px 18px; }
+.rcpt h3 { margin: 0; text-align: center; font-family: var(--brand); font-size: 18px; } .rcpt .no { text-align: center; font-size: 11px; color: var(--pm); margin-bottom: 8px; }
+.rcpt .ln { border-bottom: 1px dashed #ddd; font-size: 12.5px; }
+.rcpt .done { position: absolute; right: 10px; top: 30px; border: 2.5px solid var(--red); color: var(--red); font-weight: 900; font-size: 13px; border-radius: 6px; padding: 2px 8px; transform: rotate(-12deg); animation: stamp .4s .3s cubic-bezier(.3, 1.6, .5, 1) both; }
+.center { text-align: center; }
+
+/* 투어 카드: 셀링포인트 3개 + 들어가기 */
+.points { list-style: none; padding: 0; margin: 0 0 4px; display: grid; gap: 6px; }
+.points li { display: flex; align-items: center; gap: 10px; background: var(--soft); border-radius: 12px; padding: 10px 12px; font-weight: 700; font-size: 14px; }
+.points li i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-size: 12px; }
+
+@media (max-width: 760px) {
+  .shop-top { top: calc(52px + env(safe-area-inset-top, 0px)); padding: 0 10px; }
+  .mission li span { font-size: 9.5px; }
+  .mission li i { width: 22px; height: 22px; font-size: 13px; }
+  .shop-low { left: 10px; right: 10px; width: auto; top: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); max-height: 64vh; max-height: 64svh; }
+  .table { max-height: 40vh; max-height: 40svh; }
+  .dlg { padding: 16px 14px 10px; min-height: 0; } .dlg p { font-size: 15px; }
+  .say { padding: 10px 14px; font-size: 14px; }
+  .opts3 { grid-template-columns: repeat(4, 1fr); }
+}
+
 </style>
 <header class="top">
     <a class="brand" href="#" id="brand" aria-label="폰파리 처음으로">phone<span>paris</span><i>✳</i></a>
@@ -279,6 +429,19 @@ dialog::backdrop { background: rgba(14, 20, 28, .45); backdrop-filter: blur(3px)
   <button class="scroll-hint" id="scrollHint" aria-label="다음 장면">스크롤 <span>↓</span></button>
 
   <main class="track" id="track"></main>
+
+  <section id="shop" class="shop" hidden aria-label="폰팔이 가게">
+    <div class="shop-top">
+      <button class="sbtn" id="shopBack" aria-label="이전으로" hidden>←</button>
+      <ol class="mission" id="mission" aria-label="구매 단계"></ol>
+      <button class="sbtn" id="shopExit" aria-label="광장으로">✕</button>
+    </div>
+    <div class="shop-low">
+      <div class="table" id="shopPanel"></div>
+      <div class="dlg" id="shopDlg"><span class="who" id="shopWho"></span><p id="shopTxt" aria-live="polite"></p></div>
+      <div class="sch" id="shopCh"></div>
+    </div>
+  </section>
 
   <dialog id="sheet" class="sheet" aria-label="상세">
     <div class="sheet-in">
@@ -339,15 +502,78 @@ window.SITE = {
     { id: "finish", nav: "마무리", title: "여섯 명 다 둘러봤다.\n이제 폰만 고르면 돼.", sub: "" },
   ],
 
+  // 상품: price = 영상 속 1mm 기기값(공시지원금·매장지원 반영, SKT 번호이동 기준 예시)
+  // list = 출고가 (아이폰17/에어/18프로는 영상, 17프로·폴드8·S26은 2026-11 출고가 보도 기준)
   products: {
-    ip17:   { name: "아이폰17 NEW", list: 1452000, price: 552000, color: "#d9cdf2" },
-    ip17a:  { name: "아이폰17에어", list: 1584000, price: 484000, color: "#dfe9f2" },
-    ip18p:  { name: "아이폰18 프로", list: 1990000, price: 1391000, color: "#6e2a33" },
-    ip17p:  { name: "아이폰17프로", price: 932000, color: "#f07a2c" },
-    zf8:    { name: "Z폴드8(와이드형)", price: 1378000, color: "#b9b2c9" },
-    s26:    { name: "갤럭시 S26", price: 203600, color: "#9cc7d6" },
-    a17:    { name: "갤럭시 A17", list: 319000, price: 0, color: "#a9d3ea", tag: "공짜폰" },
-    folder: { name: "클래식 폴더", list: 205700, price: 0, color: "#1d1f22", tag: "공짜폰", folder: true },
+    ip17:   { name: "아이폰17 NEW", list: 1452000, price: 552000, color: "#d9cdf2", colors: [["라벤더", "#d9cdf2"], ["세이지", "#c9d6c2"], ["블랙", "#2b2d30"]] },
+    ip17a:  { name: "아이폰17에어", list: 1584000, price: 484000, color: "#dfe9f2", colors: [["스카이 블루", "#cfe1f2"], ["클라우드 화이트", "#f1f1ee"], ["스페이스 블랙", "#26272b"]] },
+    ip18p:  { name: "아이폰18 프로", list: 1990000, price: 1391000, color: "#6e2a33", colors: [["버건디", "#6e2a33"], ["실버", "#dadbd8"], ["블랙", "#2a2b2e"]] },
+    ip17p:  { name: "아이폰17프로", list: 1790000, price: 932000, color: "#f07a2c", colors: [["코스믹 오렌지", "#f07a2c"], ["실버", "#dadbd8"], ["딥 블루", "#2c3c5c"]] },
+    zf8:    { name: "Z폴드8(와이드형)", list: 2278100, price: 1378000, color: "#b9b2c9", colors: [["실버 섀도", "#b9b2c9"], ["블루 섀도", "#4d5c7c"], ["제트 블랙", "#1f2023"]] },
+    s26:    { name: "갤럭시 S26", list: 1403600, price: 203600, color: "#9cc7d6", colors: [["스카이 블루", "#9cc7d6"], ["코발트 바이올렛", "#7a6ab0"], ["블랙", "#25262a"]] },
+    a17:    { name: "갤럭시 A17", list: 319000, price: 0, color: "#a9d3ea", tag: "공짜폰", colors: [["라이트 블루", "#a9d3ea"], ["블랙", "#25262a"]] },
+    folder: { name: "클래식 폴더", list: 205700, price: 0, color: "#1d1f22", tag: "공짜폰", folder: true, colors: [["블랙", "#1d1f22"]] },
+  },
+  storageAdd: { "256GB": 0, "512GB": 300000 },   // 용량 올리면 출고가·기기값에 더함 (예시)
+
+  /* ---------- 구매 프로세스 (1mm STORE v6 판매 흐름) ---------- */
+  shop: {
+    memberDc: 30000,           // 1mm 멤버십 즉시 할인 (v6)
+    rate: 0.059,               // 할부 연 5.9% 가정
+    keepDays: 183,             // 고가 요금제 유지 기준
+    carriers: [
+      { id: "skt", name: "SKT", add: 0 },
+      { id: "kt", name: "KT", add: 40000 },
+      { id: "lgu", name: "LG U+", add: 20000 },
+    ],
+    curs: [["skt", "SKT"], ["kt", "KT"], ["lgu", "LG U+"], ["mvno", "알뜰폰"]],
+    chgAdd: 120000,            // 기기변경이면 번호이동보다 기기값 + (예시)
+    bundleDc: 11000,           // 결합 유지 시 월 할인 (예시)
+    tiers: [
+      { id: "low", label: "적게", sub: "~7GB", fee: { skt: 49000, kt: 47000, lgu: 47000 }, mvno: 16500 },
+      { id: "mid", label: "보통", sub: "~30GB", fee: { skt: 62000, kt: 61000, lgu: 59000 }, mvno: 29000 },
+      { id: "high", label: "많이", sub: "무제한", fee: { skt: 89000, kt: 90000, lgu: 85000 }, mvno: 39000 },
+    ],
+    selRate: 0.25,             // 선택약정 25%
+    selSupportRate: 0.12,      // 선택약정일 때 매장지원 (출고가 대비, 예시)
+    months: [0, 12, 24, 36],
+    ship: [
+      { id: "quick", icon: "🛵", name: "퀵", sub: "오늘 도착" },
+      { id: "parcel", icon: "🚚", name: "택배", sub: "1~2일 · 무료" },
+      { id: "store", icon: "🏪", name: "방문 수령", sub: "준비되면 문자" },
+    ],
+    agree: [
+      { id: "a1", t: "개봉·개통 후 단순 변심 반품 불가", d: "불량은 받은 날부터 7일 안에 교환" },
+      { id: "a2", t: "폰을 받은 뒤 개통", d: "개통 시간에만 처리돼요" },
+      { id: "a3", t: "주문 내용·배송 조건 확인" },
+      { id: "a4", t: "개인정보 수집·이용 동의", d: "이름·연락처·주소" },
+    ],
+    usedGrades: [
+      { id: "S", name: "S급", d: "사용감 거의 없음", rate: 0.62 },
+      { id: "U", name: "미개봉급", d: "개봉만 한 수준", rate: 0.74 },
+    ],
+    usedBattery: [{ id: "85", name: "85% 이상", add: 0 }, { id: "90", name: "90% 이상", add: 40000 }],
+    usedChecks: ["IMEI 분실·도난 조회", "통화·카메라·Wi-Fi", "충전·배터리 측정", "초기화·계정 잠금 해제"],
+    safeItems: [
+      { id: "case", icon: "▣", name: "강화 케이스", price: 19000 },
+      { id: "film", icon: "▭", name: "강화 필름", price: 15000 },
+      { id: "care", icon: "✚", name: "휴대폰 보험", monthly: 5900 },
+    ],
+    safePromises: ["미개봉 정품", "KT 공식인증 대리점", "의무 부가서비스 없음", "할인 즉시 반영"],
+    quickSpeed: [
+      { id: "now", icon: "🛵", name: "오늘 퀵", sub: "평일 16시 전 신청" },
+      { id: "visit", icon: "🏪", name: "방문 수령", sub: "바로 가져가기" },
+      { id: "parcel", icon: "🚚", name: "택배", sub: "1일 · 제주 2일" },
+    ],
+    quickOpen: [
+      { id: "after", name: "받고 나서 개통", sub: "쓰던 폰 그대로" },
+      { id: "before", name: "미리 개통", sub: "받자마자 바로" },
+    ],
+    priceFocus: [
+      { id: "monthly", icon: "📅", name: "매달 최저", sub: "월 납부금 순" },
+      { id: "today", icon: "0", name: "오늘 0원", sub: "할부로 시작" },
+      { id: "total", icon: "Σ", name: "2년 총액 최저", sub: "다 더해서" },
+    ],
   },
 
   dealers: {
@@ -358,6 +584,8 @@ window.SITE = {
       chips: ["케이스", "키링", "그립톡", "마그네틱 지갑"],
       products: ["ip17", "ip17a", "ip18p"],
       cta: "3D로 폰꾸 하기", action: "studio",
+      points: ["폰꾸 세트", "3D로 미리 보기", "폰+케이스 한 번에"],
+      pitch: "폰꾸 세트, 같이 골라 봐.",
     },
     quick: {
       name: "퀵퀵이폰팔이", short: "퀵퀵이", color: "#f08a2c", ink: "#8a3c00",
@@ -370,6 +598,9 @@ window.SITE = {
         { t: "받고 나서 개통도 OK", d: "배송 후 개통을 원하면 미리 요청해 주세요. 기기변경이면 개통 후에도 쓰던 폰을 계속 쓸 수 있어요." },
       ],
       cta: "퀵으로 받기", action: "pick",
+      points: ["오늘 퀵 도착", "16시 전 당일 발송", "받고 나서 개통"],
+      pitch: "언제, 어떻게 받을래?",
+      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     price: {
       name: "자린고비폰팔이", short: "자린고비", color: "#9c9e6c", ink: "#4d4f22",
@@ -378,6 +609,8 @@ window.SITE = {
       products: ["a17", "folder", "s26", "ip17a", "ip17"],
       sort: true,
       cta: "최저가 상담", action: "pick",
+      points: ["0원폰", "최저 조건 자동 비교", "2년 총액까지"],
+      pitch: "뭐가 제일 중요해? 돈 얘기만 하자.",
     },
     safe: {
       name: "세이프티폰팔이", short: "세이프티", color: "#3f4f7d", ink: "#1f2a4d",
@@ -392,6 +625,9 @@ window.SITE = {
       ],
       combo: ["강화 케이스", "강화 필름", "휴대폰 보험"],
       cta: "안심 상담", action: "consult",
+      points: ["미개봉 정품", "보호 3종 세트", "공식인증 대리점"],
+      pitch: "지킬 거 골라. 약속은 도장으로.",
+      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     used: {
       name: "중고폰팔이", short: "중고폰", color: "#9c3a55", ink: "#5e1529",
@@ -403,6 +639,9 @@ window.SITE = {
       ],
       note: "재고는 수시로 바뀌어서 상담으로 안내해요.",
       cta: "중고폰으로 상담 받기", action: "consult",
+      points: ["S급·미개봉급", "배터리 보장", "4단계 검수"],
+      pitch: "등급이랑 배터리, 네가 정해.",
+      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     allinone: {
       name: "올인원 뷰저폰팔이", short: "올인원", color: "#bdb9a8", ink: "#55513f",
@@ -411,6 +650,8 @@ window.SITE = {
       products: ["ip17", "ip17p", "zf8", "ip18p", "ip17a", "s26"],
       grid: true,
       cta: "이 모델로 상담", action: "pick",
+      points: ["모델만 고르면 끝", "상담 질문 생략", "최저 조건 자동"],
+      pitch: "나머진 내가 알아서 할게. 괜찮지?",
     },
   },
 
@@ -501,59 +742,88 @@ window.SITE = {
 
   function buildTower() {
     var segs = [], V = function (x, y, z) { return new T.Vector3(x, y, z); };
+    var mid = function (a, b) { return a.clone().add(b).multiplyScalar(.5); };
     function S(a, b, w) { segs.push([a, b, w]); }
-    function face(p0, p1, q0, q1, w) { S(p0, q1, w); S(p1, q0, w); }  // X 브레이싱
+    // 면 하나를 두 칸으로 나눠 X 두 개 + 가운데 기둥 (영상의 촘촘한 격자)
+    function face(p0, p1, q0, q1, w) {
+      var pm = mid(p0, p1), qm = mid(q0, q1);
+      S(pm, qm, w * .9); S(p0, qm, w); S(pm, q0, w); S(pm, q1, w); S(p1, qm, w);
+    }
     var y, k;
     // 네 다리 (2층까지)
     [-1, 1].forEach(function (sx) {
       [-1, 1].forEach(function (sz) {
         var prev = null;
-        for (y = 0; y <= 38.5 + .01; y += 2.2) {
+        for (y = 0; y <= 38.5 + .01; y += 1.9) {
           var o = hw(y), n = o - legT(y);
           var c = [V(sx * o, y, sz * o), V(sx * n, y, sz * o), V(sx * n, y, sz * n), V(sx * o, y, sz * n)];
-          for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .26);
-          if (prev) for (k = 0; k < 4; k++) { S(prev[k], c[k], .5); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], .16); }
+          for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .24);
+          if (prev) for (k = 0; k < 4; k++) { S(prev[k], c[k], .55); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], .13); }
           prev = c;
         }
       });
     });
-    // 몸통 (2층 → 꼭대기)
+    // 몸통 (2층 → 꼭대기): 바깥 면 + 안쪽 대각
     var prev = null;
-    for (y = 38.5; y <= 92.01; y += 2.6) {
+    for (y = 38.5; y <= 92.01; y += 2.2) {
       var h = hw(y), c = [V(h, y, h), V(-h, y, h), V(-h, y, -h), V(h, y, -h)];
-      for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .22);
-      if (prev) for (k = 0; k < 4; k++) { S(prev[k], c[k], lerp(.45, .2, (y - 38.5) / 54)); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], .12); }
+      for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .2);
+      if (prev) {
+        var t = (y - 38.5) / 54;
+        for (k = 0; k < 4; k++) { S(prev[k], c[k], lerp(.5, .2, t)); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], lerp(.12, .07, t)); }
+        if (Math.round(y / 2.2) % 3 === 0) { S(c[0], c[2], .08); S(c[1], c[3], .08); }
+      }
       prev = c;
     }
-    // 아치 네 면
+    // 아치 네 면: 두 겹 곡선 + 지그재그 격자
     for (var side = 0; side < 4; side++) {
-      var rot = side * Math.PI / 2, arcs = [[], []];
-      for (var a = 0; a <= 28; a++) {
-        var th = Math.PI * a / 28, R = 11.6;
-        for (var l = 0; l < 2; l++) {
-          var x = Math.cos(th) * R, yy = 5 + Math.sin(th) * (12.2 - l * 1.1), z = 13.4 + (l ? -.9 : 0);
+      var rot = side * Math.PI / 2, arcs = [[], [], []];
+      for (var a = 0; a <= 36; a++) {
+        var th = Math.PI * a / 36, R = 11.6;
+        for (var l = 0; l < 3; l++) {
+          var x = Math.cos(th) * (R + (l === 2 ? .3 : 0)), yy = 5 + Math.sin(th) * (12.2 - (l === 1 ? 1.2 : 0) + (l === 2 ? 2.6 : 0)), z = 13.4 + (l === 1 ? -.9 : 0);
+          if (l === 2) yy = Math.min(yy, 18.2);
           arcs[l].push(V(x * Math.cos(rot) - z * Math.sin(rot), yy, x * Math.sin(rot) + z * Math.cos(rot)));
         }
       }
       for (a = 1; a < arcs[0].length; a++) {
-        S(arcs[0][a - 1], arcs[0][a], .42); S(arcs[1][a - 1], arcs[1][a], .3);
-        if (a % 2) S(arcs[0][a], arcs[1][a], .14);
+        S(arcs[0][a - 1], arcs[0][a], .42); S(arcs[1][a - 1], arcs[1][a], .3); S(arcs[2][a - 1], arcs[2][a], .2);
+        S(a % 2 ? arcs[0][a - 1] : arcs[0][a], a % 2 ? arcs[1][a] : arcs[1][a - 1], .1);
+        S(a % 2 ? arcs[0][a] : arcs[0][a - 1], arcs[2][a], .09);
+      }
+    }
+    // 1층 바깥 장식 아치 띠 (전망대 아래 작은 아치들)
+    for (side = 0; side < 4; side++) {
+      var rr = side * Math.PI / 2, half = hw(19) + 1.4, n2 = 9;
+      for (var j = 0; j < n2; j++) {
+        var x0 = -half + j * (2 * half / n2), x1 = x0 + 2 * half / n2, pts = [];
+        for (var q = 0; q <= 6; q++) { var th2 = Math.PI * q / 6; pts.push([lerp(x0, x1, q / 6), 16.6 + Math.sin(th2) * 1.6]); }
+        for (q = 1; q < pts.length; q++) {
+          var A = pts[q - 1], B = pts[q], zz = half + .1;
+          S(V(A[0] * Math.cos(rr) - zz * Math.sin(rr), A[1], A[0] * Math.sin(rr) + zz * Math.cos(rr)),
+            V(B[0] * Math.cos(rr) - zz * Math.sin(rr), B[1], B[0] * Math.sin(rr) + zz * Math.cos(rr)), .14);
+        }
       }
     }
     var geo = new T.BoxGeometry(1, 1, 1);
-    var mat = new T.MeshStandardMaterial({ color: 0x5f4b39, roughness: .85, metalness: .15 });
+    var mat = new T.MeshStandardMaterial({ color: 0x4f3d2e, roughness: .8, metalness: .25 });
     var mesh = new T.InstancedMesh(geo, mat, segs.length), m = new T.Matrix4();
     segs.forEach(function (s, i) { mesh.setMatrixAt(i, segMatrix(s[0], s[1], s[2], m)); });
+    mesh.castShadow = true;
     var g = new T.Group(); g.add(mesh);
-    // 전망대 바닥, 꼭대기, 안테나
-    var deck = new T.MeshStandardMaterial({ color: 0x4e3e30, roughness: .9 });
+    var deck = new T.MeshStandardMaterial({ color: 0x45362a, roughness: .9 });
     [[19, hw(19) * 2 + 3.2, 1.4], [38.5, hw(38.5) * 2 + 2, 1]].forEach(function (d) {
-      var b = new T.Mesh(new T.BoxGeometry(d[1], d[2], d[1]), deck); b.position.y = d[0]; g.add(b);
-      var rail = new T.Mesh(new T.BoxGeometry(d[1] + .6, .9, d[1] + .6), new T.MeshStandardMaterial({ color: 0x6b5644, transparent: true, opacity: .55 }));
+      var b = new T.Mesh(new T.BoxGeometry(d[1], d[2], d[1]), deck); b.position.y = d[0]; b.castShadow = true; g.add(b);
+      var rail = new T.Mesh(new T.BoxGeometry(d[1] + .6, .9, d[1] + .6), new T.MeshStandardMaterial({ color: 0x6b5644, transparent: true, opacity: .5 }));
       rail.position.y = d[0] + 1.1; g.add(rail);
+      for (var p = 0; p < 4; p++) { // 전망대 위 작은 건물
+        var hut = new T.Mesh(new T.BoxGeometry(d[1] * .3, 2.2, 2), deck); var an = p * Math.PI / 2;
+        hut.position.set(Math.cos(an) * d[1] * .32, d[0] + 1.8, Math.sin(an) * d[1] * .32); hut.rotation.y = an; g.add(hut);
+      }
     });
     var top = new T.Mesh(new T.BoxGeometry(3.2, 3.4, 3.2), deck); top.position.y = 92.5; g.add(top);
-    var ant = new T.Mesh(new T.CylinderGeometry(.18, .3, 10, 6), deck); ant.position.y = 99; g.add(ant);
+    var lantern = new T.Mesh(new T.CylinderGeometry(.9, 1.3, 2.4, 8), deck); lantern.position.y = 95.4; g.add(lantern);
+    var ant = new T.Mesh(new T.CylinderGeometry(.12, .3, 9, 6), deck); ant.position.y = 101; g.add(ant);
     g.userData.segments = segs.length;
     return g;
   }
@@ -564,7 +834,7 @@ window.SITE = {
   function buildPlaza(r) {
     var g = new T.Group();
     var ground = new T.Mesh(new T.PlaneGeometry(2400, 2400), new T.MeshStandardMaterial({ color: 0x8d8c88, roughness: 1 }));
-    ground.rotation.x = -Math.PI / 2; g.add(ground);
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
     // 격자 타일 블록 (첫 장면의 광장 패턴)
     var pts = [];
     for (var x = -440; x <= 440; x += 9) for (var z = -520; z <= 440; z += 9) {
@@ -610,77 +880,131 @@ window.SITE = {
     return mesh;
   }
 
-  /* ---------- 폰팔이 캐릭터 ---------- */
-  function std(color, rough) { return new T.MeshStandardMaterial({ color: color, roughness: rough == null ? .75 : rough }); }
+  /* ---------- 폰팔이 캐릭터 (영상처럼 둥근 모서리·광택 눈·소품) ---------- */
+  function std(color, rough) { return new T.MeshStandardMaterial({ color: color, roughness: rough == null ? .62 : rough }); }
+  function rshape(w, h, r) {
+    var s = new T.Shape(), x = -w / 2, y = -h / 2;
+    s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r); s.lineTo(x + w, y + h - r);
+    s.quadraticCurveTo(x + w, y + h, x + w - r, y + h); s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y); return s;
+  }
+  function rbox(w, h, d, r, mat) { // 모서리 둥근 상자
+    r = Math.min(r, w / 2 - .01, h / 2 - .01, d / 2 - .01);
+    var g = new T.ExtrudeGeometry(rshape(w - 2 * r, h - 2 * r, .001 + r * .2), { depth: d - 2 * r, bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 5, curveSegments: 6 });
+    g.translate(0, 0, -(d - 2 * r) / 2); g.computeVertexNormals();
+    var m = new T.Mesh(g, mat); m.castShadow = true; m.receiveShadow = true; return m;
+  }
+  function lathe(points, mat, seg) {
+    var m = new T.Mesh(new T.LatheGeometry(points.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg || 40), mat);
+    m.castShadow = true; return m;
+  }
   function eyes(group, y, z, gap, size) {
-    var white = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .3 }), black = std(0x111111, .2);
+    var white = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .18 }), black = new T.MeshStandardMaterial({ color: 0x0c0c0e, roughness: .12, metalness: .2 });
+    var shine = new T.MeshBasicMaterial({ color: 0xffffff });
     var pair = new T.Group(); pair.position.set(0, y, z);
     var pupils = [];
     [-1, 1].forEach(function (s) {
-      var eye = new T.Mesh(new T.SphereGeometry(size, 20, 14), white); eye.scale.z = .55; eye.position.x = s * gap; pair.add(eye);
-      var p = new T.Mesh(new T.SphereGeometry(size * .48, 16, 10), black); p.position.set(s * gap, 0, size * .5); p.userData.base = p.position.clone(); pair.add(p); pupils.push(p);
+      var eye = new T.Mesh(new T.SphereGeometry(size, 28, 20), white); eye.scale.z = .6; eye.position.x = s * gap; pair.add(eye);
+      var p = new T.Group(); p.position.set(s * gap, 0, size * .5); p.userData.base = p.position.clone();
+      var pu = new T.Mesh(new T.SphereGeometry(size * .5, 20, 14), black); pu.scale.z = .5; p.add(pu);
+      var hl = new T.Mesh(new T.SphereGeometry(size * .13, 10, 8), shine); hl.position.set(-size * .17, size * .17, size * .2); p.add(hl);
+      pair.add(p); pupils.push(p);
     });
     group.add(pair); group.userData.eyes = pair; group.userData.pupils = pupils;
   }
-  function arm(group, from, to, color, r) {
+  function limb(group, from, to, color, r, hand) { // 캡슐 팔 + 공 손
     var a = new T.Vector3().fromArray(from), b = new T.Vector3().fromArray(to);
-    var len = a.distanceTo(b), mesh = new T.Mesh(new T.CylinderGeometry(r, r, len, 12), std(color));
+    var len = a.distanceTo(b), mat = std(color, .55);
+    var mesh = new T.Mesh(new T.CylinderGeometry(r, r, len, 18), mat); mesh.castShadow = true;
     mesh.position.copy(a).add(b).multiplyScalar(.5);
     mesh.quaternion.setFromUnitVectors(UP, b.clone().sub(a).normalize());
-    var end = new T.Mesh(new T.SphereGeometry(r * 1.25, 14, 10), std(color)); end.position.copy(b);
-    group.add(mesh, end);
+    var j = new T.Mesh(new T.SphereGeometry(r, 16, 12), mat); j.position.copy(a);
+    var end = new T.Mesh(new T.SphereGeometry(r * (hand || 1.3), 20, 14), mat); end.position.copy(b); end.castShadow = true;
+    group.add(mesh, j, end); return end;
   }
+  function textTex(lines, fg, bg, w, h) {
+    var c = document.createElement("canvas"); c.width = w || 256; c.height = h || 128; var x = c.getContext("2d");
+    x.fillStyle = bg; x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "middle";
+    lines.forEach(function (l, i) { x.font = (l.w || 900) + " " + l.s + "px 'Noto Sans KR', system-ui, sans-serif"; x.fillText(l.t, c.width / 2, c.height * (i + .5) / lines.length); });
+    var t = new T.CanvasTexture(c); t.anisotropy = 4; return t;
+  }
+  function plate(w, h, tex) { return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshStandardMaterial({ map: tex, roughness: .7 })); }
 
   function buildDealer(id, colorHex) {
-    var g = new T.Group(), body, col = new T.Color(colorHex).getHex();
-    if (id === "designer") {
-      body = new T.Mesh(new T.CylinderGeometry(.72, .72, 4.4, 28), std(col)); body.position.y = 2.2;
-      eyes(g, 3.85, .66, .27, .2); arm(g, [.7, 2.4, .2], [1.35, 1.1, .7], col, .17);
-    } else if (id === "quick") {
-      body = new T.Mesh(new T.BoxGeometry(2.1, 3.7, .9), std(col)); body.position.y = 1.85;
-      eyes(g, 3.15, .5, .32, .2); arm(g, [1.05, 2.2, 0], [1.25, .4, .5], 0xe0a040, .18);
-      var wheel = new T.Mesh(new T.CylinderGeometry(.9, .9, .3, 24), std(0x222222)); wheel.rotation.z = Math.PI / 2; wheel.position.set(-2.2, .9, .3); g.add(wheel);
-      var cart = new T.Mesh(new T.BoxGeometry(1.4, 1.2, 1.2), std(0xd08a2c)); cart.position.set(-1.8, 1.6, .3); g.add(cart);
-    } else if (id === "price") {
-      body = new T.Mesh(new T.CylinderGeometry(.12, 1.15, 4.3, 4), std(col)); body.position.y = 2.15; body.rotation.y = Math.PI / 4; body.rotation.z = -.08;
-      eyes(g, 2.2, .66, .25, .19); arm(g, [.6, 1.9, .2], [1.4, 2.6, .5], col, .16);
-    } else if (id === "safe") {
-      body = new T.Mesh(new T.BoxGeometry(2.7, 3.4, 1.3), std(col)); body.position.y = 1.7;
-      eyes(g, 2.85, .7, .33, .2); arm(g, [1.3, 2.3, 0], [2.2, .9, .5], col, .2); arm(g, [-1.3, 2.3, 0], [-2.1, 1.2, .4], col, .2);
-    } else if (id === "used") {
-      body = new T.Mesh(new T.BoxGeometry(1.05, 4.6, .9), std(col)); body.position.y = 2.3;
-      eyes(g, 3.9, .5, .23, .19); arm(g, [.5, 3, 0], [1.2, 4.1, .4], col, .14);
-      var sign = new T.Mesh(new T.BoxGeometry(.8, .6, .05), std(0xd9cfc9)); sign.position.set(1.35, 4.35, .45); sign.rotation.z = .3; g.add(sign);
-    } else {
-      body = new T.Mesh(new T.SphereGeometry(1, 36, 24), std(col, .9)); body.scale.set(1.55, 2.05, 1.3); body.position.y = 2.05;
-      eyes(g, 2.75, 1.22, .32, .2); arm(g, [1.4, 2.4, 0], [2.3, 3.3, .3], 0x8e8c86, .17); arm(g, [-1.4, 2.4, 0], [-2.3, 3.2, .3], 0x8e8c86, .17);
-      var shelf = new T.Mesh(new T.BoxGeometry(2.4, .08, .5), std(0xeeeeee)); shelf.position.set(0, 2.15, 1.32); g.add(shelf);
+    var g = new T.Group(), col = new T.Color(colorHex).getHex(), body, m = std(col);
+    if (id === "designer") { // 라벤더 원기둥 + 긴 알약 팔
+      body = lathe([[0, 0], [.74, 0], [.74, 4.1], [.7, 4.32], [.55, 4.44], [0, 4.46]], m, 48);
+      eyes(g, 3.8, .68, .27, .21);
+      limb(g, [.68, 2.6, .2], [1.15, 1.25, .75], 0xc4b6e6, .2, 1.4);
+    } else if (id === "quick") { // 주황 상자 + 손수레 + 택배 상자
+      body = rbox(2.1, 3.8, .95, .16, m); body.position.y = 1.9;
+      eyes(g, 3.1, .52, .32, .21);
+      limb(g, [1.05, 2.4, .1], [1.2, .55, .5], 0xf2b23d, .19);
+      var rail = std(0x2f3135, .4);
+      [[-2.55, .35], [-1.65, .35]].forEach(function (p) { var r = rbox(.12, 2.6, .12, .05, rail); r.position.set(p[0], 1.45, p[1]); r.rotation.z = -.12; g.add(r); });
+      var wheel = new T.Mesh(new T.TorusGeometry(.48, .2, 14, 28), std(0x18191b, .8)); wheel.position.set(-2.1, .62, .9); wheel.rotation.y = Math.PI / 2; wheel.castShadow = true; g.add(wheel);
+      [[1.2, .8, .9, 1.4], [1.0, .7, .8, 2.15]].forEach(function (b) { var bx = rbox(b[0], b[1], b[2], .05, std(0xc99a62, .9)); bx.position.set(-2.1, b[3], .4); g.add(bx); });
+    } else if (id === "price") { // 카키 원뿔 + 가격표
+      body = lathe([[0, 0], [1.18, 0], [1.12, .2], [.2, 4.05], [.08, 4.25], [0, 4.3]], m, 48);
+      body.rotation.z = -.06;
+      eyes(g, 2.15, .72, .26, .2);
+      var hand = limb(g, [.6, 1.9, .3], [1.45, 2.75, .55], 0xb3b483, .17);
+      var tag = plate(.8, .5, textTex([{ t: "0원", s: 70 }], "#d8263a", "#fffdf2", 192, 120)); tag.position.copy(hand.position).add(new T.Vector3(.1, .45, .05)); g.add(tag);
+    } else if (id === "safe") { // 남색 상자 + 두 팔 + 방패
+      body = rbox(2.75, 3.4, 1.3, .2, m); body.position.y = 1.7;
+      eyes(g, 2.85, .7, .34, .21);
+      limb(g, [1.35, 2.3, 0], [2.15, .95, .55], 0x55669a, .21); limb(g, [-1.35, 2.3, 0], [-2.05, 1.25, .45], 0x55669a, .21);
+      var sh = new T.Shape(); sh.moveTo(0, .5); sh.quadraticCurveTo(.45, .45, .5, .35); sh.lineTo(.42, -.15); sh.quadraticCurveTo(.25, -.45, 0, -.6); sh.quadraticCurveTo(-.25, -.45, -.42, -.15); sh.lineTo(-.5, .35); sh.quadraticCurveTo(-.45, .45, 0, .5);
+      var shield = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: .08, bevelEnabled: true, bevelSize: .03, bevelThickness: .03 }), std(0xe8edf5, .35)); shield.position.set(0, 1.5, .67); g.add(shield);
+    } else if (id === "used") { // 버건디 기둥 + S급 팻말
+      body = rbox(1.05, 4.6, .9, .14, m); body.position.y = 2.3;
+      eyes(g, 3.9, .48, .23, .2);
+      var h2 = limb(g, [.52, 3.1, 0], [1.15, 4.05, .4], 0xb54d69, .15);
+      var sign = rbox(1.0, .66, .06, .04, std(0xffffff)); sign.position.copy(h2.position).add(new T.Vector3(.25, .55, .02)); sign.rotation.z = .25; g.add(sign);
+      var st = plate(.9, .56, textTex([{ t: "S급", s: 78 }], "#9c3a55", "#ffffff", 192, 120)); st.position.copy(sign.position).add(new T.Vector3(0, 0, .04)); st.rotation.z = .25; g.add(st);
+      var sticker = plate(.6, .4, textTex([{ t: "검수", s: 64 }], "#ffffff", "#5e1529", 160, 110)); sticker.position.set(0, 2.2, .46); g.add(sticker);
+    } else { // 회색 달걀 + 가슴 선반 + 미니 폰
+      body = lathe([[0, 0], [.9, .08], [1.45, .7], [1.6, 1.7], [1.42, 2.8], [.95, 3.65], [.4, 4.02], [0, 4.1]], std(col, .85), 48);
+      eyes(g, 2.85, 1.37, .33, .21);
+      limb(g, [1.4, 2.5, 0], [2.35, 3.35, .3], 0x8e8c86, .17); limb(g, [-1.4, 2.5, 0], [-2.35, 3.25, .3], 0x8e8c86, .17);
+      var shelf = rbox(2.6, .1, .55, .03, std(0xf2f2f0, .4)); shelf.position.set(0, 2.15, 1.35); g.add(shelf);
+      [0xd9cdf2, 0xf07a2c, 0xb9b2c9, 0x6e2a33, 0x9cc7d6].forEach(function (c2, k) { var ph = rbox(.26, .48, .05, .04, std(c2, .3)); ph.position.set(-.9 + k * .45, 2.45, 1.4); ph.rotation.x = -.15; g.add(ph); });
     }
     body.userData.dealer = id; g.add(body);
-    g.traverse(function (o) { if (o.isMesh) o.userData.dealer = id; });
+    g.traverse(function (o) { if (o.isMesh) { o.userData.dealer = id; o.castShadow = true; } });
     g.userData.blink = 2 + Math.random() * 3;
     return g;
   }
 
-  // 각 폰팔이의 부스: 뒷판, 진열 상품, 카운터, 차양
-  function buildBooth(id, colorHex, r) {
+  // 각 폰팔이의 부스: 뒷판, 이름표, 걸이 진열, 카운터, 폰팔이별 소품
+  function buildBooth(id, colorHex, r, name) {
     var g = new T.Group(), col = new T.Color(colorHex);
-    var back = new T.Mesh(new T.BoxGeometry(6.4, 3.3, .25), std(0xbfc0bd)); back.position.set(0, 1.65, -1.9); g.add(back);
-    var strip = new T.Mesh(new T.BoxGeometry(6.6, .32, .4), std(col.getHex(), .6)); strip.position.set(0, 3.4, -1.85); g.add(strip);
-    [-3.1, 3.1].forEach(function (x) { var post = new T.Mesh(new T.BoxGeometry(.14, 4.6, .14), std(0x55595e)); post.position.set(x, 2.3, -1.7); g.add(post); });
-    var bar = new T.Mesh(new T.BoxGeometry(6.3, .1, .1), std(0x55595e)); bar.position.set(0, 4.5, -1.7); g.add(bar);
-    for (var h = 0; h < 7; h++) { // 위 봉에 걸린 상품
-      var hang = new T.Mesh(new T.BoxGeometry(.38, .62, .05), std(PASTEL[(h * 3 + Math.floor(r() * 7)) % 7])); hang.position.set(-2.7 + h * .9, 4.05, -1.68); g.add(hang);
+    var back = rbox(6.4, 3.3, .25, .06, std(0xc4c5c2, .8)); back.position.set(0, 1.65, -1.9); g.add(back);
+    var strip = rbox(6.6, .5, .4, .08, std(col.getHex(), .5)); strip.position.set(0, 3.5, -1.85); g.add(strip);
+    if (name) { var nm = plate(2.6, .42, textTex([{ t: name, s: 60 }], "#ffffff", "#" + col.getHexString(), 512, 84)); nm.position.set(0, 3.5, -1.63); g.add(nm); }
+    var metal = std(0x55595e, .4);
+    [-3.1, 3.1].forEach(function (x) { var post = rbox(.14, 4.6, .14, .05, metal); post.position.set(x, 2.3, -1.7); g.add(post); });
+    var bar = rbox(6.3, .1, .1, .04, metal); bar.position.set(0, 4.5, -1.7); g.add(bar);
+    for (var h = 0; h < 7; h++) { // 위 봉에 걸린 상품 (케이스·파우치)
+      var hang = rbox(.4, .64, .06, .05, std(PASTEL[(h * 3 + Math.floor(r() * 7)) % 7], .5)); hang.position.set(-2.7 + h * .9, 4.05, -1.68); g.add(hang);
     }
-    var counter = new T.Mesh(new T.BoxGeometry(5.6, 1.1, 1.1), std(0x9fa1a3)); counter.position.set(0, .55, 1.55); g.add(counter);
-    var top = new T.Mesh(new T.BoxGeometry(5.8, .08, 1.3), std(0xe6e7e8)); top.position.set(0, 1.14, 1.55); g.add(top);
-    for (var k = 0; k < 10; k++) { // 뒷판 진열 (케이스·박스)
-      var item = new T.Mesh(new T.BoxGeometry(.42, .7, .06), std(PASTEL[(k + Math.floor(r() * 7)) % 7]));
+    var counter = rbox(5.6, 1.1, 1.1, .08, std(0x9fa1a3, .7)); counter.position.set(0, .55, 1.55); g.add(counter);
+    var top = rbox(5.8, .08, 1.3, .03, std(0xe6e7e8, .3)); top.position.set(0, 1.14, 1.55); g.add(top);
+    for (var k = 0; k < 10; k++) { // 뒷판 진열 (폰 케이스 모양)
+      var item = rbox(.42, .74, .07, .07, std(PASTEL[(k + Math.floor(r() * 7)) % 7], .45));
       var left = k < 5; item.position.set((left ? -2.7 : 1.1) + (k % 5 % 3) * .52, 2.6 - Math.floor((k % 5) / 3) * .9, -1.74); g.add(item);
     }
-    for (var j = 0; j < 4; j++) {
-      var box = new T.Mesh(new T.BoxGeometry(.5, .14, .32), std([0x2b2d30, 0xffffff, col.getHex(), 0x8a8f96][j])); box.position.set(-1.6 + j * 1.05, 1.25, 1.5); g.add(box);
+    for (var j = 0; j < 4; j++) { // 카운터 위 폰 상자
+      var box = rbox(.5, .14, .32, .03, std([0x2b2d30, 0xffffff, col.getHex(), 0x8a8f96][j], .4)); box.position.set(-1.6 + j * 1.05, 1.25, 1.5); g.add(box);
     }
+    if (id === "designer") { // 키링 볼 진열
+      [0xff6a23, 0x3b43ef, 0xc5c7cf].forEach(function (c2, k2) { var b = new T.Mesh(new T.SphereGeometry(.16, 16, 12), std(c2, .3)); b.position.set(1.9 + k2 * .35, 1.36, 1.25); g.add(b); });
+    }
+    if (id === "safe") { // 필름 상자
+      for (var f = 0; f < 3; f++) { var fb = rbox(.5, .7, .1, .03, std(0xdfe7f2, .3)); fb.position.set(1.6 + f * .45, 1.55, 1.3); fb.rotation.x = -.25; g.add(fb); }
+    }
+    g.traverse(function (o) { if (o.isMesh) o.receiveShadow = true; });
     return g;
   }
 
@@ -709,7 +1033,13 @@ window.SITE = {
     scene.fog = new T.Fog(0xcfd8dc, 140, 900);
     scene.add(sky());
     scene.add(new T.HemisphereLight(0xe8f1f8, 0x6d675f, .55));
-    var sun = new T.DirectionalLight(0xfff4e6, .72); sun.position.set(-120, 200, 140); scene.add(sun);
+    var sun = new T.DirectionalLight(0xfff4e6, .78); sun.position.set(-40, 70, 46); scene.add(sun);
+    if (!this.mobile) { // 장터 주변만 그림자 (탑 철골 그림자가 노점에 떨어지게)
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+      sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      var sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 10; sc.far = 220;
+      sun.shadow.bias = -.0006; sun.shadow.normalBias = .02;
+    }
     scene.add(new T.AmbientLight(0xffffff, .06));
 
     this.tower = buildTower(); scene.add(this.tower);
@@ -721,7 +1051,7 @@ window.SITE = {
     DEALERS.forEach(function (id, i) {
       var d = site.dealers[id], p = dealerPos(i);
       var holder = new T.Group(); holder.position.copy(p); holder.lookAt(0, 0, 0);
-      holder.add(buildBooth(id, d.color, r));
+      holder.add(buildBooth(id, d.color, r, d.short));
       var ch = buildDealer(id, d.color); holder.add(ch);
       scene.add(holder);
       self.dealers[id] = { group: ch, holder: holder, index: i };
@@ -812,7 +1142,9 @@ window.SITE = {
     var px = this.pointer.x, py = this.pointer.y;
     for (var id in this.dealers) {
       var g = this.dealers[id].group, k = this.dealers[id].index;
-      g.position.y = Math.sin(time * 1.6 + k) * .05;
+      var talk = this.talking === id;
+      g.position.y = talk ? Math.abs(Math.sin(time * 9)) * .12 : Math.sin(time * 1.6 + k) * .05;
+      g.scale.y = talk ? 1 + Math.sin(time * 18) * .015 : 1;
       g.rotation.y = Math.sin(time * .7 + k) * .06;
       g.userData.blink -= dt;
       var e = g.userData.eyes;
@@ -842,6 +1174,8 @@ window.SITE = {
     this.renderer.render(this.scene, this.camera);
     this.frames++;
   };
+
+  World.prototype.talk = function (id) { this.talking = id || null; };
 
   // 캐릭터 머리 위 말풍선 위치 (화면 px)
   World.prototype.headOnScreen = function (id) {
@@ -1020,6 +1354,400 @@ window.SITE = {
 
 </script>
   <script>
+/* 폰파리 가게 — 1mm STORE v6 판매 흐름 + 폰팔이별 셀링포인트 결정
+ * 폰 → [셀링포인트] → 상담 → 견적 → 계약 → 배송 → 완료
+ * 폰팔이가 말하고(대사창), 소비자는 말풍선 버튼과 테이블 위 물건을 눌러 넘어갑니다.
+ */
+(function () {
+  "use strict";
+  var D = window.SITE, K = D.shop, $ = function (s) { return document.querySelector(s); };
+  var won = function (n) { return Math.round(n).toLocaleString("ko-KR") + "원"; };
+  var man = function (n) { n = Math.round(n / 1000) * 1000; if (Math.abs(n) < 10000) return won(n); var m = n / 10000; return (Number.isInteger(m) ? m : m.toFixed(1)) + "만"; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var byId = function (list, id) { return list.filter(function (x) { return x.id === id; })[0]; };
+
+  var POINT_LABEL = { designer: "폰꾸", quick: "받는 법", price: "우선순위", safe: "보호", used: "등급", allinone: "맡기기" };
+  var MISSION = function (d) { return [["📱", "폰"], ["★", POINT_LABEL[d]], ["💬", "상담"], ["🧾", "견적"], ["✍️", "계약"], ["📦", "배송"], ["🎉", "완료"]]; };
+
+  var G, CUR, HIST, typing, opts = {};
+  function fresh(dealer) {
+    return {
+      dealer: dealer, model: null, ci: 0, sto: "256GB",
+      deco: { case: "clear", keyring: "none", back: "none" },
+      quick: { speed: "now", open: "after" }, focus: "monthly",
+      safe: { case: true, film: true, care: true }, stamps: {},
+      used: { grade: "S", bat: "85" }, auto: false,
+      cur: null, bundle: "free", tier: null, method: null, con: null, months: 24,
+      member: false, agree: {}, signed: false, ink: 0, ship: null, f: { name: "", phone: "", addr: "" }, err: {}, no: null,
+    };
+  }
+
+  /* ---------- 계산 ---------- */
+  function prod() {
+    var p = D.products[G.model], add = (D.storageAdd || {})[G.sto] || 0;
+    return { name: p.name, list: p.list + add, price: p.price + add, p: p };
+  }
+  function inst(principal, n) { if (!n || principal <= 0) return 0; var r = K.rate / 12; return principal * r / (1 - Math.pow(1 + r, -n)); }
+  function extras() { // 폰팔이 셀링포인트로 붙는 비용
+    var today = 0, monthly = 0, lines = [];
+    if (G.dealer === "designer") {
+      var st = D.studio;
+      [["케이스", st.cases, G.deco.case], ["키링", st.keyrings, G.deco.keyring], ["뒷면", st.backs, G.deco.back]].forEach(function (x) {
+        var o = byId(x[1], x[2]); if (o && o.price) { today += o.price; lines.push([x[0] + " · " + o.name, o.price]); }
+      });
+    }
+    if (G.dealer === "safe") K.safeItems.forEach(function (it) {
+      if (!G.safe[it.id]) return;
+      if (it.price) { today += it.price; lines.push([it.name, it.price]); }
+      if (it.monthly) { monthly += it.monthly; lines.push([it.name + " (월)", it.monthly, true]); }
+    });
+    return { today: today, monthly: monthly, lines: lines };
+  }
+  function tier() { return byId(K.tiers, G.tier || "mid"); }
+  function priced(m, con, months) { // 방법 하나의 금액
+    var P = prod(), t = tier(), x = extras(), dev, plan;
+    if (m.kind === "carrier") {
+      var c = byId(K.carriers, m.carrier), chg = m.join === "chg";
+      var fee = t.fee[c.id] - (G.bundle === "keep" && chg ? K.bundleDc : 0);
+      if (con === "sel") { dev = P.list - Math.round(P.list * K.selSupportRate / 1000) * 1000; plan = Math.round(fee * (1 - K.selRate)); }
+      else { dev = P.price + c.add + (chg ? K.chgAdd : 0); plan = fee; }
+    } else if (m.kind === "self") { dev = P.list; plan = t.mvno; }
+    else { var gr = byId(K.usedGrades, G.used.grade), bt = byId(K.usedBattery, G.used.bat); dev = Math.round(P.list * gr.rate / 1000) * 1000 + bt.add; plan = t.mvno; }
+    if (G.member) dev -= K.memberDc;
+    dev = Math.max(0, dev);
+    var n = months == null ? G.months : months, mi = inst(dev, n);
+    var today = (n ? 0 : dev) + x.today, monthly = mi + plan + x.monthly;
+    var total = dev + (mi * n - (n ? dev : 0)) + (plan + x.monthly) * 24 + x.today;
+    return { dev: dev, plan: plan, inst: mi, today: today, monthly: monthly, total: total, con: con, extras: x };
+  }
+  function methods() {
+    var L = [];
+    if (G.dealer === "used") L.push({ id: "used", kind: "used", title: "중고 " + byId(K.usedGrades, G.used.grade).name, sub: "1mm 검수 · 배터리 " + byId(K.usedBattery, G.used.bat).name });
+    else {
+      var keep = G.bundle === "keep" && byId(K.carriers, G.cur);
+      K.carriers.forEach(function (c) {
+        if (keep && c.id !== G.cur) return;
+        var join = G.cur === c.id ? "chg" : "mnp";
+        L.push({ id: c.id, kind: "carrier", carrier: c.id, join: join, title: c.name + " " + (join === "chg" ? "기기변경" : "번호이동"), sub: tier().label + " 요금제 " + man(tier().fee[c.id]) });
+      });
+      L.push({ id: "self", kind: "self", title: "자급제 + 알뜰폰", sub: "약정 없음 · 요금 " + man(tier().mvno) });
+    }
+    L.forEach(function (m) {
+      if (m.kind === "carrier") { var a = priced(m, "sub"), b = priced(m, "sel"); m.best = a.total <= b.total ? "sub" : "sel"; m.q = m.best === "sub" ? a : b; }
+      else m.q = priced(m, null);
+    });
+    var key = G.dealer === "price" ? G.focus : "monthly";
+    L.sort(function (a, b) { return key === "today" ? (a.q.today - b.q.today) || (a.q.monthly - b.q.monthly) : key === "total" ? a.q.total - b.q.total : a.q.monthly - b.q.monthly; });
+    return L;
+  }
+  function curMethod() { var L = methods(); return L.filter(function (m) { return m.id === G.method; })[0] || L[0]; }
+  function quoteNow() { var m = curMethod(); return priced(m, m.kind === "carrier" ? (G.con || m.best) : null); }
+  function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function fmtD(d) { return (d.getMonth() + 1) + "/" + d.getDate(); }
+
+  /* ---------- 테이블 위 물건 (패널) ---------- */
+  function phoneIcon(p, col) { return '<span class="ph' + (p.folder ? " folder" : "") + '" style="--c:' + (col || p.color) + '"></span>'; }
+  var P = {};
+  P.model = function () {
+    var d = D.dealers[G.dealer], ids = (d.products || Object.keys(D.products)).slice();
+    if (G.dealer === "price") ids.sort(function (a, b) { return D.products[a].price - D.products[b].price; });
+    return '<div class="tl">📱 폰 고르기<small>' + ids.length + '개</small></div><div class="shelf">' + ids.map(function (id) {
+      var p = D.products[id];
+      return '<button class="pk' + (G.model === id ? " on" : "") + '" data-act="model" data-v="' + id + '"><span class="im">' + phoneIcon(p) + '</span><span class="tag"><b>' + esc(p.name) + '</b><span>' + (p.price ? man(p.price) : "0원") + '</span>' + (p.tag ? '<em>' + p.tag + '</em>' : "") + '</span></button>';
+    }).join("") + '</div>';
+  };
+  P.spec = function () {
+    var p = D.products[G.model];
+    var stos = p.folder || G.model === "a17" ? ["256GB"] : Object.keys(D.storageAdd);
+    return '<div class="pick-row">' + phoneIcon(p, p.colors[G.ci][1]) + '<span><b>' + esc(p.name) + '</b><em>' + esc(p.colors[G.ci][0]) + '</em></span></div>' +
+      '<div class="tl">🎨 색상</div><div class="chips2">' + p.colors.map(function (c, i) { return '<button class="' + (G.ci === i ? "on" : "") + '" style="background:' + c[1] + '" aria-label="' + esc(c[0]) + '" data-act="ci" data-v="' + i + '"></button>'; }).join("") + '</div>' +
+      '<div class="tl">📦 용량<small>상자를 골라 주세요</small></div><div class="boxes">' + stos.map(function (s) {
+        var P2 = prod.call(null), add = D.storageAdd[s] - (D.storageAdd[G.sto] || 0);
+        return '<button class="pbox' + (G.sto === s ? " on" : "") + '" data-act="sto" data-v="' + s + '"><span class="lid"></span><span class="bd"><b>' + s.replace("GB", "") + (/TB/.test(s) ? "" : "GB") + '</b><span>' + won(P2.list + add) + '</span></span></button>';
+      }).join("") + '</div>';
+  };
+  P.point = function () {
+    var id = G.dealer, h = "";
+    if (id === "designer") {
+      var st = D.studio;
+      [["케이스", "case", st.cases], ["키링", "keyring", st.keyrings], ["뒷면", "back", st.backs]].forEach(function (x) {
+        h += '<div class="tl">' + x[0] + '</div><div class="opts3">' + x[2].map(function (o) {
+          var on = G.deco[x[1]] === o.id;
+          return '<button class="tok' + (on ? " on" : "") + '" data-act="deco" data-k="' + x[1] + '" data-v="' + o.id + '">' + (o.c ? '<i style="background:' + o.c + '"></i>' : '<i class="none"></i>') + '<b>' + esc(o.name) + '</b><small>' + (o.price ? man(o.price) : "0원") + '</small></button>';
+        }).join("") + '</div>';
+      });
+      h += '<button class="wide" data-act="studio">🌀 3D로 돌려 보기</button>';
+    } else if (id === "quick") {
+      h += '<div class="tl">받는 속도</div><div class="veh">' + K.quickSpeed.map(function (o) { return '<button class="' + (G.quick.speed === o.id ? "on" : "") + '" data-act="qs" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + o.sub + '</span></button>'; }).join("") + '</div>';
+      h += '<div class="tl">개통 시점</div><div class="two">' + K.quickOpen.map(function (o) { return '<button class="tok' + (G.quick.open === o.id ? " on" : "") + '" data-act="qo" data-v="' + o.id + '"><b>' + o.name + '</b><small>' + o.sub + '</small></button>'; }).join("") + '</div>';
+      var now = new Date(), late = now.getDay() === 0 || now.getDay() === 6 || now.getHours() >= 16;
+      if (G.quick.speed === "now") h += '<div class="memo">' + (late ? "⏰ 지금은 16시 이후·주말이라 다음 평일 출발해요" : "⏰ 지금 신청하면 오늘 출발해요") + '</div>';
+    } else if (id === "price") {
+      h += '<div class="tl">제일 중요한 것 하나</div><div class="veh">' + K.priceFocus.map(function (o) { return '<button class="' + (G.focus === o.id ? "on" : "") + '" data-act="focus" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + o.sub + '</span></button>'; }).join("") + '</div>';
+      h += '<div class="memo">견적에서 이 기준으로 줄 세워 드려요</div>';
+    } else if (id === "safe") {
+      h += '<div class="tl">지킬 것 고르기</div><div class="veh">' + K.safeItems.map(function (o) { return '<button class="' + (G.safe[o.id] ? "on" : "") + '" data-act="safe" data-v="' + o.id + '"><i>' + o.icon + '</i><b>' + o.name + '</b><span>' + (o.price ? won(o.price) : "월 " + won(o.monthly)) + '</span></button>'; }).join("") + '</div>';
+      h += '<div class="tl">약속 도장<small>눌러서 확인</small></div><div class="paper">' + K.safePromises.map(function (t, i) { return '<button class="cl' + (G.stamps[i] ? " on" : "") + '" data-act="stamp" data-v="' + i + '"><span class="st">' + (G.stamps[i] ? "약속" : "") + '</span><span>' + esc(t) + '</span></button>'; }).join("") + '</div>';
+    } else if (id === "used") {
+      h += '<div class="tl">등급</div><div class="two">' + K.usedGrades.map(function (o) { return '<button class="tok' + (G.used.grade === o.id ? " on" : "") + '" data-act="grade" data-v="' + o.id + '"><b>' + o.name + '</b><small>' + o.d + ' · 출고가 ' + Math.round(o.rate * 100) + '%</small></button>'; }).join("") + '</div>';
+      h += '<div class="tl">배터리</div><div class="two">' + K.usedBattery.map(function (o) { return '<button class="tok' + (G.used.bat === o.id ? " on" : "") + '" data-act="bat" data-v="' + o.id + '"><b>' + o.name + '</b><small>' + (o.add ? "+" + man(o.add) : "기본") + '</small></button>'; }).join("") + '</div>';
+      h += '<div class="paper"><div class="tl dark">1mm 검수표</div>' + K.usedChecks.map(function (t) { return '<div class="ck">✓ ' + esc(t) + '</div>'; }).join("") + '</div>';
+    } else {
+      h += '<div class="auto"><b>모델만 골랐어요</b><span>통신사·요금제·할인·할부는<br>가장 싼 조건으로 맞출게요</span></div>';
+    }
+    return h;
+  };
+  P.cur = function () { return '<div class="tl">지금 쓰는 통신사</div>' + summaryRow(); };
+  P.bundle = function () { return '<div class="tl">' + esc(byId(K.carriers, G.cur).name) + ' 가족·인터넷 결합</div>' + summaryRow(); };
+  P.data = function () {
+    return '<div class="tl">한 달 데이터</div><div class="veh">' + K.tiers.map(function (t) {
+      return '<button class="' + (G.tier === t.id ? "on" : "") + '" data-act="tier" data-v="' + t.id + '"><i>' + { low: "▁", mid: "▃", high: "█" }[t.id] + '</i><b>' + t.label + '</b><span>' + t.sub + '</span></button>';
+    }).join("") + '</div>';
+  };
+  P.calc = function () { return '<div class="loading"><i></i><i></i><i></i><span>3사 · 자급제' + (G.dealer === "used" ? " · 중고" : "") + ' 계산 중</span></div>'; };
+  P.quote = function () {
+    var L = methods(), w = curMethod(), key = G.dealer === "price" ? G.focus : "monthly";
+    var lbl = { monthly: "월 납부 싼 순", today: "오늘 내는 돈 순", total: "2년 총액 순" }[key];
+    return '<div class="tl">' + esc(prod().name) + ' · ' + lbl + '</div><div class="ways">' + L.map(function (m, i) {
+      var v = key === "today" ? m.q.today : key === "total" ? m.q.total : m.q.monthly;
+      return '<button class="way' + (m.id === w.id ? " on" : "") + '" data-act="method" data-v="' + m.id + '">' + (i === 0 ? '<i class="best">최저</i>' : "") +
+        '<span class="n">' + (i + 1) + '</span><span>' + esc(m.title) + '<em>' + esc(m.sub) + '</em></span><strong>' + (key === "monthly" ? "월 " : "") + man(v) + '<small>' + (key === "monthly" ? "2년 " + man(m.q.total) : "월 " + man(m.q.monthly)) + '</small></strong></button>';
+    }).join("") + '</div><div class="foot">기기값 할부 연 ' + (K.rate * 100).toFixed(1) + '% 가정 · 예시 정책</div>';
+  };
+  function coins() {
+    return '<div class="coins">' + K.months.map(function (m) { return '<button class="coin' + (G.months === m ? " on" : "") + '" data-act="months" data-v="' + m + '">' + (m ? m + "<small>개월</small>" : "일시불") + '</button>'; }).join("") + '</div>';
+  }
+  function bill(q, m) {
+    var P2 = prod(), h = '<div class="bill"><div class="ln"><span>출고가</span><b>' + won(P2.list) + '</b></div>';
+    var disc = P2.list - q.dev - (G.member ? K.memberDc : 0);
+    if (disc > 0) h += '<div class="ln m"><span>' + (m.kind === "used" ? "중고 할인" : q.con === "sel" ? "매장 지원" : "공시·매장 지원") + '</span><b>-' + won(disc) + '</b></div>';
+    if (G.member) h += '<div class="ln m"><span>1mm 멤버십</span><b>-' + won(K.memberDc) + '</b></div>';
+    h += '<div class="ln t"><span>내는 기기값</span><b>' + won(q.dev) + '</b></div>';
+    h += '<div class="ln"><span>요금제' + (q.con === "sel" ? " (25%↓)" : "") + '</span><b>월 ' + won(q.plan) + '</b></div>';
+    q.extras.lines.forEach(function (l) { h += '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + (l[2] ? "월 " : "") + won(l[1]) + '</b></div>'; });
+    h += '<div class="big"><div><span>오늘</span><b>' + won(q.today) + '</b></div><div><span>매달' + (G.months ? " " + G.months + "개월" : "") + '</span><b>' + won(q.monthly) + '</b></div></div>';
+    if (m.kind === "carrier") h += '<div class="memo">📅 요금제는 ' + fmtD(addDays(new Date(), K.keepDays)) + '부터 바꿔도 돼요 (' + K.keepDays + '일)</div>';
+    return h + '</div>';
+  }
+  P.cond = function () {
+    var m = curMethod();
+    if (m.kind === "carrier") {
+      var a = priced(m, "sub"), b = priced(m, "sel"), win = a.total <= b.total ? "sub" : "sel"; if (!G.con) G.con = win;
+      return '<div class="tl">할인은 하나만</div><div class="cards">' + [["sub", "a", "💳", "공시지원금", "기기값 ↓", a], ["sel", "b", "📉", "선택약정 25%", "요금 ↓", b]].map(function (x) {
+        return '<button class="dcard ' + x[1] + (G.con === x[0] ? " on" : "") + '" data-act="con" data-v="' + x[0] + '">' + (win === x[0] ? '<i class="win">2년 더 쌈</i>' : "") + '<span class="ic">' + x[2] + '</span><b>' + x[3] + '</b><span>' + x[4] + '</span><strong>월 ' + man(x[5].monthly) + '</strong><em>2년 ' + man(x[5].total) + '</em></button>';
+      }).join("") + '</div><div class="tl">기기값 내는 방법</div>' + coins() + bill(G.con === "sub" ? a : b, m);
+    }
+    return '<div class="tl">' + (m.kind === "used" ? "중고폰 값 내는 방법" : "폰값 내는 방법") + '</div>' + coins() + bill(priced(m, null), m);
+  };
+  P.join = function () {
+    return '<div class="mcard"><span class="l">1mm</span><div><div class="v">-' + man(K.memberDc) + '</div><small>이번 구매 바로 할인 · 약정 끝 알림 · 가입비 0원</small></div></div>' +
+      '<div class="social"><button class="k" data-act="join">카카오</button><button class="n" data-act="join">네이버</button><button class="g" data-act="join">구글</button></div>';
+  };
+  P.agree = function () {
+    var need = K.agree.filter(function (a) { return a.id !== "a2" || curMethod().kind === "carrier"; });
+    return '<div class="tl">전자 계약서<small>도장 찍고 서명</small></div><div class="paper">' + need.map(function (a) {
+      return '<button class="cl' + (G.agree[a.id] ? " on" : "") + (G.err[a.id] ? " err" : "") + '" data-act="agree" data-v="' + a.id + '"><span class="st">' + (G.agree[a.id] ? "확인" : "") + '</span><span><b>' + esc(a.t) + '</b>' + (a.d ? "<em>" + esc(a.d) + "</em>" : "") + '</span></button>';
+    }).join("") + '<div class="sign' + (G.err.sign ? " err" : "") + '"><span>여기에 손가락으로 서명</span><i class="x">✕</i><canvas id="signPad" aria-label="서명"></canvas></div></div>';
+  };
+  P.ship = function () {
+    var f = G.f, E = G.err;
+    var fl = function (id, l, ph, ex) { return '<div class="fl' + (E[id] ? " err" : "") + '"><label for="f_' + id + '">' + l + '</label><input id="f_' + id + '" value="' + esc(f[id]) + '" placeholder="' + ph + '" ' + (ex || "") + ' data-f="' + id + '">' + (E[id] ? '<span class="e">' + E[id] + '</span>' : "") + '</div>'; };
+    return '<div class="tl">받는 방법</div><div class="veh">' + K.ship.map(function (s) { return '<button class="' + (G.ship === s.id ? "on" : "") + '" data-act="ship" data-v="' + s.id + '"><i>' + s.icon + '</i><b>' + s.name + '</b><span>' + s.sub + '</span></button>'; }).join("") + '</div>' +
+      (G.ship === "quick" ? '<div class="memo">📞 기사님 확인 전화를 꼭 받아 주세요</div>' : "") +
+      '<div class="tl">받는 분</div>' + fl("name", "이름", "홍길동", 'autocomplete="name"') + fl("phone", "연락처", "010-0000-0000", 'inputmode="numeric" autocomplete="tel" maxlength="13"') +
+      (G.ship !== "store" ? fl("addr", "주소", "서울 강남구 …", 'autocomplete="street-address"') : "");
+  };
+  function orderLines() {
+    var m = curMethod(), q = quoteNow(), P2 = prod(), p = D.products[G.model], ship = byId(K.ship, G.ship) || {};
+    var L = [["폰", P2.name + " " + G.sto + " · " + p.colors[G.ci][0]], ["사는 방법", m.title + (m.kind === "carrier" ? " · " + (G.con === "sel" ? "선택약정" : "공시지원금") : "") + " · " + (G.months ? G.months + "개월" : "일시불")]];
+    L.push([POINT_LABEL[G.dealer], pointSummary()]);
+    L.push(["오늘", won(q.today)], ["매달", won(q.monthly)]);
+    L.push(["받는 방법", (ship.icon || "") + " " + (ship.name || "")]);
+    if (G.f.name) L.push(["받는 분", G.f.name]);
+    return L;
+  }
+  function pointSummary() {
+    var id = G.dealer, st = D.studio;
+    if (id === "designer") return [byId(st.cases, G.deco.case).name + " 케이스", byId(st.keyrings, G.deco.keyring).name, byId(st.backs, G.deco.back).name].filter(function (x) { return x !== "없음"; }).join(" · ");
+    if (id === "quick") return byId(K.quickSpeed, G.quick.speed).name + " · " + byId(K.quickOpen, G.quick.open).name;
+    if (id === "price") return byId(K.priceFocus, G.focus).name;
+    if (id === "safe") return K.safeItems.filter(function (o) { return G.safe[o.id]; }).map(function (o) { return o.name; }).join(" + ") || "선택 안 함";
+    if (id === "used") return byId(K.usedGrades, G.used.grade).name + " · 배터리 " + byId(K.usedBattery, G.used.bat).name;
+    return "최저 조건 자동";
+  }
+  P.review = function () {
+    return '<div class="paper rcpt review"><h3>주문 내역</h3><div class="no">결제 전에 한 번 더 확인</div>' +
+      orderLines().map(function (l) { return '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join("") +
+      '<div class="foot center">프로토타입 · 실제 결제는 되지 않아요</div></div>';
+  };
+  P.done = function () {
+    return '<div class="paper rcpt"><h3>phoneparis</h3><div class="no">' + G.no + ' · ' + esc(D.dealers[G.dealer].name) + '</div><span class="done">주문 접수</span>' +
+      orderLines().map(function (l) { return '<div class="ln"><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join("") +
+      '<div class="ln"><span>불량 교환</span><b>받은 날부터 7일</b></div><div class="foot center">문의 ' + D.contact.phone + ' · 프로토타입</div></div>';
+  };
+  function summaryRow() { var P2 = prod(), p = D.products[G.model]; return '<div class="pick-row">' + phoneIcon(p, p.colors[G.ci][1]) + '<span><b>' + esc(P2.name) + ' ' + G.sto + '</b><em>' + esc(p.colors[G.ci][0]) + ' · 출고가 ' + won(P2.list) + '</em></span></div>'; }
+
+  /* ---------- 대본 (q = 미션 칸) ---------- */
+  function say(t) { return t; }
+  var STEPS = {
+    model: { q: 0, t: function () { return "“" + D.dealers[G.dealer].quote + "” 어떤 폰?"; }, panel: "model" },
+    spec: { q: 0, t: function () { return "<b>" + esc(prod().name) + "</b> 좋지! 색이랑 용량 골라."; }, panel: "spec", ch: function () { return [["이걸로", function () { go("point"); }, "go"], ["다른 폰", function () { go("model"); }]]; } },
+    point: { q: 1, t: function () { return D.dealers[G.dealer].pitch; }, panel: "point", ch: function () {
+      if (G.dealer === "allinone") return [["🙌 알아서 해 줘", function () { G.auto = true; G.cur = "mvno"; G.bundle = "free"; G.tier = "mid"; G.months = 24; G.method = null; G.con = null; go("calc"); }, "go"], ["내가 고를래", function () { G.auto = false; go("cur"); }]];
+      return [["좋아, 다음", function () { go(G.dealer === "used" ? "data" : "cur"); }, "go"]];
+    } },
+    cur: { q: 2, t: function () { return "지금 쓰는 <b>통신사</b>는?"; }, panel: "cur", grid: true, ch: function () {
+      return K.curs.map(function (c) { return [c[1], function () { G.cur = c[0]; go(byId(K.carriers, c[0]) ? "bundle" : "data"); }]; });
+    } },
+    bundle: { q: 2, t: function () { return "<b>가족·인터넷 결합</b> 있어?"; }, panel: "bundle", ch: function () {
+      return [["있어 · 유지", function () { G.bundle = "keep"; go("data"); }], ["없어 · 최저가", function () { G.bundle = "free"; go("data"); }, "go"]];
+    } },
+    data: { q: 2, t: function () { return G.dealer === "used" ? "중고폰엔 알뜰 요금이 잘 맞아. 데이터는 얼마나 써?" : "데이터는 한 달에 얼마나 써?"; }, panel: "data" },
+    calc: { q: 3, t: function () { return "잠깐만, 다 계산해 볼게…"; }, panel: "calc", auto: 1300, next: "quote" },
+    quote: { q: 3, t: function () {
+      var L = methods(); if (G.auto) { G.method = L[0].id; G.con = L[0].best || null; }
+      return G.auto ? "제일 싼 건 <b>" + esc(L[0].title) + "</b>. 이걸로 맞춰 놨어." : "<b>" + esc(L[0].title) + "</b>이(가) 제일 싸. 다른 줄도 눌러 봐.";
+    }, panel: "quote", ch: function () { return [[G.auto ? "이대로 할게" : "이 방법으로", function () { if (!G.method) G.method = methods()[0].id; go(G.auto ? "join" : "cond"); }, "go"]]; } },
+    cond: { q: 3, t: function () { return curMethod().kind === "carrier" ? "할인은 <b>둘 중 하나</b>. 더 싼 쪽에 표시해 놨어." : "약정 없어. 폰값 낼 방법만 골라."; }, panel: "cond", ch: function () { return [["좋아", function () { go(G.member ? "agree" : "join"); }, "go"], ["견적 다시", function () { go("quote"); }]]; } },
+    join: { q: 4, t: function () { return "<b>1mm 멤버십</b> 가입하면 지금 " + man(K.memberDc) + " 더 빠져. 3초!"; }, panel: "join", ch: function () { return [["다음에", function () { go("agree"); }]]; } },
+    joined: { q: 4, t: function () { return "가입 완료! " + man(K.memberDc) + " 빠졌어."; }, panel: "join", auto: 1200, next: "agree" },
+    agree: { q: 4, t: function () { return "<b>개봉·개통하면</b> 단순 변심 반품은 안 돼. 불량은 7일 안에 교환. 도장 찍고 서명!"; }, panel: "agree", ch: function () { return [["서명 완료", signDone, "go"]]; } },
+    ship: { q: 5, t: function () { return "어디로 보낼까?"; }, panel: "ship", ch: function () { return [["주문 내역 확인", function () { if (formOk()) go("review"); else repaint(); }, "go"]]; } },
+    review: { q: 5, t: function () { return "<b>주문 내역</b> 확인하고 결제!"; }, panel: "review", ch: function () {
+      return [["✏️ 수정", function () { go("ship"); }], ["💳 결제하기", function () { var d = new Date(); G.no = "PP-" + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0") + "-" + (1000 + Math.floor(Math.random() * 9000)); go("done"); }, "go"]];
+    } },
+    done: { q: 6, t: function () { return "고마워, " + esc(G.f.name) + "! " + (G.ship === "quick" ? "오늘 퀵으로 보낼게." : "잘 챙겨 보낼게.") + " 영수증 받아 가."; }, panel: "done", ch: function () { return [["광장으로", function () { close(); }, "go"], ["처음부터", function () { open(G.dealer); }]]; } },
+  };
+  function signDone() {
+    var need = K.agree.filter(function (a) { return a.id !== "a2" || curMethod().kind === "carrier"; });
+    G.err = {}; need.forEach(function (a) { if (!G.agree[a.id]) G.err[a.id] = 1; }); if (!G.signed) G.err.sign = 1;
+    if (Object.keys(G.err).length) { repaint(); toast(G.err.sign && Object.keys(G.err).length === 1 ? "서명해 주세요" : "항목을 모두 확인해 주세요"); return; }
+    if (!G.ship) G.ship = G.dealer === "quick" ? { now: "quick", visit: "store", parcel: "parcel" }[G.quick.speed] : "quick";
+    go("ship");
+  }
+  function formOk() {
+    var f = G.f, E = {};
+    if (!f.name.trim()) E.name = "이름을 입력해 주세요";
+    if (!/^01[016789]-?\d{3,4}-?\d{4}$/.test(f.phone.trim())) E.phone = "010-1234-5678처럼";
+    if (G.ship !== "store" && !f.addr.trim()) E.addr = "주소를 입력해 주세요";
+    if (G.ship === "quick" && /제주/.test(f.addr)) E.addr = "제주는 퀵 불가 · 택배로";
+    G.err = E; return !Object.keys(E).length;
+  }
+
+  /* ---------- 진행 ---------- */
+  var timers = [];
+  function go(id, back) {
+    timers.forEach(clearTimeout); timers = [];
+    if (!back && CUR && CUR !== id && !STEPS[CUR].auto) HIST.push(CUR);
+    CUR = id; G.err = id === "agree" || id === "ship" ? G.err : {};
+    var st = STEPS[id];
+    renderMission(st.q);
+    $("#shopBack").hidden = !HIST.length || id === "done";
+    var panel = $("#shopPanel");
+    if (st.panel) { panel.hidden = false; panel.innerHTML = P[st.panel](); panel.scrollTop = 0; if (st.panel === "agree") initSign(); }
+    else panel.hidden = true;
+    $("#shopCh").innerHTML = ""; $("#shopCh").className = "sch" + (st.grid ? " grid" : "");
+    type(st.t());
+    if (st.auto) timers.push(setTimeout(function () { go(st.next); }, st.auto));
+    if (opts.onStep) opts.onStep(id);
+  }
+  function back() { var p = HIST.pop(); if (p) go(p, true); }
+  function repaint() { var st = STEPS[CUR], el = $("#shopPanel"), y = el.scrollTop; if (st.panel) { el.innerHTML = P[st.panel](); el.scrollTop = y; if (st.panel === "agree") initSign(); } }
+  var full = "";
+  function type(html) {
+    var p = $("#shopTxt"); full = html; var plain = html.replace(/<[^>]+>/g, ""), i = 0;
+    if (typing) clearInterval(typing);
+    if (opts.onTalk) opts.onTalk(true);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+    p.textContent = "";
+    typing = setInterval(function () { i += 2; p.textContent = plain.slice(0, i); if (i >= plain.length) finish(); }, 22);
+  }
+  function finish() {
+    if (typing) clearInterval(typing); typing = null; $("#shopTxt").innerHTML = full;
+    if (opts.onTalk) opts.onTalk(false);
+    var st = STEPS[CUR], ch = $("#shopCh");
+    if (st.ch && !ch.children.length) st.ch().forEach(function (c) {
+      var b = document.createElement("button"); b.className = "say" + (c[2] ? " go" : ""); b.textContent = c[0]; b.onclick = c[1]; ch.appendChild(b);
+    });
+  }
+  function renderMission(q) {
+    var ol = $("#mission"); ol.innerHTML = "";
+    MISSION(G.dealer).forEach(function (m, i) {
+      var skip = (i === 2 && (G.auto || false));
+      var li = document.createElement("li"); li.className = (i < q ? "on" : "") + (i === q ? " now" : "") + (skip && q > 2 ? " skip" : "");
+      li.innerHTML = "<i>" + m[0] + "</i><span>" + m[1] + "</span>"; ol.appendChild(li);
+    });
+  }
+  function toast(t) { if (opts.toast) opts.toast(t); }
+  function initSign() {
+    var c = $("#signPad"); if (!c) return;
+    var r = c.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); c.width = r.width * dpr; c.height = r.height * dpr;
+    var x = c.getContext("2d"); x.scale(dpr, dpr); x.lineWidth = 2.6; x.lineCap = "round"; x.strokeStyle = "#1E2A5A";
+    if (G.sig) { var im = new Image(); im.onload = function () { x.drawImage(im, 0, 0, r.width, r.height); }; im.src = G.sig; }
+    var last = null, pt = function (e) { var b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+    c.onpointerdown = function (e) { c.setPointerCapture(e.pointerId); last = pt(e); };
+    c.onpointermove = function (e) { if (!last) return; var p = pt(e); x.beginPath(); x.moveTo(last[0], last[1]); x.lineTo(p[0], p[1]); x.stroke(); G.ink += Math.hypot(p[0] - last[0], p[1] - last[1]); last = p; };
+    c.onpointerup = function () { last = null; if (G.ink > 40) { G.signed = true; G.sig = c.toDataURL(); if (G.err.sign) { delete G.err.sign; c.parentNode.classList.remove("err"); } } };
+  }
+
+  // 테이블 위 물건 누르기
+  function onPanel(e) {
+    var b = e.target.closest("[data-act]"); if (!b) return;
+    var a = b.dataset.act, v = b.dataset.v;
+    if (a === "model") { G.model = v; G.ci = 0; G.sto = "256GB"; go("spec"); return; }
+    if (a === "ci") G.ci = +v;
+    if (a === "sto") G.sto = v;
+    if (a === "deco") { G.deco[b.dataset.k] = v; if (opts.onDeco) opts.onDeco(G); }
+    if (a === "studio") { if (opts.openStudio) opts.openStudio(G); return; }
+    if (a === "qs") G.quick.speed = v;
+    if (a === "qo") G.quick.open = v;
+    if (a === "focus") G.focus = v;
+    if (a === "safe") G.safe[v] = !G.safe[v];
+    if (a === "stamp") G.stamps[v] = !G.stamps[v];
+    if (a === "grade") G.used.grade = v;
+    if (a === "bat") G.used.bat = v;
+    if (a === "tier") { G.tier = v; go("calc"); return; }
+    if (a === "method") { G.method = v; G.con = null; }
+    if (a === "con") G.con = v;
+    if (a === "months") G.months = +v;
+    if (a === "join") { G.member = true; toast("🎉 -" + man(K.memberDc) + " 멤버십 등록!"); go("joined"); return; }
+    if (a === "agree") { G.agree[v] = !G.agree[v]; delete G.err[v]; }
+    if (a === "ship") G.ship = v;
+    repaint();
+  }
+
+  function open(dealer) {
+    G = fresh(dealer); HIST = []; CUR = null;
+    var d = D.dealers[dealer], sec = $("#shop");
+    sec.hidden = false; sec.style.setProperty("--c", d.color); sec.dataset.dealer = dealer;
+    $("#shopWho").textContent = d.name;
+    document.documentElement.classList.add("shopping");
+    go("model");
+  }
+  function close() {
+    timers.forEach(clearTimeout); if (typing) clearInterval(typing); typing = null;
+    $("#shop").hidden = true; document.documentElement.classList.remove("shopping");
+    if (opts.onClose) opts.onClose();
+  }
+  function init(o) {
+    opts = o || {};
+    $("#shopPanel").addEventListener("click", onPanel);
+    $("#shopPanel").addEventListener("input", function (e) { var f = e.target.dataset.f; if (f) G.f[f] = e.target.value; });
+    $("#shopDlg").addEventListener("click", function () { if (typing) finish(); });
+    $("#shopBack").addEventListener("click", back);
+    $("#shopExit").addEventListener("click", close);
+    addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("#shop").hidden && !document.querySelector("dialog[open]")) close(); });
+  }
+  window.PPShop = {
+    init: init, open: open, close: close, go: go, repaint: repaint,
+    state: function () { return G; }, step: function () { return CUR; },
+    setDeco: function (deco) { if (G) { Object.assign(G.deco, deco); if (CUR === "point") repaint(); } },
+    methods: function () { return methods(); }, quote: function () { return quoteNow(); },
+  };
+})();
+
+</script>
+  <script>
 /* 폰파리 — 스크롤 ↔ 3D 카메라 연결, 폰팔이 카드, 클릭 흐름, 폰꾸 작업실 */
 (function () {
   "use strict";
@@ -1042,13 +1770,6 @@ window.SITE = {
   }
   var toastT;
   function toast(m) { var t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("on"); }, 1800); }
-  function copy(text) {
-    var ok = function () { toast("복사했어요"); };
-    var fb = function () { var ta = el("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { toast("길게 눌러 복사해 주세요"); } ta.remove(); };
-    if (navigator.clipboard) navigator.clipboard.writeText(text).then(ok, fb); else fb();
-  }
-  function phone(p, big) { return el("div", { class: "ph" + (p.folder ? " folder" : "") + (big ? " big" : ""), style: { "--c": p.color }, "aria-hidden": "true" }); }
-  function pct(p) { return p.list ? Math.round((1 - p.price / p.list) * 100) : null; }
 
   /* ---------- 스크롤 트랙 ---------- */
   var track = $("#track");
@@ -1070,7 +1791,7 @@ window.SITE = {
   /* ---------- 3D 월드 ---------- */
   var world = null;
   if (window.THREE && window.PPWorld && PPWorld.supported()) {
-    try { world = new PPWorld($("#world"), D, { onDealer: function (id) { var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); }, preserve: /[?&]shot/.test(location.search) }); }
+    try { world = new PPWorld($("#world"), D, { onDealer: function (id) { if (document.documentElement.classList.contains("shopping")) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); }, preserve: /[?&]shot/.test(location.search) }); }
     catch (e) { console.warn(e); world = null; }
   }
   if (!world) { $("#world").hidden = true; $("#fallback").hidden = false; }
@@ -1081,6 +1802,7 @@ window.SITE = {
   var cur = -1, cardOpen = false, cardTimer = 0;
   function progress() { return Math.max(0, Math.min(N - 1, scrollY / stopH())); }
   function onScroll() {
+    if (document.documentElement.classList.contains("shopping")) return;
     var s = progress(), i = Math.round(s), near = Math.abs(s - i);
     if (world) world.setProgress(s);
     else { var img = $("#fallbackImg"), src = "assets/fallback/" + FALLBACK[i] + ".webp"; if (img.getAttribute("src") !== src) img.src = src; }
@@ -1096,6 +1818,7 @@ window.SITE = {
     }
   }
   function setCard(on) {
+    if (document.documentElement.classList.contains("shopping")) on = false;
     cardOpen = on; $("#card").classList.toggle("on", on);
     if (world) {
       var mobile = matchMedia("(max-width: 760px)").matches;
@@ -1127,131 +1850,36 @@ window.SITE = {
   requestAnimationFrame(tickBubble);
   addEventListener("scroll", onScroll, { passive: true });
 
-  /* ---------- 폰팔이 카드 ---------- */
-  var cardState = { chips: {}, zeroOnly: false, open: {}, combo: {}, grade: "S" };
-  function prodCard(id, dealer, compact) {
-    var p = D.products[id], off = pct(p);
-    return el("button", { class: "prod", onclick: function () { openDetail(id, dealer); }, "aria-label": p.name + " " + won(p.price) + " 상세 보기" }, [
-      el("div", { class: "shot" }, [phone(p)]),
-      el("b", { text: p.name }),
-      !compact && p.list ? el("s", { text: won(p.list) }) : null,
-      el("div", { class: "pr" }, [off != null && !compact ? el("em", { text: off + "%" }) : null, p.price === 0 ? "0원" : won(p.price)]),
-      !compact && p.tag ? el("div", { class: "tag", text: p.tag }) : null,
-      !compact ? el("span", { class: "more", text: "상세 보기 ›" }) : null,
-    ]);
-  }
+  /* ---------- 폰팔이 카드: 셀링포인트 3개 + 가게 들어가기 ---------- */
   function renderCard(id) {
     var d = D.dealers[id], card = $("#card");
     card.style.setProperty("--c", d.color); card.innerHTML = "";
     card.appendChild(el("span", { class: "badge", text: d.name }));
     card.appendChild(el("h2", { text: d.title }));
-    var body = el("div");
-    if (id === "designer") {
-      body.appendChild(el("div", { class: "chips" }, d.chips.map(function (c) {
-        return el("button", { class: "chip" + (cardState.chips[c] ? " on" : ""), "aria-pressed": cardState.chips[c] ? "true" : "false", text: c, onclick: function () { cardState.chips[c] = !cardState.chips[c]; renderCard(id); } });
-      })));
-      body.appendChild(el("div", { class: "row" }, d.products.map(function (p) { return prodCard(p, id); })));
-    } else if (id === "quick" || id === "safe") {
-      if (id === "safe") {
-        var icons = ["▣", "▭", "✚"];
-        body.appendChild(el("div", { class: "combo" }, d.combo.map(function (c, k) {
-          var on = cardState.combo[c] !== false;
-          return el("button", { class: on ? "on" : "", "aria-pressed": on ? "true" : "false", onclick: function () { cardState.combo[c] = !on; renderCard(id); } }, [el("span", { class: "ic", text: icons[k] }), c]);
-        })));
-      }
-      body.appendChild(el("ol", { class: "steps-list" }, d.steps.map(function (s, k) {
-        var key = id + k, open = !!cardState.open[key];
-        return el("li", { class: open ? "open" : "" }, [
-          el("button", { "aria-expanded": open ? "true" : "false", onclick: function () { cardState.open[key] = !open; renderCard(id); } }, [
-            id === "quick" ? el("span", { class: "n", text: String(k + 1) }) : el("span", { class: "bar" }), el("span", { text: s.t }), el("span", { class: "ar", text: "›" }),
-          ]),
-          el("p", { text: s.d }),
-        ]);
-      })));
-    } else if (id === "price") {
-      body.appendChild(el("div", { class: "chips" }, [["전체", false], ["0원만", true]].map(function (o) {
-        return el("button", { class: "chip" + (cardState.zeroOnly === o[1] ? " on" : ""), text: o[0], onclick: function () { cardState.zeroOnly = o[1]; renderCard(id); } });
-      })));
-      var list = d.products.slice().sort(function (a, b) { return D.products[a].price - D.products[b].price; })
-        .filter(function (p) { return !cardState.zeroOnly || D.products[p].price === 0; });
-      body.appendChild(el("div", { class: "row" }, list.map(function (p) { return prodCard(p, id); })));
-    } else if (id === "used") {
-      body.appendChild(el("div", { class: "grades" }, d.grades.map(function (g) {
-        var on = cardState.grade === g.id;
-        return el("button", { class: on ? "on" : "", "aria-pressed": on ? "true" : "false", onclick: function () { cardState.grade = g.id; renderCard(id); } }, [el("span", { class: "badge", text: g.name }), el("small", { text: g.d })]);
-      })));
-      body.appendChild(el("p", { class: "note", text: d.note }));
-    } else if (id === "allinone") {
-      body.appendChild(el("div", { class: "grid3" }, d.products.map(function (p) { return prodCard(p, id, true); })));
-    }
-    card.appendChild(body);
-    card.appendChild(el("button", { class: "primary", text: d.cta, onclick: function () { dealerAction(id); } }));
-    if (d.products || id === "allinone") card.appendChild(el("p", { class: "note", text: D.priceNote }));
+    card.appendChild(el("ul", { class: "points" }, d.points.map(function (p, k) { return el("li", {}, [el("i", { text: String(k + 1) }), p]); })));
+    card.appendChild(el("button", { class: "primary", text: d.short + "에게 사러 가기 →", onclick: function () { openShop(id); } }));
   }
-  function openDealer(id) { if (cardOpen) { var b = $("#card .primary"); if (b) b.focus(); } }
-  function dealerAction(id) {
-    var d = D.dealers[id];
-    if (d.action === "studio") openStudio();
-    else if (d.action === "pick") openPick(id);
-    else openConsult(id, null);
+  function openDealer(id) { openShop(id); }
+  var mobileQ = matchMedia("(max-width: 760px)");
+  function openShop(id) {
+    var i = indexOf(id);
+    if (i !== cur) scrollTo({ top: i * stopH(), behavior: "auto" });
+    setCard(false); clearTimeout(cardTimer);
+    PPShop.open(id);
+    if (world) { world.setProgress(i); world.setFrameOffset(mobileQ.matches ? 0 : -.2, mobileQ.matches ? -.17 : 0); }
   }
+  PPShop.init({
+    toast: toast,
+    onTalk: function (on) { if (world) world.talk(on ? PPShop.state().dealer : null); },
+    onClose: function () { if (world) world.talk(null); cardOpen = false; onScroll(); },
+    openStudio: function (G) { openStudio(G); },
+  });
 
-  /* ---------- 시트: 상세 / 모델 선택 / 상담 ---------- */
+  /* ---------- 시트 (이미지 보기) ---------- */
   var sheet = $("#sheet");
   function showSheet(node) { $("#sheetBody").innerHTML = ""; $("#sheetBody").appendChild(node); if (!sheet.open) sheet.showModal(); }
   document.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { b.closest("dialog").close(); }); });
   sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.close(); });
-
-  function openDetail(pid, dealer) {
-    var p = D.products[pid], off = pct(p), d = D.dealers[dealer];
-    showSheet(el("div", { class: "detail" }, [
-      el("span", { class: "badge", style: { "--c": d.color }, text: d.name }),
-      el("div", { class: "shot" }, [phone(p, true)]),
-      el("h3", { text: p.name }),
-      p.list ? el("s", { text: "출고가 " + won(p.list) }) : null,
-      el("div", { class: "big" }, [off != null ? el("em", { text: off + "%" }) : null, p.price === 0 ? "0원" : won(p.price)]),
-      p.tag ? el("div", { class: "tag", style: { color: "var(--blue)", "font-weight": "700" }, text: p.tag }) : null,
-      el("p", { class: "note", text: D.priceNote }),
-      el("div", { class: "btns" }, [
-        el("button", { class: "ghost", text: "다른 모델", onclick: function () { openPick(dealer); } }),
-        el("button", { class: "primary", style: { background: d.color }, text: "이 폰으로 상담", onclick: function () { openConsult(dealer, pid); } }),
-      ]),
-    ]));
-  }
-  function openPick(dealer) {
-    var d = D.dealers[dealer], ids = d.products || Object.keys(D.products);
-    showSheet(el("div", {}, [
-      el("span", { class: "badge", style: { "--c": d.color }, text: d.name }),
-      el("h3", { style: { margin: "10px 0 0", "font-size": "22px" }, text: "어떤 폰?" }),
-      el("div", { class: "pick-grid" }, ids.map(function (pid) {
-        var p = D.products[pid];
-        return el("button", { class: "prod", style: { "flex-basis": "auto" }, onclick: function () { openConsult(dealer, pid); } }, [
-          el("div", { class: "shot" }, [phone(p)]), el("b", { text: p.name }), el("div", { class: "pr", text: p.price === 0 ? "0원" : won(p.price) }),
-        ]);
-      })),
-    ]));
-  }
-  function openConsult(dealer, pid, extra) {
-    var d = D.dealers[dealer], rows = [["폰팔이", d.name]];
-    if (pid) rows.push(["모델", D.products[pid].name], ["예시가", D.products[pid].price === 0 ? "0원" : won(D.products[pid].price)]);
-    if (dealer === "quick") rows.push(["받는 방법", "퀵배송·방문 수령"]);
-    if (dealer === "safe") rows.push(["보호 조합", d.combo.filter(function (c) { return cardState.combo[c] !== false; }).join(" + ") || "선택 안 함"]);
-    if (dealer === "used") rows.push(["등급", d.grades.filter(function (g) { return g.id === cardState.grade; })[0].name]);
-    (extra || []).forEach(function (r) { rows.push(r); });
-    var text = "[폰파리 상담]\n" + rows.map(function (r) { return r[0] + ": " + r[1]; }).join("\n");
-    var tel = D.contact.phone.replace(/[^0-9]/g, "");
-    showSheet(el("div", {}, [
-      el("span", { class: "badge", style: { "--c": d.color }, text: "상담 신청" }),
-      el("div", { class: "sum-rows" }, rows.map(function (r) { return el("div", {}, [el("span", { text: r[0] }), el("b", { text: r[1] })]); })),
-      el("a", { class: "tel", href: "tel:" + tel, text: D.contact.phone }),
-      el("p", { class: "note center", text: D.contact.hours + " · 위 내용을 말씀해 주세요" }),
-      el("div", { class: "btns" }, [
-        el("button", { class: "ghost", text: "번호 복사", onclick: function () { copy(D.contact.phone); } }),
-        el("button", { class: "primary", style: { background: d.color }, text: "상담 내용 복사", onclick: function () { copy(text); } }),
-      ]),
-      D.contact.kakao ? el("a", { class: "link", href: D.contact.kakao, target: "_blank", rel: "noopener", text: "카카오톡 채널로 문의 ›" }) : null,
-    ]));
-  }
 
   /* ---------- 폰꾸 작업실 ---------- */
   var S = D.studio, studio = null, sStep = 0, sMax = 0;
@@ -1266,16 +1894,23 @@ window.SITE = {
   ];
   function find(list, id) { return list.filter(function (x) { return x.id === id; })[0] || list[0]; }
   function total() { return find(S.cases, sState.case).price + find(S.keyrings, sState.keyring).price + find(S.backs, sState.back).price; }
-  function openStudio() {
+  var fromShop = null;
+  var DEV_MAP = { ip18p: "ip18p", ip17p: "ip18p", s26: "s26", zf8: "s26", a17: "s26" };
+  function openStudio(G) {
     if (sheet.open) sheet.close();
+    fromShop = G && G.deco ? G : null;
+    if (fromShop) { sState.device = DEV_MAP[G.model] || "ip17"; sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
     $("#studio").showModal();
     if (world) world.paused = true;
     if (!studio && window.PPStudio && window.THREE) { try { studio = new PPStudio($("#studioCanvas")); } catch (e) { console.warn(e); } }
     if (studio) { studio.active = true; requestAnimationFrame(function () { studio.resize(); }); }
     renderStudio();
   }
-  $("#studio").addEventListener("close", function () { if (world) world.paused = false; if (studio) studio.active = false; });
-  $("#topCta").addEventListener("click", openStudio);
+  $("#studio").addEventListener("close", function () {
+    if (world) world.paused = false; if (studio) studio.active = false;
+    if (fromShop) { PPShop.setDeco({ case: sState.case, keyring: sState.keyring, back: sState.back }); fromShop = null; }
+  });
+  $("#topCta").addEventListener("click", function () { openStudio(null); });
   document.querySelectorAll("[data-view]").forEach(function (b) { b.addEventListener("click", function () { if (studio) studio.view(b.dataset.view); }); });
   function renderStudio() {
     sMax = Math.max(sMax, sStep);
@@ -1307,9 +1942,9 @@ window.SITE = {
           if (!studio) return toast("3D 미리보기를 쓸 수 없는 브라우저예요");
           showSheet(el("div", { class: "center" }, [el("h3", { style: { margin: "0 0 10px" }, text: "길게 눌러 저장" }), el("img", { class: "shot-img", src: studio.snapshot(), alt: "내가 꾸민 폰" })]));
         } }),
-        el("button", { class: "primary", text: "이 조합으로 상담", onclick: function () {
-          $("#studio").close();
-          openConsult("designer", null, rows.concat([["액세서리 합계", won(total())]]));
+        el("button", { class: "primary", text: fromShop ? "이 조합으로 계속" : "디자이너에게 사러 가기", onclick: function () {
+          var had = !!fromShop; $("#studio").close();
+          if (!had) { openShop("designer"); }
         } }),
       ]));
     }
