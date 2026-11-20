@@ -4,14 +4,15 @@ bunqlabs.com에서 역설계한 사이트 구조(`studio-site/`)에 이산 작�
 
 ```bash
 python3 -m http.server -d book-site 8080   # http://localhost:8080
-node book-site/test/site.test.js           # 동작 테스트 10개
+node book-site/test/site.test.js           # 동작 테스트 12개
 ```
 
 ## 섹션 구성 (원본 구조 → 책 내용)
 
 | 원본 사이트 섹션 | 이 사이트 |
 |---|---|
-| 첫 화면: 산 위의 작업 표지 + 큰 헤드라인 | 산 위의 **책 표지** + "괴로움은 고장이 아니다 ✦ 너무 성실한 정상 작동이다" |
+| 첫 화면: Three.js 3D 산 위의 작업 표지 + 큰 헤드라인 | **WebGL 3D 산**(빛·그림자·눈·안개) 꼭대기에 선 **책 표지** + "괴로움은 고장이 아니다 ✦ 너무 성실한 정상 작동이다" |
+| 스크롤하면 산이 점구름으로 흩어짐 | 같은 지형의 점 2만여 개가 스크롤에 맞춰 흩어지고, 다음 섹션의 점구름으로 이어짐 |
 | 손글씨·펜 표시가 그려지는 선언문 | 책이 약속하는 **세 문장** (결함 아님 · 구조로 이해 · 출구가 있다) |
 | 고객사 로고가 바뀌는 로고 월 | 책의 **핵심 개념**이 차례로 바뀜 (위협 판정, 안전 규칙, 각성, 감정, 안전행동, 루프, 저항, 집착, 정체성의 결박, 운영권) |
 | 곡면 3D 작업 갤러리 | **목차 4부 17장** — 카드를 넘기며 장을 보고, 클릭하면 장 소개 |
@@ -32,3 +33,15 @@ node book-site/test/site.test.js           # 동작 테스트 10개
 ## 수정 방법
 
 모든 문구와 데이터는 `assets/content.js` 한 파일에 있습니다. 색은 `assets/styles.css` 맨 위 토큰, 책 표지 모양은 같은 파일 끝의 "book-specific" 부분입니다.
+
+## 3D 첫 화면 (Three.js)
+
+- 소스: `src/hero3d.js` → 빌드 결과: `assets/hero3d.js` (Three.js r180 포함, MIT, 한 파일로 묶어 `file://`로 열어도 동작)
+- 지형 모양은 `app.js`의 `height()` 함수 하나를 3D 산, 2D 대체 그림, 아래 섹션 점구름이 함께 씁니다.
+- WebGL을 못 쓰는 브라우저에서는 기존 Canvas 2D 산이 자동으로 나옵니다. `prefers-reduced-motion`이면 카메라가 움직이지 않습니다.
+- 수정 후 다시 빌드:
+
+```bash
+npm i --no-save three@0.180.0 esbuild@0.25.10
+npx esbuild book-site/src/hero3d.js --bundle --minify --format=iife --legal-comments=inline --outfile=book-site/assets/hero3d.js
+```

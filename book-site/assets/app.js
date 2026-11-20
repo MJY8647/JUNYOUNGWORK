@@ -228,11 +228,12 @@
     const ridge = 1 - Math.abs(noise(x * 2.2 + 3, z * 2.2 + 1, 5));
     return base * (.7 + .5 * ridge * ridge) + noise(x * 5, z * 5, 3) * .04 * base;
   };
+  window.__terrain = { height, noise }; // shared with the WebGL hero (assets/hero3d.js)
 
   /* ---------------- hero: shaded mountain on canvas ---------------- */
   const mountainCanvas = $('[data-mountain]');
   function drawMountain() {
-    const c = mountainCanvas; if (!c) return;
+    const c = mountainCanvas; if (!c || root.classList.contains('webgl-hero')) return; // WebGL hero owns --peak
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const w = c.clientWidth, h = c.clientHeight; if (!w || !h) return;
     c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);

@@ -166,6 +166,42 @@ const count = (p) => p.textContent('[data-work-count]');
     await p.close();
   });
 
+  await test('WebGL hero: 3D mountain renders, cover sits on its summit, scroll dissolves it', async () => {
+    const p = await open(browser);
+    await p.waitForFunction(() => document.documentElement.classList.contains('webgl-hero'), null, { timeout: 8000 });
+    assert.equal(await p.isVisible('[data-mountain3d]'), true);
+    assert.equal(await p.isVisible('[data-mountain]'), false, '2D fallback should be hidden');
+    await p.waitForTimeout(300);
+    const peak = await p.evaluate(() => parseFloat(getComputedStyle(document.querySelector('[data-hero]')).getPropertyValue('--peak')));
+    assert.ok(peak > 900 * .3 && peak < 900 * .6, `summit at ${peak}px from the bottom`);
+    // the canvas actually draws: the mountain area changes when the canvas is hidden
+    const clip = { x: 200, y: 900 - peak + 60, width: 300, height: 120 };
+    const withGL = await p.screenshot({ clip });
+    await p.$eval('[data-mountain3d]', (c) => { c.style.visibility = 'hidden'; });
+    const without = await p.screenshot({ clip });
+    await p.$eval('[data-mountain3d]', (c) => { c.style.visibility = ''; });
+    assert.notDeepEqual(withGL, without, 'WebGL canvas appears blank');
+    await p.evaluate(() => scrollTo({ top: innerHeight * .5, behavior: 'instant' })); await p.waitForTimeout(300);
+    assert.deepEqual(p.errors, []);
+    await p.close();
+  });
+
+  await test('without WebGL the 2D canvas mountain is used', async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await ctx.addInitScript(() => {
+      const orig = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, ...a) { return /webgl/.test(type) ? null : orig.call(this, type, ...a); };
+    });
+    const p = await ctx.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message));
+    await p.goto(URL);
+    await p.waitForFunction(() => !document.documentElement.classList.contains('is-loading'), null, { timeout: 8000 });
+    assert.equal(await p.evaluate(() => document.documentElement.classList.contains('webgl-hero')), false);
+    assert.equal(await p.isVisible('[data-mountain]'), true);
+    assert.ok(parseFloat(await p.evaluate(() => getComputedStyle(document.querySelector('[data-hero]')).getPropertyValue('--peak'))) > 0);
+    assert.deepEqual(errs, []);
+    await ctx.close();
+  });
+
   if (shotDir) {
     for (const [w, h, tag] of [[1440, 900, 'desktop'], [390, 844, 'mobile']]) {
       for (const scheme of ['light', 'dark']) {
