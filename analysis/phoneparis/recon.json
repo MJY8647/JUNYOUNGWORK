@@ -1,148 +1,186 @@
 {
   "url": "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/",
-  "title": "Sign in required",
+  "title": "폰파리 — 너의 폰, 너의 취향.",
   "license": "assume proprietary",
   "stack": {
-    "React": [
-      "react-dom"
+    "Three.js": [
+      "three(\\.module)?(\\.min)?\\.js",
+      "WebGLRenderer",
+      "THREE\\."
+    ],
+    "GSAP": [
+      "\\bFlip\\b"
     ]
   },
   "fonts": [
-    "inherit",
-    "system-ui"
+    "Arial",
+    "Noto Sans KR"
   ],
   "font_files": [],
   "tokens": {
     "color": {
-      "--background": "#010002",
-      "--foreground": "#fff",
-      "--secondary": "#cdcdcd",
-      "--muted": "#afafaf",
-      "--button-background": "#fff",
-      "--button-foreground": "#0d0d0d",
-      "--button-hover": "#ececec",
-      "--focus-ring": "rgb(139 165 255 / 80%)"
+      "--blue": "#254bf1",
+      "--ink": "#202529",
+      "--muted": "#737d86",
+      "--line": "#dce1e4",
+      "--orange": "#ff6a23"
+    },
+    "other": {
+      "--mobile-header": "calc(60px + env(safe-area-inset-top,0px))"
     }
   },
   "top_colors": [
     [
-      "#000",
-      8
-    ],
-    [
       "#fff",
-      4
+      15
     ],
     [
-      "#0d0d0d",
+      "#dce1e4",
       2
     ],
     [
-      "#010002",
+      "#edf0f2",
+      2
+    ],
+    [
+      "#dce2e7",
+      2
+    ],
+    [
+      "#26313b",
+      2
+    ],
+    [
+      "#273467",
+      2
+    ],
+    [
+      "#254bf1",
       1
     ],
     [
-      "#cdcdcd",
+      "#202529",
       1
     ],
     [
-      "#afafaf",
+      "#737d86",
       1
     ],
     [
-      "#ececec",
+      "#ff6a23",
       1
     ],
     [
-      "#020617",
+      "#f5f7f8",
       1
     ],
     [
-      "#111",
+      "#697781",
       1
     ],
     [
-      "#ff8a8a",
+      "#c5dfef",
       1
     ],
     [
-      "#212121",
+      "#e6f0f5",
       1
     ],
     [
-      "#737373",
+      "#b9d8ed",
       1
     ],
     [
-      "#b4b4b4",
-      1
-    ],
-    [
-      "#e5e5e5",
-      1
-    ],
-    [
-      "#424242",
-      1
-    ],
-    [
-      "#0085ff",
+      "#dfeef5",
       1
     ]
   ],
   "easings": [],
   "media_queries": [
     [
-      "@media (max-height: 800px) ",
+      "@media(max-width:760px)",
+      6
+    ],
+    [
+      "@media(max-width:900px)",
+      4
+    ],
+    [
+      "@media(orientation:landscape) and (max-height:500px)",
+      4
+    ],
+    [
+      "@media(min-width:761px) and (max-height:820px)",
+      2
+    ],
+    [
+      "@media(min-width:1500px)",
       1
     ],
     [
-      "@media (max-width: 1024px), (max-width: 1366px) and (pointer: coarse) ",
+      "@media(max-height:720px) and (max-width:760px)",
       1
     ],
     [
-      "@media (max-width: 640px) ",
+      "@media(prefers-reduced-motion:reduce)",
       1
     ],
     [
-      "@media (prefers-reduced-motion: no-preference) ",
+      "@media(max-width:370px)",
+      1
+    ],
+    [
+      "@media(max-width:760px) and (max-height:740px)",
+      1
+    ],
+    [
+      "@media(max-width:760px) and (min-height:680px) and (max-height:740px)",
       1
     ]
   ],
   "meta": {
-    "viewport": "width=device-width,initial-scale=1",
-    "og:type": "website",
-    "og:site_name": "ChatGPT",
-    "og:title": "ChatGPT",
-    "og:image": "https://cdn.openai.com/chatgpt/share-og.png",
-    "og:image:secure_url": "https://cdn.openai.com/chatgpt/share-og.png",
-    "og:image:type": "image/png",
-    "og:image:width": "1600",
-    "og:image:height": "900",
-    "og:image:alt": "Abstract art featuring a striking contrast of orange gradients on a blue canvas, overlaid with the white ChatGPT logo.",
-    "twitter:card": "summary_large_image",
-    "twitter:site": "@ChatGPTapp",
-    "twitter:title": "ChatGPT",
-    "twitter:image": "https://cdn.openai.com/chatgpt/share-og.png",
-    "twitter:image:alt": "Abstract art featuring a striking contrast of orange gradients on a blue canvas, overlaid with the white ChatGPT logo."
+    "viewport": "width=device-width,initial-scale=1,viewport-fit=cover",
+    "theme-color": "#edf2f4",
+    "description": "에펠탑 광장에서 만나는 나만의 폰. 디자이너폰팔이와 함께 케이스부터 키링까지, 360도로 완성하세요."
   },
   "headings": [
-    "Log in to access"
+    "단단한 보호, 든든한 안심.",
+    "에펠탑 광장에 폰 시장이 열렸다.",
+    "",
+    "지금 만나볼 수 있는 것."
   ],
   "sections": [
     [
       "main",
-      "wrap"
+      "story"
+    ],
+    [
+      "section",
+      "story-stage"
+    ],
+    [
+      "nav",
+      "world-chapters"
+    ],
+    [
+      "section",
+      "studio"
+    ],
+    [
+      "nav",
+      "steps"
     ]
   ],
   "media_assets": [
-    "Z.json"
+    "phoneparis-my-design.json",
+    "response.json"
   ],
   "stylesheets": [
-    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/_sites/dispatch-assets/status.css"
+    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/style.css?v=stops5",
+    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/mobile.css?v=stops5",
+    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/safety.css?v=stops5"
   ],
   "scripts": [
-    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/_sites/dispatch-assets/login-required.js",
-    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/_sites/dispatch-assets/status-pages.js"
+    "https://phoneparis-designer-studio.junyeong0111.chatgpt.site/app.js?v=stops5"
   ]
 }

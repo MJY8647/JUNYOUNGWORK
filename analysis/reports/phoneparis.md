@@ -1,47 +1,30 @@
 # Site analysis — phoneparis-designer-studio.junyeong0111.chatgpt.site (live site, 2026-11-20)
 
-Source: static fetch (`scripts/recon.py`) through the session proxy.
-**License:** proprietary (ChatGPT Sites). Nothing copied.
+Source: static fetch of HTML/CSS/JS + 320 scroll frames (`world/000–319.webp`, 390×740), viewed as a contact sheet.
+**Ownership:** 사용자 본인 계정의 사이트이며, 프레임은 사용자가 제공한 원본 영상에서 뽑은 것. 재구성 시 대체 이미지로만 10장 재사용.
 
-## 결과: 로그인 벽 (401)
-
-사이트는 ChatGPT 로그인 뒤에 있어 공개 요청에는 "Log in to access" 안내 페이지만 돌아옵니다
-(`<title>Sign in required</title>`, `body.login-required`). 실제 화면·구성·모션은 확인할 수 없었습니다.
-recon.md의 색상 토큰(#010002 / #fff 등)은 로그인 안내 페이지의 것이라 원본 디자인과 무관합니다.
-
+## Stack
 | Layer | Finding |
 |---|---|
-| Framework | React (ChatGPT Sites 호스팅) — 로그인 페이지 기준 |
-| 3D / Animation | 확인 불가 |
-| Fonts | system-ui (로그인 페이지) |
+| Framework | 바닐라 ES 모듈 (`app.js`, `world.js`, `scene.js`, `catalog.js`, `tour-navigation.js`) |
+| 월드 | **3D 아님** — 영상 6.65s–44.4s를 320장 webp로 잘라 스크롤에 맞춰 캔버스에 그림 |
+| 내비게이션 | 휠/터치 한 번 = 한 장면(StepGate, 1.25s 쿨다운), 9개 정지점 |
+| 3D | `scene.js` three.js — 디자이너 작업실의 절차적 폰만 |
+| 폰트 | Noto Sans KR, 로고 Arial |
 
-## 대신 사용한 근거
+## 영상 흐름 (프레임 기준)
+000–016 광장 전경(격자 타일, 중앙 에펠탑) → 024–040 탑 위에서 하강, 파스텔 노점·군중 → 048 모션 블러 전환 → 056 디자이너(라벤더 원기둥) → 096 퀵퀵이(주황 박스+카트) → 136 자린고비(카키 원뿔) → 176 세이프티(남색 박스) → 216 중고폰(버건디 기둥) → 256 올인원(회색 달걀) → 296–319 탑 아래 "여섯 명 다 둘러봤다. 이제 폰만 고르면 돼."
+각 폰팔이: 하단 자막 → 흰 카드(배지, 인용, 제목, 상품/단계).
 
-- 사이트 이름 "PhoneParis Designer Studio" → 휴대폰 판매점(딜러)용 견적·시세표 제작 도구로 해석
-- 사용자 요청: 딜러가 하는 모든 항목, 글 최소화, 클릭으로 넘어가는 방식, 정보 축약
-- 같은 저장소 `claude/busy-noether-wb5p2s` 브랜치의 1mm 모바일 PRODUCT.md (183일 요금제 변경 알림표, 모델 우선 흐름)
-
-## 딜러 업무 → 화면 매핑
-
-| 딜러가 하는 일 | 스튜디오 화면 | 입력 방식 |
-|---|---|---|
-| 기종 상담 | 견적 1 기종 | 타일 탭 → 자동 다음 |
-| 용량 / 출고가 | 견적 2 용량 | 타일 탭 |
-| 통신사 · 번이/기변/신규 | 견적 3 개통 | 타일 2개 탭 |
-| 고가 요금제 / 6개월 후 변경 | 견적 4·5 요금·변경 | 타일 탭 |
-| 공시 vs 선약 비교, 추가지원금 | 견적 6 지원 | 자동 유리 표시, 칩, ± |
-| 할부·현금완납, 중고 반납 | 견적 7 결제 | 칩, ± |
-| 부가서비스·결합·제휴카드 | 견적 8 혜택 | 토글 타일, 칩 |
-| 견적서·카톡 안내 | 견적 9 결과 | 큰 숫자, 복사 버튼 |
-| 개통 서류·유심·데이터 이전 | 견적 10 체크 | 토글 + 진행률 |
-| 매장 시세표(카톡/밴드 게시) | 시세표 | 칩 선택 → PNG |
-| 요금제 변경일·부가 해지·약정 만료 | 사후관리 | 날짜 1개 → 타임라인, .ics |
+## Design tokens
+--ink #202529 · --muted #737d86 · --line #dce1e4 · --blue #254bf1 · --orange #ff6a23, 카드 흰색 r≈18.
 
 ## Rebuild plan
-
-| Original technique | Our implementation | Why |
+| Original | Ours | Why |
 |---|---|---|
-| React SPA (추정) | 무빌드 HTML/CSS/JS, `content.js` 한 파일에 데이터 | 매장에서 바로 열고 수정 |
-| — | 하단 고정 요약 바(할부원금·월 납부) | 단계 이동 중에도 숫자 확인 |
-| — | Canvas 시세표 → PNG | 외부 라이브러리 없이 이미지 저장 |
-| — | localStorage 상태 유지 | 새로고침해도 상담 이어서 |
+| 320장 프레임 스크럽 | three.js 실시간 장면(탑 1,708 철골, 군중 2,600, 노점 240, 캐릭터 6) | 요청: 카메라·피사체·모션을 실제로 구현 |
+| StepGate 휠 제어 | CSS scroll-snap(장면=100vh) + Catmull-Rom 카메라 곡선 | 단순, 키보드·터치 기본 동작 |
+| 영상 속 정지 카드 | HTML 카드 + 탭 흐름(6종) | 글 최소화, 클릭으로 진행 |
+| 이미지 속 자막 | 캐릭터 머리 위 말풍선(3D 위치 추적) | 장면과 함께 움직임 |
+| 디자이너 3D | 새 절차적 폰(케이스 테두리·키링 흔들림·그립톡/지갑) | 기능 유지·개선 |
+| — | WebGL 없으면 원본 프레임 10장으로 대체 | 저사양 대비 |

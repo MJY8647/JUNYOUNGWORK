@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>폰파리</title>
+  <meta name="description" content="에펠탑 광장에 폰 시장이 열렸다. 여섯 폰팔이를 만나고, 3D로 내 폰을 꾸며 보세요.">
+  <meta name="theme-color" content="#cfd8dc">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#" id="brand" aria-label="폰파리 처음으로">phone<span>paris</span><i>✳</i></a>
+    <span class="top-note" id="topNote">에펠탑 아래, 취향을 만나다.</span>
+    <button class="top-cta" id="topCta">내 폰 꾸미기</button>
+  </header>
+
+  <canvas id="world" aria-label="에펠탑 광장 3D 장면" role="img"></canvas>
+  <div id="fallback" hidden><img id="fallbackImg" alt=""></div>
+
+  <div id="loader" role="status"><b>phone<span>paris</span></b><small>광장으로 들어가는 중…</small><i></i></div>
+
+  <div class="headline" id="headline" aria-live="polite">
+    <p class="eyebrow" id="eyebrow">PHONEPARIS · 에펠탑 광장</p>
+    <h1 id="title">에펠탑 광장에<br>폰 시장이 열렸다.</h1>
+    <p class="sub" id="sub"></p>
+  </div>
+
+  <div class="bubble" id="bubble" hidden><b id="bubbleName"></b><span id="bubbleText"></span></div>
+
+  <aside class="card" id="card" aria-live="polite" aria-label="폰팔이 카드"></aside>
+
+  <nav class="chapters" id="chapters" aria-label="장면 이동"></nav>
+  <div class="progress"><i id="progress"></i></div>
+  <button class="scroll-hint" id="scrollHint" aria-label="다음 장면">스크롤 <span>↓</span></button>
+
+  <main class="track" id="track"></main>
+
+  <dialog id="sheet" class="sheet" aria-label="상세">
+    <div class="sheet-in">
+      <button class="x" data-close aria-label="닫기">✕</button>
+      <div id="sheetBody"></div>
+    </div>
+  </dialog>
+
+  <dialog id="studio" class="studio" aria-label="3D 폰꾸 작업실">
+    <div class="studio-grid">
+      <div class="stage3d">
+        <div class="stage-top"><span class="pill" style="--c:#b7a6dc">디자이너폰팔이</span><span class="ed">YOUR OWN EDITION</span></div>
+        <div id="studioCanvas" tabindex="0" aria-label="드래그 또는 방향키로 360도 회전"></div>
+        <div class="stage-bottom">
+          <span>드래그해서 360° 돌려 보세요</span>
+          <div class="seg"><button data-view="front">앞</button><button data-view="back">뒤</button><button data-view="reset">↺</button></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-top"><button class="link" data-close>← 광장으로</button><span>DESIGNER’S STUDIO</span></div>
+        <nav class="steps" id="studioSteps" aria-label="꾸미기 단계"></nav>
+        <div class="panel-body" id="studioBody"></div>
+        <div class="panel-foot">
+          <div class="sum"><span id="studioSum">액세서리 합계</span><b id="studioTotal">0원</b></div>
+          <div class="btns"><button class="ghost" id="studioPrev">이전</button><button class="primary" id="studioNext">다음</button></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="assets/vendor/three.min.js"></script>
+  <script src="assets/content.js"></script>
+  <script src="assets/world.js"></script>
+  <script src="assets/studio.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

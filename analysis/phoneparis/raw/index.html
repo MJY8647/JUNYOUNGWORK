@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#edf2f4"><meta name="description" content="에펠탑 광장에서 만나는 나만의 폰. 디자이너폰팔이와 함께 케이스부터 키링까지, 360도로 완성하세요."><title>폰파리 — 너의 폰, 너의 취향.</title><link rel="stylesheet" href="style.css?v=stops5"><link rel="stylesheet" href="mobile.css?v=stops5"><link rel="preload" as="image" href="world/000.webp" fetchpriority="high"><link rel="stylesheet" href="safety.css?v=stops5"></head>
+<body>
+<header><a class="brand" href="#" aria-label="폰파리 처음으로">phone<span>paris</span><i>✳</i></a><span class="header-note">에펠탑 아래, 취향을 만나다.</span><button class="header-cta" data-enter>내 폰 꾸미기</button></header>
+<main id="story">
+<div class="story-track"><section class="story-stage" aria-label="에펠탑 광장과 여섯 폰팔이 둘러보기">
+<canvas id="world-canvas" role="img" aria-label="파리 에펠탑 광장 전경"></canvas>
+<article id="safety-panel" class="safety-panel" hidden aria-label="세이프티폰팔이 보호 조합">
+<span class="safety-badge">세이프티폰팔이</span>
+<p class="safety-quote">“소중한 폰, 오래오래 안심하고 쓰자!”</p>
+<h2>단단한 보호, 든든한 안심.</h2>
+<p class="safety-combo">강화 케이스 + 강화 필름 + 제조사 휴대폰 보험</p>
+<dl class="safety-items">
+<div><dt>강화 케이스</dt><dd>모서리·후면을 감싸 충격에 대비해요.</dd></div>
+<div><dt>강화 필름</dt><dd>화면을 한 겹 더 보호해 흠집에 대비해요.</dd></div>
+<div><dt>제조사 휴대폰 보험</dt><dd><a href="https://www.apple.com/kr/support/products/iphone/" target="_blank" rel="noopener noreferrer">AppleCare+</a>·<a href="https://www.samsung.com/sec/samsung-care-plus/im/" target="_blank" rel="noopener noreferrer">삼성케어플러스</a> 등 기기에 맞는 케어·보험 상품을 함께 확인해요.</dd></div>
+</dl>
+<p class="safety-note">가입 조건·보장·자기부담금은 상품별로 달라요.</p>
+</article>
+<div id="world-loading" role="status">광장으로 들어가는 중…</div>
+<div class="world-heading"><p>PHONEPARIS · 에펠탑 광장</p><h1 id="world-title">에펠탑 광장에<br>폰 시장이 열렸다.</h1><p id="world-description">스크롤을 내려 광장으로 들어가세요.</p></div>
+<nav class="world-chapters" aria-label="광장 장면 선택" id="world-chapters"></nav>
+<div class="world-bottom"><div><span id="world-current">에펠탑 광장</span><p id="world-hint">스크롤하면 광장과 폰팔이들이 차례로 나타나요.</p></div><button id="world-action" class="primary" hidden>3D 폰 꾸미기</button></div>
+<div class="world-progress"><div id="world-progress-fill"></div></div>
+</section></div>
+<footer><span class="brand">phone<span>paris</span>✳</span><p>광장에서는 여섯 폰팔이를 모두 만날 수 있어요.<br>지금 구매 가능한 작업실은 디자이너폰팔이입니다.</p><button class="text-button" id="status-button">구현 범위 보기</button></footer>
+</main>
+<section id="studio" hidden aria-label="디자이너폰팔이 구매 구성">
+<div class="studio-top"><button class="text-button" id="exit">광장으로</button><span>DESIGNER’S STUDIO</span><button class="text-button" id="status-studio">프리뷰 안내</button></div>
+<div class="studio-grid"><div class="preview-panel"><div class="preview-label"><span class="badge">디자이너폰팔이</span><span id="preview-count">YOUR OWN EDITION</span></div><button id="expand-preview" class="expand-preview" aria-expanded="false">크게 보기</button><div id="canvas-wrap" tabindex="0" role="img" aria-label="드래그 또는 방향키로 360도 회전하는 휴대폰 미리보기"></div><div class="preview-bottom"><span>드래그해서 360° 돌려보세요</span><div><button id="front" aria-label="휴대폰 앞면 보기">앞면</button><button id="back" aria-label="휴대폰 뒷면 보기">뒷면</button><button id="reset-view" aria-label="기본 시점으로">시점 초기화</button></div></div><span class="edition">PHONEPARIS<br>MADE BY YOU.</span><div id="model-loading" role="status" hidden>3D 미리보기를 준비하고 있어요…</div><div id="webgl-error" hidden>3D 미리보기를 표시할 수 없습니다.<br>WebGL을 지원하는 브라우저에서 다시 열어주세요.</div></div>
+<div class="selection-panel"><nav class="steps" aria-label="구매 단계" id="steps"></nav><div class="selection-body" id="selection-body"><p class="eyebrow" id="step-caption"></p><h2 id="step-title"></h2><p class="step-sub" id="step-sub"></p><div id="options" class="options"></div><div id="colors"></div><p class="sample-note">샘플 옵션 · 기기 구매가 제외 · 표시 가격은 예시입니다.</p></div><div class="purchase-bottom"><div class="price-line"><span id="selection-summary">나만의 조합</span><strong id="total">0원</strong></div><div class="actions"><button class="secondary" id="previous">이전</button><button class="primary" id="next">다음</button></div></div></div></div>
+</section>
+<dialog id="preview-dialog" aria-label="휴대폰 3D 크게 보기"></dialog>
+<dialog id="info-dialog"><button class="dialog-close" aria-label="닫기">×</button><p class="eyebrow">PREVIEW NOTES</p><h2>지금 만나볼 수 있는 것.</h2><p><b>구현</b><br>에펠탑 광장과 여섯 캐릭터의 스크롤 순회, 4단계 선택, 실시간 3D 장착, 360° 회전, 조합 저장·복원 및 다운로드.</p><p><b>샘플로 표현</b><br>폰·액세서리는 절차적으로 만든 3D 모델입니다. 재질, 기종, 상품명, 가격은 시연용이며 실제 제품과 다를 수 있습니다.</p><p><b>추후 연결</b><br>실측 3D 자산, 실제 상품·재고, 결제·주문·배송, 다른 폰팔이 캐릭터의 구매 흐름.</p><p class="sample-note">영상 속 통신사·프로모션·캐릭터 화면은 제공된 원본 영상의 일부입니다. 실제 판매 조건을 뜻하지 않습니다.</p></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=stops5"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5d5c4adbc0d9c31',t:'MTc5NTE2MDAyNQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5d5c4adbc0d9c31',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body></html>

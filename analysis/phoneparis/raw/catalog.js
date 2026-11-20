@@ -1,0 +1,9 @@
+// Character entries own their purchasing catalog. Add future flows here.
+export const characters=[{id:'designer',name:'디자이너폰팔이',available:true,flow:['device','case','keyring','accessory']}];
+export const devices=[{id:'pro',name:'iPhone 16 Pro',detail:'6.3″ · 트리플 카메라',width:1,price:0},{id:'promax',name:'iPhone 16 Pro Max',detail:'6.9″ · 트리플 카메라',width:1.08,price:0},{id:'s25',name:'Galaxy S25',detail:'6.2″ · 세로형 카메라',width:.97,price:0}];
+export const phoneColors=[{id:'silver',name:'실버',color:'#d5d5d1'},{id:'black',name:'블랙',color:'#353638'},{id:'sand',name:'내추럴',color:'#b8a895'}];
+export const cases=[{id:'clear',name:'클리어',detail:'투명한 나의 취향',color:'#e8e8df',price:19000,material:'clear'},{id:'cobalt',name:'코발트 블루',detail:'선명한 한 끗',color:'#2335e8',price:24000,material:'silicone'},{id:'orange',name:'탠저린',detail:'손끝의 에너지',color:'#ff641e',price:24000,material:'silicone'},{id:'chrome',name:'실버 크롬',detail:'반짝이는 존재감',color:'#bfc1c4',price:29000,material:'metal'}];
+export const keyrings=[{id:'none',name:'선택 안 함',detail:'깔끔하게 그대로',price:0},{id:'ball',name:'오렌지 볼',detail:'동그란 포인트',color:'#ff6a23',price:9000},{id:'chain',name:'실버 체인',detail:'묵직한 반짝임',color:'#c5c7cf',price:12000},{id:'ribbon',name:'블루 루프',detail:'가볍게 걸어봐',color:'#3b43ef',price:9000}];
+export const accessories=[{id:'none',name:'선택 안 함',detail:'케이스의 멋 그대로',price:0},{id:'wallet',name:'카드지갑',detail:'데일리 카드 2장',color:'#ff6a23',price:18000},{id:'grip',name:'그립톡',detail:'안정적인 손끝',color:'#243bea',price:14000}];
+export const steps=[{key:'device',label:'기기',title:'어떤 폰과 함께해?',sub:'사용 중인 기기를 골라주세요.',items:devices},{key:'case',label:'케이스',title:'취향을 입혀봐.',sub:'손에 닿는 색, 나다운 첫인상.',items:cases},{key:'keyring',label:'키링',title:'작은 디테일, 큰 차이.',sub:'나만의 포인트를 걸어주세요.',items:keyrings},{key:'accessory',label:'마무리',title:'마지막 한 끗.',sub:'카드지갑 또는 그립톡, 하나를 골라주세요.',items:accessories}];
+export const money=n=>new Intl.NumberFormat('ko-KR').format(n)+'원';
