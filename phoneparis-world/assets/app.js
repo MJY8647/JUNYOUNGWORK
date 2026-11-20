@@ -20,13 +20,6 @@
   }
   var toastT;
   function toast(m) { var t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("on"); }, 1800); }
-  function copy(text) {
-    var ok = function () { toast("복사했어요"); };
-    var fb = function () { var ta = el("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); ok(); } catch (e) { toast("길게 눌러 복사해 주세요"); } ta.remove(); };
-    if (navigator.clipboard) navigator.clipboard.writeText(text).then(ok, fb); else fb();
-  }
-  function phone(p, big) { return el("div", { class: "ph" + (p.folder ? " folder" : "") + (big ? " big" : ""), style: { "--c": p.color }, "aria-hidden": "true" }); }
-  function pct(p) { return p.list ? Math.round((1 - p.price / p.list) * 100) : null; }
 
   /* ---------- 스크롤 트랙 ---------- */
   var track = $("#track");
@@ -48,7 +41,7 @@
   /* ---------- 3D 월드 ---------- */
   var world = null;
   if (window.THREE && window.PPWorld && PPWorld.supported()) {
-    try { world = new PPWorld($("#world"), D, { onDealer: function (id) { var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); }, preserve: /[?&]shot/.test(location.search) }); }
+    try { world = new PPWorld($("#world"), D, { onDealer: function (id) { if (document.documentElement.classList.contains("shopping")) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); }, preserve: /[?&]shot/.test(location.search) }); }
     catch (e) { console.warn(e); world = null; }
   }
   if (!world) { $("#world").hidden = true; $("#fallback").hidden = false; }
@@ -59,6 +52,7 @@
   var cur = -1, cardOpen = false, cardTimer = 0;
   function progress() { return Math.max(0, Math.min(N - 1, scrollY / stopH())); }
   function onScroll() {
+    if (document.documentElement.classList.contains("shopping")) return;
     var s = progress(), i = Math.round(s), near = Math.abs(s - i);
     if (world) world.setProgress(s);
     else { var img = $("#fallbackImg"), src = "assets/fallback/" + FALLBACK[i] + ".webp"; if (img.getAttribute("src") !== src) img.src = src; }
@@ -74,6 +68,7 @@
     }
   }
   function setCard(on) {
+    if (document.documentElement.classList.contains("shopping")) on = false;
     cardOpen = on; $("#card").classList.toggle("on", on);
     if (world) {
       var mobile = matchMedia("(max-width: 760px)").matches;
@@ -105,131 +100,36 @@
   requestAnimationFrame(tickBubble);
   addEventListener("scroll", onScroll, { passive: true });
 
-  /* ---------- 폰팔이 카드 ---------- */
-  var cardState = { chips: {}, zeroOnly: false, open: {}, combo: {}, grade: "S" };
-  function prodCard(id, dealer, compact) {
-    var p = D.products[id], off = pct(p);
-    return el("button", { class: "prod", onclick: function () { openDetail(id, dealer); }, "aria-label": p.name + " " + won(p.price) + " 상세 보기" }, [
-      el("div", { class: "shot" }, [phone(p)]),
-      el("b", { text: p.name }),
-      !compact && p.list ? el("s", { text: won(p.list) }) : null,
-      el("div", { class: "pr" }, [off != null && !compact ? el("em", { text: off + "%" }) : null, p.price === 0 ? "0원" : won(p.price)]),
-      !compact && p.tag ? el("div", { class: "tag", text: p.tag }) : null,
-      !compact ? el("span", { class: "more", text: "상세 보기 ›" }) : null,
-    ]);
-  }
+  /* ---------- 폰팔이 카드: 셀링포인트 3개 + 가게 들어가기 ---------- */
   function renderCard(id) {
     var d = D.dealers[id], card = $("#card");
     card.style.setProperty("--c", d.color); card.innerHTML = "";
     card.appendChild(el("span", { class: "badge", text: d.name }));
     card.appendChild(el("h2", { text: d.title }));
-    var body = el("div");
-    if (id === "designer") {
-      body.appendChild(el("div", { class: "chips" }, d.chips.map(function (c) {
-        return el("button", { class: "chip" + (cardState.chips[c] ? " on" : ""), "aria-pressed": cardState.chips[c] ? "true" : "false", text: c, onclick: function () { cardState.chips[c] = !cardState.chips[c]; renderCard(id); } });
-      })));
-      body.appendChild(el("div", { class: "row" }, d.products.map(function (p) { return prodCard(p, id); })));
-    } else if (id === "quick" || id === "safe") {
-      if (id === "safe") {
-        var icons = ["▣", "▭", "✚"];
-        body.appendChild(el("div", { class: "combo" }, d.combo.map(function (c, k) {
-          var on = cardState.combo[c] !== false;
-          return el("button", { class: on ? "on" : "", "aria-pressed": on ? "true" : "false", onclick: function () { cardState.combo[c] = !on; renderCard(id); } }, [el("span", { class: "ic", text: icons[k] }), c]);
-        })));
-      }
-      body.appendChild(el("ol", { class: "steps-list" }, d.steps.map(function (s, k) {
-        var key = id + k, open = !!cardState.open[key];
-        return el("li", { class: open ? "open" : "" }, [
-          el("button", { "aria-expanded": open ? "true" : "false", onclick: function () { cardState.open[key] = !open; renderCard(id); } }, [
-            id === "quick" ? el("span", { class: "n", text: String(k + 1) }) : el("span", { class: "bar" }), el("span", { text: s.t }), el("span", { class: "ar", text: "›" }),
-          ]),
-          el("p", { text: s.d }),
-        ]);
-      })));
-    } else if (id === "price") {
-      body.appendChild(el("div", { class: "chips" }, [["전체", false], ["0원만", true]].map(function (o) {
-        return el("button", { class: "chip" + (cardState.zeroOnly === o[1] ? " on" : ""), text: o[0], onclick: function () { cardState.zeroOnly = o[1]; renderCard(id); } });
-      })));
-      var list = d.products.slice().sort(function (a, b) { return D.products[a].price - D.products[b].price; })
-        .filter(function (p) { return !cardState.zeroOnly || D.products[p].price === 0; });
-      body.appendChild(el("div", { class: "row" }, list.map(function (p) { return prodCard(p, id); })));
-    } else if (id === "used") {
-      body.appendChild(el("div", { class: "grades" }, d.grades.map(function (g) {
-        var on = cardState.grade === g.id;
-        return el("button", { class: on ? "on" : "", "aria-pressed": on ? "true" : "false", onclick: function () { cardState.grade = g.id; renderCard(id); } }, [el("span", { class: "badge", text: g.name }), el("small", { text: g.d })]);
-      })));
-      body.appendChild(el("p", { class: "note", text: d.note }));
-    } else if (id === "allinone") {
-      body.appendChild(el("div", { class: "grid3" }, d.products.map(function (p) { return prodCard(p, id, true); })));
-    }
-    card.appendChild(body);
-    card.appendChild(el("button", { class: "primary", text: d.cta, onclick: function () { dealerAction(id); } }));
-    if (d.products || id === "allinone") card.appendChild(el("p", { class: "note", text: D.priceNote }));
+    card.appendChild(el("ul", { class: "points" }, d.points.map(function (p, k) { return el("li", {}, [el("i", { text: String(k + 1) }), p]); })));
+    card.appendChild(el("button", { class: "primary", text: d.short + "에게 사러 가기 →", onclick: function () { openShop(id); } }));
   }
-  function openDealer(id) { if (cardOpen) { var b = $("#card .primary"); if (b) b.focus(); } }
-  function dealerAction(id) {
-    var d = D.dealers[id];
-    if (d.action === "studio") openStudio();
-    else if (d.action === "pick") openPick(id);
-    else openConsult(id, null);
+  function openDealer(id) { openShop(id); }
+  var mobileQ = matchMedia("(max-width: 760px)");
+  function openShop(id) {
+    var i = indexOf(id);
+    if (i !== cur) scrollTo({ top: i * stopH(), behavior: "auto" });
+    setCard(false); clearTimeout(cardTimer);
+    PPShop.open(id);
+    if (world) { world.setProgress(i); world.setFrameOffset(mobileQ.matches ? 0 : -.2, mobileQ.matches ? -.17 : 0); }
   }
+  PPShop.init({
+    toast: toast,
+    onTalk: function (on) { if (world) world.talk(on ? PPShop.state().dealer : null); },
+    onClose: function () { if (world) world.talk(null); cardOpen = false; onScroll(); },
+    openStudio: function (G) { openStudio(G); },
+  });
 
-  /* ---------- 시트: 상세 / 모델 선택 / 상담 ---------- */
+  /* ---------- 시트 (이미지 보기) ---------- */
   var sheet = $("#sheet");
   function showSheet(node) { $("#sheetBody").innerHTML = ""; $("#sheetBody").appendChild(node); if (!sheet.open) sheet.showModal(); }
   document.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { b.closest("dialog").close(); }); });
   sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.close(); });
-
-  function openDetail(pid, dealer) {
-    var p = D.products[pid], off = pct(p), d = D.dealers[dealer];
-    showSheet(el("div", { class: "detail" }, [
-      el("span", { class: "badge", style: { "--c": d.color }, text: d.name }),
-      el("div", { class: "shot" }, [phone(p, true)]),
-      el("h3", { text: p.name }),
-      p.list ? el("s", { text: "출고가 " + won(p.list) }) : null,
-      el("div", { class: "big" }, [off != null ? el("em", { text: off + "%" }) : null, p.price === 0 ? "0원" : won(p.price)]),
-      p.tag ? el("div", { class: "tag", style: { color: "var(--blue)", "font-weight": "700" }, text: p.tag }) : null,
-      el("p", { class: "note", text: D.priceNote }),
-      el("div", { class: "btns" }, [
-        el("button", { class: "ghost", text: "다른 모델", onclick: function () { openPick(dealer); } }),
-        el("button", { class: "primary", style: { background: d.color }, text: "이 폰으로 상담", onclick: function () { openConsult(dealer, pid); } }),
-      ]),
-    ]));
-  }
-  function openPick(dealer) {
-    var d = D.dealers[dealer], ids = d.products || Object.keys(D.products);
-    showSheet(el("div", {}, [
-      el("span", { class: "badge", style: { "--c": d.color }, text: d.name }),
-      el("h3", { style: { margin: "10px 0 0", "font-size": "22px" }, text: "어떤 폰?" }),
-      el("div", { class: "pick-grid" }, ids.map(function (pid) {
-        var p = D.products[pid];
-        return el("button", { class: "prod", style: { "flex-basis": "auto" }, onclick: function () { openConsult(dealer, pid); } }, [
-          el("div", { class: "shot" }, [phone(p)]), el("b", { text: p.name }), el("div", { class: "pr", text: p.price === 0 ? "0원" : won(p.price) }),
-        ]);
-      })),
-    ]));
-  }
-  function openConsult(dealer, pid, extra) {
-    var d = D.dealers[dealer], rows = [["폰팔이", d.name]];
-    if (pid) rows.push(["모델", D.products[pid].name], ["예시가", D.products[pid].price === 0 ? "0원" : won(D.products[pid].price)]);
-    if (dealer === "quick") rows.push(["받는 방법", "퀵배송·방문 수령"]);
-    if (dealer === "safe") rows.push(["보호 조합", d.combo.filter(function (c) { return cardState.combo[c] !== false; }).join(" + ") || "선택 안 함"]);
-    if (dealer === "used") rows.push(["등급", d.grades.filter(function (g) { return g.id === cardState.grade; })[0].name]);
-    (extra || []).forEach(function (r) { rows.push(r); });
-    var text = "[폰파리 상담]\n" + rows.map(function (r) { return r[0] + ": " + r[1]; }).join("\n");
-    var tel = D.contact.phone.replace(/[^0-9]/g, "");
-    showSheet(el("div", {}, [
-      el("span", { class: "badge", style: { "--c": d.color }, text: "상담 신청" }),
-      el("div", { class: "sum-rows" }, rows.map(function (r) { return el("div", {}, [el("span", { text: r[0] }), el("b", { text: r[1] })]); })),
-      el("a", { class: "tel", href: "tel:" + tel, text: D.contact.phone }),
-      el("p", { class: "note center", text: D.contact.hours + " · 위 내용을 말씀해 주세요" }),
-      el("div", { class: "btns" }, [
-        el("button", { class: "ghost", text: "번호 복사", onclick: function () { copy(D.contact.phone); } }),
-        el("button", { class: "primary", style: { background: d.color }, text: "상담 내용 복사", onclick: function () { copy(text); } }),
-      ]),
-      D.contact.kakao ? el("a", { class: "link", href: D.contact.kakao, target: "_blank", rel: "noopener", text: "카카오톡 채널로 문의 ›" }) : null,
-    ]));
-  }
 
   /* ---------- 폰꾸 작업실 ---------- */
   var S = D.studio, studio = null, sStep = 0, sMax = 0;
@@ -244,16 +144,23 @@
   ];
   function find(list, id) { return list.filter(function (x) { return x.id === id; })[0] || list[0]; }
   function total() { return find(S.cases, sState.case).price + find(S.keyrings, sState.keyring).price + find(S.backs, sState.back).price; }
-  function openStudio() {
+  var fromShop = null;
+  var DEV_MAP = { ip18p: "ip18p", ip17p: "ip18p", s26: "s26", zf8: "s26", a17: "s26" };
+  function openStudio(G) {
     if (sheet.open) sheet.close();
+    fromShop = G && G.deco ? G : null;
+    if (fromShop) { sState.device = DEV_MAP[G.model] || "ip17"; sState.case = G.deco.case; sState.keyring = G.deco.keyring; sState.back = G.deco.back; sStep = 1; sMax = 4; }
     $("#studio").showModal();
     if (world) world.paused = true;
     if (!studio && window.PPStudio && window.THREE) { try { studio = new PPStudio($("#studioCanvas")); } catch (e) { console.warn(e); } }
     if (studio) { studio.active = true; requestAnimationFrame(function () { studio.resize(); }); }
     renderStudio();
   }
-  $("#studio").addEventListener("close", function () { if (world) world.paused = false; if (studio) studio.active = false; });
-  $("#topCta").addEventListener("click", openStudio);
+  $("#studio").addEventListener("close", function () {
+    if (world) world.paused = false; if (studio) studio.active = false;
+    if (fromShop) { PPShop.setDeco({ case: sState.case, keyring: sState.keyring, back: sState.back }); fromShop = null; }
+  });
+  $("#topCta").addEventListener("click", function () { openStudio(null); });
   document.querySelectorAll("[data-view]").forEach(function (b) { b.addEventListener("click", function () { if (studio) studio.view(b.dataset.view); }); });
   function renderStudio() {
     sMax = Math.max(sMax, sStep);
@@ -285,9 +192,9 @@
           if (!studio) return toast("3D 미리보기를 쓸 수 없는 브라우저예요");
           showSheet(el("div", { class: "center" }, [el("h3", { style: { margin: "0 0 10px" }, text: "길게 눌러 저장" }), el("img", { class: "shot-img", src: studio.snapshot(), alt: "내가 꾸민 폰" })]));
         } }),
-        el("button", { class: "primary", text: "이 조합으로 상담", onclick: function () {
-          $("#studio").close();
-          openConsult("designer", null, rows.concat([["액세서리 합계", won(total())]]));
+        el("button", { class: "primary", text: fromShop ? "이 조합으로 계속" : "디자이너에게 사러 가기", onclick: function () {
+          var had = !!fromShop; $("#studio").close();
+          if (!had) { openShop("designer"); }
         } }),
       ]));
     }

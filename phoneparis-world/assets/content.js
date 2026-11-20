@@ -24,15 +24,78 @@ window.SITE = {
     { id: "finish", nav: "마무리", title: "여섯 명 다 둘러봤다.\n이제 폰만 고르면 돼.", sub: "" },
   ],
 
+  // 상품: price = 영상 속 1mm 기기값(공시지원금·매장지원 반영, SKT 번호이동 기준 예시)
+  // list = 출고가 (아이폰17/에어/18프로는 영상, 17프로·폴드8·S26은 2026-11 출고가 보도 기준)
   products: {
-    ip17:   { name: "아이폰17 NEW", list: 1452000, price: 552000, color: "#d9cdf2" },
-    ip17a:  { name: "아이폰17에어", list: 1584000, price: 484000, color: "#dfe9f2" },
-    ip18p:  { name: "아이폰18 프로", list: 1990000, price: 1391000, color: "#6e2a33" },
-    ip17p:  { name: "아이폰17프로", price: 932000, color: "#f07a2c" },
-    zf8:    { name: "Z폴드8(와이드형)", price: 1378000, color: "#b9b2c9" },
-    s26:    { name: "갤럭시 S26", price: 203600, color: "#9cc7d6" },
-    a17:    { name: "갤럭시 A17", list: 319000, price: 0, color: "#a9d3ea", tag: "공짜폰" },
-    folder: { name: "클래식 폴더", list: 205700, price: 0, color: "#1d1f22", tag: "공짜폰", folder: true },
+    ip17:   { name: "아이폰17 NEW", list: 1452000, price: 552000, color: "#d9cdf2", colors: [["라벤더", "#d9cdf2"], ["세이지", "#c9d6c2"], ["블랙", "#2b2d30"]] },
+    ip17a:  { name: "아이폰17에어", list: 1584000, price: 484000, color: "#dfe9f2", colors: [["스카이 블루", "#cfe1f2"], ["클라우드 화이트", "#f1f1ee"], ["스페이스 블랙", "#26272b"]] },
+    ip18p:  { name: "아이폰18 프로", list: 1990000, price: 1391000, color: "#6e2a33", colors: [["버건디", "#6e2a33"], ["실버", "#dadbd8"], ["블랙", "#2a2b2e"]] },
+    ip17p:  { name: "아이폰17프로", list: 1790000, price: 932000, color: "#f07a2c", colors: [["코스믹 오렌지", "#f07a2c"], ["실버", "#dadbd8"], ["딥 블루", "#2c3c5c"]] },
+    zf8:    { name: "Z폴드8(와이드형)", list: 2278100, price: 1378000, color: "#b9b2c9", colors: [["실버 섀도", "#b9b2c9"], ["블루 섀도", "#4d5c7c"], ["제트 블랙", "#1f2023"]] },
+    s26:    { name: "갤럭시 S26", list: 1403600, price: 203600, color: "#9cc7d6", colors: [["스카이 블루", "#9cc7d6"], ["코발트 바이올렛", "#7a6ab0"], ["블랙", "#25262a"]] },
+    a17:    { name: "갤럭시 A17", list: 319000, price: 0, color: "#a9d3ea", tag: "공짜폰", colors: [["라이트 블루", "#a9d3ea"], ["블랙", "#25262a"]] },
+    folder: { name: "클래식 폴더", list: 205700, price: 0, color: "#1d1f22", tag: "공짜폰", folder: true, colors: [["블랙", "#1d1f22"]] },
+  },
+  storageAdd: { "256GB": 0, "512GB": 300000 },   // 용량 올리면 출고가·기기값에 더함 (예시)
+
+  /* ---------- 구매 프로세스 (1mm STORE v6 판매 흐름) ---------- */
+  shop: {
+    memberDc: 30000,           // 1mm 멤버십 즉시 할인 (v6)
+    rate: 0.059,               // 할부 연 5.9% 가정
+    keepDays: 183,             // 고가 요금제 유지 기준
+    carriers: [
+      { id: "skt", name: "SKT", add: 0 },
+      { id: "kt", name: "KT", add: 40000 },
+      { id: "lgu", name: "LG U+", add: 20000 },
+    ],
+    curs: [["skt", "SKT"], ["kt", "KT"], ["lgu", "LG U+"], ["mvno", "알뜰폰"]],
+    chgAdd: 120000,            // 기기변경이면 번호이동보다 기기값 + (예시)
+    bundleDc: 11000,           // 결합 유지 시 월 할인 (예시)
+    tiers: [
+      { id: "low", label: "적게", sub: "~7GB", fee: { skt: 49000, kt: 47000, lgu: 47000 }, mvno: 16500 },
+      { id: "mid", label: "보통", sub: "~30GB", fee: { skt: 62000, kt: 61000, lgu: 59000 }, mvno: 29000 },
+      { id: "high", label: "많이", sub: "무제한", fee: { skt: 89000, kt: 90000, lgu: 85000 }, mvno: 39000 },
+    ],
+    selRate: 0.25,             // 선택약정 25%
+    selSupportRate: 0.12,      // 선택약정일 때 매장지원 (출고가 대비, 예시)
+    months: [0, 12, 24, 36],
+    ship: [
+      { id: "quick", icon: "🛵", name: "퀵", sub: "오늘 도착" },
+      { id: "parcel", icon: "🚚", name: "택배", sub: "1~2일 · 무료" },
+      { id: "store", icon: "🏪", name: "방문 수령", sub: "준비되면 문자" },
+    ],
+    agree: [
+      { id: "a1", t: "개봉·개통 후 단순 변심 반품 불가", d: "불량은 받은 날부터 7일 안에 교환" },
+      { id: "a2", t: "폰을 받은 뒤 개통", d: "개통 시간에만 처리돼요" },
+      { id: "a3", t: "주문 내용·배송 조건 확인" },
+      { id: "a4", t: "개인정보 수집·이용 동의", d: "이름·연락처·주소" },
+    ],
+    usedGrades: [
+      { id: "S", name: "S급", d: "사용감 거의 없음", rate: 0.62 },
+      { id: "U", name: "미개봉급", d: "개봉만 한 수준", rate: 0.74 },
+    ],
+    usedBattery: [{ id: "85", name: "85% 이상", add: 0 }, { id: "90", name: "90% 이상", add: 40000 }],
+    usedChecks: ["IMEI 분실·도난 조회", "통화·카메라·Wi-Fi", "충전·배터리 측정", "초기화·계정 잠금 해제"],
+    safeItems: [
+      { id: "case", icon: "▣", name: "강화 케이스", price: 19000 },
+      { id: "film", icon: "▭", name: "강화 필름", price: 15000 },
+      { id: "care", icon: "✚", name: "휴대폰 보험", monthly: 5900 },
+    ],
+    safePromises: ["미개봉 정품", "KT 공식인증 대리점", "의무 부가서비스 없음", "할인 즉시 반영"],
+    quickSpeed: [
+      { id: "now", icon: "🛵", name: "오늘 퀵", sub: "평일 16시 전 신청" },
+      { id: "visit", icon: "🏪", name: "방문 수령", sub: "바로 가져가기" },
+      { id: "parcel", icon: "🚚", name: "택배", sub: "1일 · 제주 2일" },
+    ],
+    quickOpen: [
+      { id: "after", name: "받고 나서 개통", sub: "쓰던 폰 그대로" },
+      { id: "before", name: "미리 개통", sub: "받자마자 바로" },
+    ],
+    priceFocus: [
+      { id: "monthly", icon: "📅", name: "매달 최저", sub: "월 납부금 순" },
+      { id: "today", icon: "0", name: "오늘 0원", sub: "할부로 시작" },
+      { id: "total", icon: "Σ", name: "2년 총액 최저", sub: "다 더해서" },
+    ],
   },
 
   dealers: {
@@ -43,6 +106,8 @@ window.SITE = {
       chips: ["케이스", "키링", "그립톡", "마그네틱 지갑"],
       products: ["ip17", "ip17a", "ip18p"],
       cta: "3D로 폰꾸 하기", action: "studio",
+      points: ["폰꾸 세트", "3D로 미리 보기", "폰+케이스 한 번에"],
+      pitch: "폰꾸 세트, 같이 골라 봐.",
     },
     quick: {
       name: "퀵퀵이폰팔이", short: "퀵퀵이", color: "#f08a2c", ink: "#8a3c00",
@@ -55,6 +120,9 @@ window.SITE = {
         { t: "받고 나서 개통도 OK", d: "배송 후 개통을 원하면 미리 요청해 주세요. 기기변경이면 개통 후에도 쓰던 폰을 계속 쓸 수 있어요." },
       ],
       cta: "퀵으로 받기", action: "pick",
+      points: ["오늘 퀵 도착", "16시 전 당일 발송", "받고 나서 개통"],
+      pitch: "언제, 어떻게 받을래?",
+      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     price: {
       name: "자린고비폰팔이", short: "자린고비", color: "#9c9e6c", ink: "#4d4f22",
@@ -63,6 +131,8 @@ window.SITE = {
       products: ["a17", "folder", "s26", "ip17a", "ip17"],
       sort: true,
       cta: "최저가 상담", action: "pick",
+      points: ["0원폰", "최저 조건 자동 비교", "2년 총액까지"],
+      pitch: "뭐가 제일 중요해? 돈 얘기만 하자.",
     },
     safe: {
       name: "세이프티폰팔이", short: "세이프티", color: "#3f4f7d", ink: "#1f2a4d",
@@ -77,6 +147,9 @@ window.SITE = {
       ],
       combo: ["강화 케이스", "강화 필름", "휴대폰 보험"],
       cta: "안심 상담", action: "consult",
+      points: ["미개봉 정품", "보호 3종 세트", "공식인증 대리점"],
+      pitch: "지킬 거 골라. 약속은 도장으로.",
+      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     used: {
       name: "중고폰팔이", short: "중고폰", color: "#9c3a55", ink: "#5e1529",
@@ -88,6 +161,9 @@ window.SITE = {
       ],
       note: "재고는 수시로 바뀌어서 상담으로 안내해요.",
       cta: "중고폰으로 상담 받기", action: "consult",
+      points: ["S급·미개봉급", "배터리 보장", "4단계 검수"],
+      pitch: "등급이랑 배터리, 네가 정해.",
+      products: ["ip17", "ip17a", "ip17p", "ip18p", "s26", "zf8"],
     },
     allinone: {
       name: "올인원 뷰저폰팔이", short: "올인원", color: "#bdb9a8", ink: "#55513f",
@@ -96,6 +172,8 @@ window.SITE = {
       products: ["ip17", "ip17p", "zf8", "ip18p", "ip17a", "s26"],
       grid: true,
       cta: "이 모델로 상담", action: "pick",
+      points: ["모델만 고르면 끝", "상담 질문 생략", "최저 조건 자동"],
+      pitch: "나머진 내가 알아서 할게. 괜찮지?",
     },
   },
 

@@ -51,59 +51,88 @@
 
   function buildTower() {
     var segs = [], V = function (x, y, z) { return new T.Vector3(x, y, z); };
+    var mid = function (a, b) { return a.clone().add(b).multiplyScalar(.5); };
     function S(a, b, w) { segs.push([a, b, w]); }
-    function face(p0, p1, q0, q1, w) { S(p0, q1, w); S(p1, q0, w); }  // X 브레이싱
+    // 면 하나를 두 칸으로 나눠 X 두 개 + 가운데 기둥 (영상의 촘촘한 격자)
+    function face(p0, p1, q0, q1, w) {
+      var pm = mid(p0, p1), qm = mid(q0, q1);
+      S(pm, qm, w * .9); S(p0, qm, w); S(pm, q0, w); S(pm, q1, w); S(p1, qm, w);
+    }
     var y, k;
     // 네 다리 (2층까지)
     [-1, 1].forEach(function (sx) {
       [-1, 1].forEach(function (sz) {
         var prev = null;
-        for (y = 0; y <= 38.5 + .01; y += 2.2) {
+        for (y = 0; y <= 38.5 + .01; y += 1.9) {
           var o = hw(y), n = o - legT(y);
           var c = [V(sx * o, y, sz * o), V(sx * n, y, sz * o), V(sx * n, y, sz * n), V(sx * o, y, sz * n)];
-          for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .26);
-          if (prev) for (k = 0; k < 4; k++) { S(prev[k], c[k], .5); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], .16); }
+          for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .24);
+          if (prev) for (k = 0; k < 4; k++) { S(prev[k], c[k], .55); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], .13); }
           prev = c;
         }
       });
     });
-    // 몸통 (2층 → 꼭대기)
+    // 몸통 (2층 → 꼭대기): 바깥 면 + 안쪽 대각
     var prev = null;
-    for (y = 38.5; y <= 92.01; y += 2.6) {
+    for (y = 38.5; y <= 92.01; y += 2.2) {
       var h = hw(y), c = [V(h, y, h), V(-h, y, h), V(-h, y, -h), V(h, y, -h)];
-      for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .22);
-      if (prev) for (k = 0; k < 4; k++) { S(prev[k], c[k], lerp(.45, .2, (y - 38.5) / 54)); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], .12); }
+      for (k = 0; k < 4; k++) S(c[k], c[(k + 1) % 4], .2);
+      if (prev) {
+        var t = (y - 38.5) / 54;
+        for (k = 0; k < 4; k++) { S(prev[k], c[k], lerp(.5, .2, t)); face(prev[k], prev[(k + 1) % 4], c[k], c[(k + 1) % 4], lerp(.12, .07, t)); }
+        if (Math.round(y / 2.2) % 3 === 0) { S(c[0], c[2], .08); S(c[1], c[3], .08); }
+      }
       prev = c;
     }
-    // 아치 네 면
+    // 아치 네 면: 두 겹 곡선 + 지그재그 격자
     for (var side = 0; side < 4; side++) {
-      var rot = side * Math.PI / 2, arcs = [[], []];
-      for (var a = 0; a <= 28; a++) {
-        var th = Math.PI * a / 28, R = 11.6;
-        for (var l = 0; l < 2; l++) {
-          var x = Math.cos(th) * R, yy = 5 + Math.sin(th) * (12.2 - l * 1.1), z = 13.4 + (l ? -.9 : 0);
+      var rot = side * Math.PI / 2, arcs = [[], [], []];
+      for (var a = 0; a <= 36; a++) {
+        var th = Math.PI * a / 36, R = 11.6;
+        for (var l = 0; l < 3; l++) {
+          var x = Math.cos(th) * (R + (l === 2 ? .3 : 0)), yy = 5 + Math.sin(th) * (12.2 - (l === 1 ? 1.2 : 0) + (l === 2 ? 2.6 : 0)), z = 13.4 + (l === 1 ? -.9 : 0);
+          if (l === 2) yy = Math.min(yy, 18.2);
           arcs[l].push(V(x * Math.cos(rot) - z * Math.sin(rot), yy, x * Math.sin(rot) + z * Math.cos(rot)));
         }
       }
       for (a = 1; a < arcs[0].length; a++) {
-        S(arcs[0][a - 1], arcs[0][a], .42); S(arcs[1][a - 1], arcs[1][a], .3);
-        if (a % 2) S(arcs[0][a], arcs[1][a], .14);
+        S(arcs[0][a - 1], arcs[0][a], .42); S(arcs[1][a - 1], arcs[1][a], .3); S(arcs[2][a - 1], arcs[2][a], .2);
+        S(a % 2 ? arcs[0][a - 1] : arcs[0][a], a % 2 ? arcs[1][a] : arcs[1][a - 1], .1);
+        S(a % 2 ? arcs[0][a] : arcs[0][a - 1], arcs[2][a], .09);
+      }
+    }
+    // 1층 바깥 장식 아치 띠 (전망대 아래 작은 아치들)
+    for (side = 0; side < 4; side++) {
+      var rr = side * Math.PI / 2, half = hw(19) + 1.4, n2 = 9;
+      for (var j = 0; j < n2; j++) {
+        var x0 = -half + j * (2 * half / n2), x1 = x0 + 2 * half / n2, pts = [];
+        for (var q = 0; q <= 6; q++) { var th2 = Math.PI * q / 6; pts.push([lerp(x0, x1, q / 6), 16.6 + Math.sin(th2) * 1.6]); }
+        for (q = 1; q < pts.length; q++) {
+          var A = pts[q - 1], B = pts[q], zz = half + .1;
+          S(V(A[0] * Math.cos(rr) - zz * Math.sin(rr), A[1], A[0] * Math.sin(rr) + zz * Math.cos(rr)),
+            V(B[0] * Math.cos(rr) - zz * Math.sin(rr), B[1], B[0] * Math.sin(rr) + zz * Math.cos(rr)), .14);
+        }
       }
     }
     var geo = new T.BoxGeometry(1, 1, 1);
-    var mat = new T.MeshStandardMaterial({ color: 0x5f4b39, roughness: .85, metalness: .15 });
+    var mat = new T.MeshStandardMaterial({ color: 0x4f3d2e, roughness: .8, metalness: .25 });
     var mesh = new T.InstancedMesh(geo, mat, segs.length), m = new T.Matrix4();
     segs.forEach(function (s, i) { mesh.setMatrixAt(i, segMatrix(s[0], s[1], s[2], m)); });
+    mesh.castShadow = true;
     var g = new T.Group(); g.add(mesh);
-    // 전망대 바닥, 꼭대기, 안테나
-    var deck = new T.MeshStandardMaterial({ color: 0x4e3e30, roughness: .9 });
+    var deck = new T.MeshStandardMaterial({ color: 0x45362a, roughness: .9 });
     [[19, hw(19) * 2 + 3.2, 1.4], [38.5, hw(38.5) * 2 + 2, 1]].forEach(function (d) {
-      var b = new T.Mesh(new T.BoxGeometry(d[1], d[2], d[1]), deck); b.position.y = d[0]; g.add(b);
-      var rail = new T.Mesh(new T.BoxGeometry(d[1] + .6, .9, d[1] + .6), new T.MeshStandardMaterial({ color: 0x6b5644, transparent: true, opacity: .55 }));
+      var b = new T.Mesh(new T.BoxGeometry(d[1], d[2], d[1]), deck); b.position.y = d[0]; b.castShadow = true; g.add(b);
+      var rail = new T.Mesh(new T.BoxGeometry(d[1] + .6, .9, d[1] + .6), new T.MeshStandardMaterial({ color: 0x6b5644, transparent: true, opacity: .5 }));
       rail.position.y = d[0] + 1.1; g.add(rail);
+      for (var p = 0; p < 4; p++) { // 전망대 위 작은 건물
+        var hut = new T.Mesh(new T.BoxGeometry(d[1] * .3, 2.2, 2), deck); var an = p * Math.PI / 2;
+        hut.position.set(Math.cos(an) * d[1] * .32, d[0] + 1.8, Math.sin(an) * d[1] * .32); hut.rotation.y = an; g.add(hut);
+      }
     });
     var top = new T.Mesh(new T.BoxGeometry(3.2, 3.4, 3.2), deck); top.position.y = 92.5; g.add(top);
-    var ant = new T.Mesh(new T.CylinderGeometry(.18, .3, 10, 6), deck); ant.position.y = 99; g.add(ant);
+    var lantern = new T.Mesh(new T.CylinderGeometry(.9, 1.3, 2.4, 8), deck); lantern.position.y = 95.4; g.add(lantern);
+    var ant = new T.Mesh(new T.CylinderGeometry(.12, .3, 9, 6), deck); ant.position.y = 101; g.add(ant);
     g.userData.segments = segs.length;
     return g;
   }
@@ -114,7 +143,7 @@
   function buildPlaza(r) {
     var g = new T.Group();
     var ground = new T.Mesh(new T.PlaneGeometry(2400, 2400), new T.MeshStandardMaterial({ color: 0x8d8c88, roughness: 1 }));
-    ground.rotation.x = -Math.PI / 2; g.add(ground);
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
     // 격자 타일 블록 (첫 장면의 광장 패턴)
     var pts = [];
     for (var x = -440; x <= 440; x += 9) for (var z = -520; z <= 440; z += 9) {
@@ -160,77 +189,131 @@
     return mesh;
   }
 
-  /* ---------- 폰팔이 캐릭터 ---------- */
-  function std(color, rough) { return new T.MeshStandardMaterial({ color: color, roughness: rough == null ? .75 : rough }); }
+  /* ---------- 폰팔이 캐릭터 (영상처럼 둥근 모서리·광택 눈·소품) ---------- */
+  function std(color, rough) { return new T.MeshStandardMaterial({ color: color, roughness: rough == null ? .62 : rough }); }
+  function rshape(w, h, r) {
+    var s = new T.Shape(), x = -w / 2, y = -h / 2;
+    s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r); s.lineTo(x + w, y + h - r);
+    s.quadraticCurveTo(x + w, y + h, x + w - r, y + h); s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y); return s;
+  }
+  function rbox(w, h, d, r, mat) { // 모서리 둥근 상자
+    r = Math.min(r, w / 2 - .01, h / 2 - .01, d / 2 - .01);
+    var g = new T.ExtrudeGeometry(rshape(w - 2 * r, h - 2 * r, .001 + r * .2), { depth: d - 2 * r, bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 5, curveSegments: 6 });
+    g.translate(0, 0, -(d - 2 * r) / 2); g.computeVertexNormals();
+    var m = new T.Mesh(g, mat); m.castShadow = true; m.receiveShadow = true; return m;
+  }
+  function lathe(points, mat, seg) {
+    var m = new T.Mesh(new T.LatheGeometry(points.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg || 40), mat);
+    m.castShadow = true; return m;
+  }
   function eyes(group, y, z, gap, size) {
-    var white = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .3 }), black = std(0x111111, .2);
+    var white = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .18 }), black = new T.MeshStandardMaterial({ color: 0x0c0c0e, roughness: .12, metalness: .2 });
+    var shine = new T.MeshBasicMaterial({ color: 0xffffff });
     var pair = new T.Group(); pair.position.set(0, y, z);
     var pupils = [];
     [-1, 1].forEach(function (s) {
-      var eye = new T.Mesh(new T.SphereGeometry(size, 20, 14), white); eye.scale.z = .55; eye.position.x = s * gap; pair.add(eye);
-      var p = new T.Mesh(new T.SphereGeometry(size * .48, 16, 10), black); p.position.set(s * gap, 0, size * .5); p.userData.base = p.position.clone(); pair.add(p); pupils.push(p);
+      var eye = new T.Mesh(new T.SphereGeometry(size, 28, 20), white); eye.scale.z = .6; eye.position.x = s * gap; pair.add(eye);
+      var p = new T.Group(); p.position.set(s * gap, 0, size * .5); p.userData.base = p.position.clone();
+      var pu = new T.Mesh(new T.SphereGeometry(size * .5, 20, 14), black); pu.scale.z = .5; p.add(pu);
+      var hl = new T.Mesh(new T.SphereGeometry(size * .13, 10, 8), shine); hl.position.set(-size * .17, size * .17, size * .2); p.add(hl);
+      pair.add(p); pupils.push(p);
     });
     group.add(pair); group.userData.eyes = pair; group.userData.pupils = pupils;
   }
-  function arm(group, from, to, color, r) {
+  function limb(group, from, to, color, r, hand) { // 캡슐 팔 + 공 손
     var a = new T.Vector3().fromArray(from), b = new T.Vector3().fromArray(to);
-    var len = a.distanceTo(b), mesh = new T.Mesh(new T.CylinderGeometry(r, r, len, 12), std(color));
+    var len = a.distanceTo(b), mat = std(color, .55);
+    var mesh = new T.Mesh(new T.CylinderGeometry(r, r, len, 18), mat); mesh.castShadow = true;
     mesh.position.copy(a).add(b).multiplyScalar(.5);
     mesh.quaternion.setFromUnitVectors(UP, b.clone().sub(a).normalize());
-    var end = new T.Mesh(new T.SphereGeometry(r * 1.25, 14, 10), std(color)); end.position.copy(b);
-    group.add(mesh, end);
+    var j = new T.Mesh(new T.SphereGeometry(r, 16, 12), mat); j.position.copy(a);
+    var end = new T.Mesh(new T.SphereGeometry(r * (hand || 1.3), 20, 14), mat); end.position.copy(b); end.castShadow = true;
+    group.add(mesh, j, end); return end;
   }
+  function textTex(lines, fg, bg, w, h) {
+    var c = document.createElement("canvas"); c.width = w || 256; c.height = h || 128; var x = c.getContext("2d");
+    x.fillStyle = bg; x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = fg; x.textAlign = "center"; x.textBaseline = "middle";
+    lines.forEach(function (l, i) { x.font = (l.w || 900) + " " + l.s + "px 'Noto Sans KR', system-ui, sans-serif"; x.fillText(l.t, c.width / 2, c.height * (i + .5) / lines.length); });
+    var t = new T.CanvasTexture(c); t.anisotropy = 4; return t;
+  }
+  function plate(w, h, tex) { return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshStandardMaterial({ map: tex, roughness: .7 })); }
 
   function buildDealer(id, colorHex) {
-    var g = new T.Group(), body, col = new T.Color(colorHex).getHex();
-    if (id === "designer") {
-      body = new T.Mesh(new T.CylinderGeometry(.72, .72, 4.4, 28), std(col)); body.position.y = 2.2;
-      eyes(g, 3.85, .66, .27, .2); arm(g, [.7, 2.4, .2], [1.35, 1.1, .7], col, .17);
-    } else if (id === "quick") {
-      body = new T.Mesh(new T.BoxGeometry(2.1, 3.7, .9), std(col)); body.position.y = 1.85;
-      eyes(g, 3.15, .5, .32, .2); arm(g, [1.05, 2.2, 0], [1.25, .4, .5], 0xe0a040, .18);
-      var wheel = new T.Mesh(new T.CylinderGeometry(.9, .9, .3, 24), std(0x222222)); wheel.rotation.z = Math.PI / 2; wheel.position.set(-2.2, .9, .3); g.add(wheel);
-      var cart = new T.Mesh(new T.BoxGeometry(1.4, 1.2, 1.2), std(0xd08a2c)); cart.position.set(-1.8, 1.6, .3); g.add(cart);
-    } else if (id === "price") {
-      body = new T.Mesh(new T.CylinderGeometry(.12, 1.15, 4.3, 4), std(col)); body.position.y = 2.15; body.rotation.y = Math.PI / 4; body.rotation.z = -.08;
-      eyes(g, 2.2, .66, .25, .19); arm(g, [.6, 1.9, .2], [1.4, 2.6, .5], col, .16);
-    } else if (id === "safe") {
-      body = new T.Mesh(new T.BoxGeometry(2.7, 3.4, 1.3), std(col)); body.position.y = 1.7;
-      eyes(g, 2.85, .7, .33, .2); arm(g, [1.3, 2.3, 0], [2.2, .9, .5], col, .2); arm(g, [-1.3, 2.3, 0], [-2.1, 1.2, .4], col, .2);
-    } else if (id === "used") {
-      body = new T.Mesh(new T.BoxGeometry(1.05, 4.6, .9), std(col)); body.position.y = 2.3;
-      eyes(g, 3.9, .5, .23, .19); arm(g, [.5, 3, 0], [1.2, 4.1, .4], col, .14);
-      var sign = new T.Mesh(new T.BoxGeometry(.8, .6, .05), std(0xd9cfc9)); sign.position.set(1.35, 4.35, .45); sign.rotation.z = .3; g.add(sign);
-    } else {
-      body = new T.Mesh(new T.SphereGeometry(1, 36, 24), std(col, .9)); body.scale.set(1.55, 2.05, 1.3); body.position.y = 2.05;
-      eyes(g, 2.75, 1.22, .32, .2); arm(g, [1.4, 2.4, 0], [2.3, 3.3, .3], 0x8e8c86, .17); arm(g, [-1.4, 2.4, 0], [-2.3, 3.2, .3], 0x8e8c86, .17);
-      var shelf = new T.Mesh(new T.BoxGeometry(2.4, .08, .5), std(0xeeeeee)); shelf.position.set(0, 2.15, 1.32); g.add(shelf);
+    var g = new T.Group(), col = new T.Color(colorHex).getHex(), body, m = std(col);
+    if (id === "designer") { // 라벤더 원기둥 + 긴 알약 팔
+      body = lathe([[0, 0], [.74, 0], [.74, 4.1], [.7, 4.32], [.55, 4.44], [0, 4.46]], m, 48);
+      eyes(g, 3.8, .68, .27, .21);
+      limb(g, [.68, 2.6, .2], [1.15, 1.25, .75], 0xc4b6e6, .2, 1.4);
+    } else if (id === "quick") { // 주황 상자 + 손수레 + 택배 상자
+      body = rbox(2.1, 3.8, .95, .16, m); body.position.y = 1.9;
+      eyes(g, 3.1, .52, .32, .21);
+      limb(g, [1.05, 2.4, .1], [1.2, .55, .5], 0xf2b23d, .19);
+      var rail = std(0x2f3135, .4);
+      [[-2.55, .35], [-1.65, .35]].forEach(function (p) { var r = rbox(.12, 2.6, .12, .05, rail); r.position.set(p[0], 1.45, p[1]); r.rotation.z = -.12; g.add(r); });
+      var wheel = new T.Mesh(new T.TorusGeometry(.48, .2, 14, 28), std(0x18191b, .8)); wheel.position.set(-2.1, .62, .9); wheel.rotation.y = Math.PI / 2; wheel.castShadow = true; g.add(wheel);
+      [[1.2, .8, .9, 1.4], [1.0, .7, .8, 2.15]].forEach(function (b) { var bx = rbox(b[0], b[1], b[2], .05, std(0xc99a62, .9)); bx.position.set(-2.1, b[3], .4); g.add(bx); });
+    } else if (id === "price") { // 카키 원뿔 + 가격표
+      body = lathe([[0, 0], [1.18, 0], [1.12, .2], [.2, 4.05], [.08, 4.25], [0, 4.3]], m, 48);
+      body.rotation.z = -.06;
+      eyes(g, 2.15, .72, .26, .2);
+      var hand = limb(g, [.6, 1.9, .3], [1.45, 2.75, .55], 0xb3b483, .17);
+      var tag = plate(.8, .5, textTex([{ t: "0원", s: 70 }], "#d8263a", "#fffdf2", 192, 120)); tag.position.copy(hand.position).add(new T.Vector3(.1, .45, .05)); g.add(tag);
+    } else if (id === "safe") { // 남색 상자 + 두 팔 + 방패
+      body = rbox(2.75, 3.4, 1.3, .2, m); body.position.y = 1.7;
+      eyes(g, 2.85, .7, .34, .21);
+      limb(g, [1.35, 2.3, 0], [2.15, .95, .55], 0x55669a, .21); limb(g, [-1.35, 2.3, 0], [-2.05, 1.25, .45], 0x55669a, .21);
+      var sh = new T.Shape(); sh.moveTo(0, .5); sh.quadraticCurveTo(.45, .45, .5, .35); sh.lineTo(.42, -.15); sh.quadraticCurveTo(.25, -.45, 0, -.6); sh.quadraticCurveTo(-.25, -.45, -.42, -.15); sh.lineTo(-.5, .35); sh.quadraticCurveTo(-.45, .45, 0, .5);
+      var shield = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: .08, bevelEnabled: true, bevelSize: .03, bevelThickness: .03 }), std(0xe8edf5, .35)); shield.position.set(0, 1.5, .67); g.add(shield);
+    } else if (id === "used") { // 버건디 기둥 + S급 팻말
+      body = rbox(1.05, 4.6, .9, .14, m); body.position.y = 2.3;
+      eyes(g, 3.9, .48, .23, .2);
+      var h2 = limb(g, [.52, 3.1, 0], [1.15, 4.05, .4], 0xb54d69, .15);
+      var sign = rbox(1.0, .66, .06, .04, std(0xffffff)); sign.position.copy(h2.position).add(new T.Vector3(.25, .55, .02)); sign.rotation.z = .25; g.add(sign);
+      var st = plate(.9, .56, textTex([{ t: "S급", s: 78 }], "#9c3a55", "#ffffff", 192, 120)); st.position.copy(sign.position).add(new T.Vector3(0, 0, .04)); st.rotation.z = .25; g.add(st);
+      var sticker = plate(.6, .4, textTex([{ t: "검수", s: 64 }], "#ffffff", "#5e1529", 160, 110)); sticker.position.set(0, 2.2, .46); g.add(sticker);
+    } else { // 회색 달걀 + 가슴 선반 + 미니 폰
+      body = lathe([[0, 0], [.9, .08], [1.45, .7], [1.6, 1.7], [1.42, 2.8], [.95, 3.65], [.4, 4.02], [0, 4.1]], std(col, .85), 48);
+      eyes(g, 2.85, 1.37, .33, .21);
+      limb(g, [1.4, 2.5, 0], [2.35, 3.35, .3], 0x8e8c86, .17); limb(g, [-1.4, 2.5, 0], [-2.35, 3.25, .3], 0x8e8c86, .17);
+      var shelf = rbox(2.6, .1, .55, .03, std(0xf2f2f0, .4)); shelf.position.set(0, 2.15, 1.35); g.add(shelf);
+      [0xd9cdf2, 0xf07a2c, 0xb9b2c9, 0x6e2a33, 0x9cc7d6].forEach(function (c2, k) { var ph = rbox(.26, .48, .05, .04, std(c2, .3)); ph.position.set(-.9 + k * .45, 2.45, 1.4); ph.rotation.x = -.15; g.add(ph); });
     }
     body.userData.dealer = id; g.add(body);
-    g.traverse(function (o) { if (o.isMesh) o.userData.dealer = id; });
+    g.traverse(function (o) { if (o.isMesh) { o.userData.dealer = id; o.castShadow = true; } });
     g.userData.blink = 2 + Math.random() * 3;
     return g;
   }
 
-  // 각 폰팔이의 부스: 뒷판, 진열 상품, 카운터, 차양
-  function buildBooth(id, colorHex, r) {
+  // 각 폰팔이의 부스: 뒷판, 이름표, 걸이 진열, 카운터, 폰팔이별 소품
+  function buildBooth(id, colorHex, r, name) {
     var g = new T.Group(), col = new T.Color(colorHex);
-    var back = new T.Mesh(new T.BoxGeometry(6.4, 3.3, .25), std(0xbfc0bd)); back.position.set(0, 1.65, -1.9); g.add(back);
-    var strip = new T.Mesh(new T.BoxGeometry(6.6, .32, .4), std(col.getHex(), .6)); strip.position.set(0, 3.4, -1.85); g.add(strip);
-    [-3.1, 3.1].forEach(function (x) { var post = new T.Mesh(new T.BoxGeometry(.14, 4.6, .14), std(0x55595e)); post.position.set(x, 2.3, -1.7); g.add(post); });
-    var bar = new T.Mesh(new T.BoxGeometry(6.3, .1, .1), std(0x55595e)); bar.position.set(0, 4.5, -1.7); g.add(bar);
-    for (var h = 0; h < 7; h++) { // 위 봉에 걸린 상품
-      var hang = new T.Mesh(new T.BoxGeometry(.38, .62, .05), std(PASTEL[(h * 3 + Math.floor(r() * 7)) % 7])); hang.position.set(-2.7 + h * .9, 4.05, -1.68); g.add(hang);
+    var back = rbox(6.4, 3.3, .25, .06, std(0xc4c5c2, .8)); back.position.set(0, 1.65, -1.9); g.add(back);
+    var strip = rbox(6.6, .5, .4, .08, std(col.getHex(), .5)); strip.position.set(0, 3.5, -1.85); g.add(strip);
+    if (name) { var nm = plate(2.6, .42, textTex([{ t: name, s: 60 }], "#ffffff", "#" + col.getHexString(), 512, 84)); nm.position.set(0, 3.5, -1.63); g.add(nm); }
+    var metal = std(0x55595e, .4);
+    [-3.1, 3.1].forEach(function (x) { var post = rbox(.14, 4.6, .14, .05, metal); post.position.set(x, 2.3, -1.7); g.add(post); });
+    var bar = rbox(6.3, .1, .1, .04, metal); bar.position.set(0, 4.5, -1.7); g.add(bar);
+    for (var h = 0; h < 7; h++) { // 위 봉에 걸린 상품 (케이스·파우치)
+      var hang = rbox(.4, .64, .06, .05, std(PASTEL[(h * 3 + Math.floor(r() * 7)) % 7], .5)); hang.position.set(-2.7 + h * .9, 4.05, -1.68); g.add(hang);
     }
-    var counter = new T.Mesh(new T.BoxGeometry(5.6, 1.1, 1.1), std(0x9fa1a3)); counter.position.set(0, .55, 1.55); g.add(counter);
-    var top = new T.Mesh(new T.BoxGeometry(5.8, .08, 1.3), std(0xe6e7e8)); top.position.set(0, 1.14, 1.55); g.add(top);
-    for (var k = 0; k < 10; k++) { // 뒷판 진열 (케이스·박스)
-      var item = new T.Mesh(new T.BoxGeometry(.42, .7, .06), std(PASTEL[(k + Math.floor(r() * 7)) % 7]));
+    var counter = rbox(5.6, 1.1, 1.1, .08, std(0x9fa1a3, .7)); counter.position.set(0, .55, 1.55); g.add(counter);
+    var top = rbox(5.8, .08, 1.3, .03, std(0xe6e7e8, .3)); top.position.set(0, 1.14, 1.55); g.add(top);
+    for (var k = 0; k < 10; k++) { // 뒷판 진열 (폰 케이스 모양)
+      var item = rbox(.42, .74, .07, .07, std(PASTEL[(k + Math.floor(r() * 7)) % 7], .45));
       var left = k < 5; item.position.set((left ? -2.7 : 1.1) + (k % 5 % 3) * .52, 2.6 - Math.floor((k % 5) / 3) * .9, -1.74); g.add(item);
     }
-    for (var j = 0; j < 4; j++) {
-      var box = new T.Mesh(new T.BoxGeometry(.5, .14, .32), std([0x2b2d30, 0xffffff, col.getHex(), 0x8a8f96][j])); box.position.set(-1.6 + j * 1.05, 1.25, 1.5); g.add(box);
+    for (var j = 0; j < 4; j++) { // 카운터 위 폰 상자
+      var box = rbox(.5, .14, .32, .03, std([0x2b2d30, 0xffffff, col.getHex(), 0x8a8f96][j], .4)); box.position.set(-1.6 + j * 1.05, 1.25, 1.5); g.add(box);
     }
+    if (id === "designer") { // 키링 볼 진열
+      [0xff6a23, 0x3b43ef, 0xc5c7cf].forEach(function (c2, k2) { var b = new T.Mesh(new T.SphereGeometry(.16, 16, 12), std(c2, .3)); b.position.set(1.9 + k2 * .35, 1.36, 1.25); g.add(b); });
+    }
+    if (id === "safe") { // 필름 상자
+      for (var f = 0; f < 3; f++) { var fb = rbox(.5, .7, .1, .03, std(0xdfe7f2, .3)); fb.position.set(1.6 + f * .45, 1.55, 1.3); fb.rotation.x = -.25; g.add(fb); }
+    }
+    g.traverse(function (o) { if (o.isMesh) o.receiveShadow = true; });
     return g;
   }
 
@@ -259,7 +342,13 @@
     scene.fog = new T.Fog(0xcfd8dc, 140, 900);
     scene.add(sky());
     scene.add(new T.HemisphereLight(0xe8f1f8, 0x6d675f, .55));
-    var sun = new T.DirectionalLight(0xfff4e6, .72); sun.position.set(-120, 200, 140); scene.add(sun);
+    var sun = new T.DirectionalLight(0xfff4e6, .78); sun.position.set(-40, 70, 46); scene.add(sun);
+    if (!this.mobile) { // 장터 주변만 그림자 (탑 철골 그림자가 노점에 떨어지게)
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+      sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      var sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 10; sc.far = 220;
+      sun.shadow.bias = -.0006; sun.shadow.normalBias = .02;
+    }
     scene.add(new T.AmbientLight(0xffffff, .06));
 
     this.tower = buildTower(); scene.add(this.tower);
@@ -271,7 +360,7 @@
     DEALERS.forEach(function (id, i) {
       var d = site.dealers[id], p = dealerPos(i);
       var holder = new T.Group(); holder.position.copy(p); holder.lookAt(0, 0, 0);
-      holder.add(buildBooth(id, d.color, r));
+      holder.add(buildBooth(id, d.color, r, d.short));
       var ch = buildDealer(id, d.color); holder.add(ch);
       scene.add(holder);
       self.dealers[id] = { group: ch, holder: holder, index: i };
@@ -362,7 +451,9 @@
     var px = this.pointer.x, py = this.pointer.y;
     for (var id in this.dealers) {
       var g = this.dealers[id].group, k = this.dealers[id].index;
-      g.position.y = Math.sin(time * 1.6 + k) * .05;
+      var talk = this.talking === id;
+      g.position.y = talk ? Math.abs(Math.sin(time * 9)) * .12 : Math.sin(time * 1.6 + k) * .05;
+      g.scale.y = talk ? 1 + Math.sin(time * 18) * .015 : 1;
       g.rotation.y = Math.sin(time * .7 + k) * .06;
       g.userData.blink -= dt;
       var e = g.userData.eyes;
@@ -392,6 +483,8 @@
     this.renderer.render(this.scene, this.camera);
     this.frames++;
   };
+
+  World.prototype.talk = function (id) { this.talking = id || null; };
 
   // 캐릭터 머리 위 말풍선 위치 (화면 px)
   World.prototype.headOnScreen = function (id) {

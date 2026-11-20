@@ -39,6 +39,19 @@
 
   <main class="track" id="track"></main>
 
+  <section id="shop" class="shop" hidden aria-label="폰팔이 가게">
+    <div class="shop-top">
+      <button class="sbtn" id="shopBack" aria-label="이전으로" hidden>←</button>
+      <ol class="mission" id="mission" aria-label="구매 단계"></ol>
+      <button class="sbtn" id="shopExit" aria-label="광장으로">✕</button>
+    </div>
+    <div class="shop-low">
+      <div class="table" id="shopPanel"></div>
+      <div class="dlg" id="shopDlg"><span class="who" id="shopWho"></span><p id="shopTxt" aria-live="polite"></p></div>
+      <div class="sch" id="shopCh"></div>
+    </div>
+  </section>
+
   <dialog id="sheet" class="sheet" aria-label="상세">
     <div class="sheet-in">
       <button class="x" data-close aria-label="닫기">✕</button>
@@ -74,6 +87,7 @@
   <script src="assets/content.js"></script>
   <script src="assets/world.js"></script>
   <script src="assets/studio.js"></script>
+  <script src="assets/shop.js"></script>
   <script src="assets/app.js"></script>
 </body>
 </html>
