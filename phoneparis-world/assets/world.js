@@ -161,6 +161,8 @@
     }
     return [0, 40];
   }
+  // 파리 건물 지붕: 위가 좁아지는 망사르드 (상자 지붕은 실사 변환 때 현대식 아파트처럼 읽힘)
+  function mansard() { var g = new T.BoxGeometry(1, 1, 1), p = g.attributes.position; for (var i = 0; i < p.count; i++) if (p.getY(i) > 0) { p.setX(i, p.getX(i) * .62); p.setZ(i, p.getZ(i) * .55); } g.computeVertexNormals(); return g; }
   function buildPlaza(r, obs) {
     var g = new T.Group();
     // 바닥: 실사 변환 때 그대로 쓸 수 있게 실제 샹드마르스 배치로 (모래 자갈 광장·잔디·가로수 줄·차도·건물 블록)
@@ -196,11 +198,11 @@
     var blocks = [];
     for (var bx = 150; bx <= 400; bx += 34) for (var bz = -60; bz <= 430; bz += 30) if (r() < .85) [-1, 1].forEach(function (sd) { blocks.push([sd * (bx + (r() - .5) * 4), bz + (r() - .5) * 4, 26, 22, 14 + r() * 8]); });
     var wall = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .9 }), blocks.length);
-    var roofs = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0x7d8790, roughness: .7 }), blocks.length);
+    var roofs = new T.InstancedMesh(mansard(), new T.MeshStandardMaterial({ color: 0x6f7a86, roughness: .7 }), blocks.length);
     blocks.forEach(function (bk, i) {
       m.compose(new T.Vector3(bk[0], bk[4] / 2, bk[1]), q0, new T.Vector3(bk[2], bk[4], bk[3])); wall.setMatrixAt(i, m);
       wall.setColorAt(i, c.setHex(0xe6ddc9).offsetHSL(0, 0, (r() - .5) * .08));
-      m.compose(new T.Vector3(bk[0], bk[4] + 1.4, bk[1]), q0, new T.Vector3(bk[2] * .92, 2.8, bk[3] * .92)); roofs.setMatrixAt(i, m);
+      m.compose(new T.Vector3(bk[0], bk[4] + 2.1, bk[1]), q0, new T.Vector3(bk[2] * 1.02, 4.2, bk[3] * 1.02)); roofs.setMatrixAt(i, m);
     });
     wall.castShadow = true; g.add(wall, roofs);
     // 노점은 여섯 폰팔이만 둠 (잡화 노점 없음)
@@ -256,12 +258,12 @@
       blocks.push([bx, bz, 16 + r() * 14, 18 + r() * 12, 14 + r() * 10, r() * .5]);
     }
     var wall = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .9 }), blocks.length);
-    var roofs = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0x7d8790, roughness: .7 }), blocks.length);
+    var roofs = new T.InstancedMesh(mansard(), new T.MeshStandardMaterial({ color: 0x6f7a86, roughness: .7 }), blocks.length);
     blocks.forEach(function (b, i) {
       e.set(0, b[5] - .25, 0); q.setFromEuler(e);
       m.compose(new T.Vector3(b[0], 1.3 + b[4] / 2, b[1]), q, new T.Vector3(b[2], b[4], b[3])); wall.setMatrixAt(i, m);
       wall.setColorAt(i, c.setHex(0xe6ddc9).offsetHSL(0, 0, (r() - .5) * .08));
-      m.compose(new T.Vector3(b[0], 1.3 + b[4] + 1.6, b[1]), q, new T.Vector3(b[2] * .92, 3.2, b[3] * .92)); roofs.setMatrixAt(i, m);
+      m.compose(new T.Vector3(b[0], 1.3 + b[4] + 2.2, b[1]), q, new T.Vector3(b[2] * 1.02, 4.4, b[3] * 1.02)); roofs.setMatrixAt(i, m);
     });
     g.add(wall, roofs);
     var trunkG = new T.CylinderGeometry(.25, .35, 3, 6); trunkG.translate(0, 1.5, 0);
