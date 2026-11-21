@@ -147,6 +147,8 @@
   function walkable(x, z) {
     var d = Math.hypot(x, z);
     if (Math.abs(x) < 24 && Math.abs(z) < 24) return false;              // 탑 바로 아래(네 다리 사이)는 지나다니는 사람이 거의 없음
+    var bz = z - 26, bd = Math.hypot(x, bz);                             // 노점 앞(노점~카메라 사이)은 비워 둠: 폰팔이 장면에서 행인이 카메라를 가리지 않게
+    if (bd > 10 && bd < 27 && Math.abs(Math.atan2(x, bz)) < 1.4) return false;
     return d >= 14 && d <= 62;                                           // 사람은 에펠탑 주위 광장에만
   }
   // 사람·노점이 놓일 자리: 구역별 비율로 고름
