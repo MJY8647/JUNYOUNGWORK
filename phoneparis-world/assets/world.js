@@ -168,26 +168,46 @@
   }
   function buildPlaza(r, obs) {
     var g = new T.Group();
-    var ground = new T.Mesh(new T.PlaneGeometry(2400, 2400), new T.MeshStandardMaterial({ color: 0x8d8c88, roughness: 1 }));
+    // 바닥: 실사 변환 때 그대로 쓸 수 있게 실제 샹드마르스 배치로 (모래 자갈 광장·잔디·가로수 줄·차도·건물 블록)
+    var ground = new T.Mesh(new T.PlaneGeometry(2400, 2400), new T.MeshStandardMaterial({ color: 0xcdbf9f, roughness: 1 }));
     ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
-    // 격자 타일 블록: 강 남쪽에만, 샹드마르스 잔디 자리는 비움
-    var pts = [];
-    for (var x = -360; x <= 360; x += 9) for (var z = -84; z <= 440; z += 9) {
-      var d = Math.hypot(x, z); if (d < 75 || Math.abs(x) < 26) continue;
-      if (Math.abs(x) < 64 && z > 80) continue;                         // 샹드마르스 잔디
-      if (((Math.floor(x / 63) + Math.floor(z / 63)) & 3) === 0) continue; // 블록 사이 길
-      pts.push([x, z]);
-    }
-    var tile = new T.InstancedMesh(new T.BoxGeometry(7.4, .5, 7.4), new T.MeshStandardMaterial({ color: 0x9c9c99, roughness: .95 }), pts.length);
-    var m = new T.Matrix4(), c = new T.Color();
-    pts.forEach(function (p, i) {
-      m.makeTranslation(p[0], .25, p[1]); tile.setMatrixAt(i, m);
-      tile.setColorAt(i, c.setHex(0x9c9c99).offsetHSL(0, 0, (r() - .5) * .05));
+    var m = new T.Matrix4(), c = new T.Color(), q0 = new T.Quaternion();
+    var lawnM = new T.MeshStandardMaterial({ color: 0x8faa6e, roughness: 1 }), roadM = new T.MeshStandardMaterial({ color: 0x7c7f83, roughness: .95 });
+    function slab(w, d, x, z, mat, y) { var o = new T.Mesh(new T.BoxGeometry(w, y || .3, d), mat); o.position.set(x, (y || .3) / 2, z); o.receiveShadow = true; g.add(o); }
+    [-1, 1].forEach(function (sd) {
+      slab(44, 340, sd * 33, 260, lawnM);                 // 샹드마르스 가운데 잔디 두 줄 (가운데 모래길)
+      slab(38, 360, sd * 90, 250, lawnM);                 // 양옆 잔디
+      slab(44, 70, sd * 92, -20, lawnM);                  // 탑 양옆 정원
+      slab(10, 540, sd * 128, 180, roadM, .2);            // 양쪽 대로
     });
-    g.add(tile);
-    // 샹드마르스 잔디 두 줄 (가운데 산책길)
-    var lawnM = new T.MeshStandardMaterial({ color: 0x8faa6e, roughness: 1 });
-    [-1, 1].forEach(function (sd) { var l = new T.Mesh(new T.BoxGeometry(44, .3, 340), lawnM); l.position.set(sd * 33, .15, 260); l.receiveShadow = true; g.add(l); });
+    slab(640, 9, 0, -80, roadM, .2);                      // 브랑리 강변 차도
+    // 가로수 줄 (샹드마르스 양옆, 탑 양옆 정원 둘레)
+    var tp = [];
+    [-1, 1].forEach(function (sd) {
+      for (var z = 70; z <= 430; z += 8) { tp.push([sd * 60, z], [sd * 118, z]); }
+      for (var z2 = -52; z2 <= 12; z2 += 8) tp.push([sd * 66, z2], [sd * 118, z2]);
+    });
+    var trunkG = new T.CylinderGeometry(.25, .35, 3, 6); trunkG.translate(0, 1.5, 0);
+    var crownG = new T.SphereGeometry(2.4, 8, 6); crownG.translate(0, 4.4, 0);
+    var trunks = new T.InstancedMesh(trunkG, new T.MeshStandardMaterial({ color: 0x5e4b3c, roughness: 1 }), tp.length);
+    var crowns = new T.InstancedMesh(crownG, new T.MeshStandardMaterial({ color: 0xffffff, roughness: 1 }), tp.length);
+    tp.forEach(function (p, i) {
+      var s2 = .9 + r() * .25; m.compose(new T.Vector3(p[0], 0, p[1]), q0, new T.Vector3(s2, s2, s2));
+      trunks.setMatrixAt(i, m); crowns.setMatrixAt(i, m); crowns.setColorAt(i, c.setHex(0x6f9157).offsetHSL(0, 0, (r() - .5) * .08));
+      obs.add(p[0], p[1], .6);
+    });
+    trunks.castShadow = crowns.castShadow = true; g.add(trunks, crowns);
+    // 대로 바깥은 파리 건물 블록 (크림색 벽 + 회색 지붕)
+    var blocks = [];
+    for (var bx = 150; bx <= 400; bx += 34) for (var bz = -60; bz <= 430; bz += 30) if (r() < .85) [-1, 1].forEach(function (sd) { blocks.push([sd * (bx + (r() - .5) * 4), bz + (r() - .5) * 4, 26, 22, 14 + r() * 8]); });
+    var wall = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .9 }), blocks.length);
+    var roofs = new T.InstancedMesh(new T.BoxGeometry(1, 1, 1), new T.MeshStandardMaterial({ color: 0x7d8790, roughness: .7 }), blocks.length);
+    blocks.forEach(function (bk, i) {
+      m.compose(new T.Vector3(bk[0], bk[4] / 2, bk[1]), q0, new T.Vector3(bk[2], bk[4], bk[3])); wall.setMatrixAt(i, m);
+      wall.setColorAt(i, c.setHex(0xe6ddc9).offsetHSL(0, 0, (r() - .5) * .08));
+      m.compose(new T.Vector3(bk[0], bk[4] + 1.4, bk[1]), q0, new T.Vector3(bk[2] * .92, 2.8, bk[3] * .92)); roofs.setMatrixAt(i, m);
+    });
+    wall.castShadow = true; g.add(wall, roofs);
     // 노점은 여섯 폰팔이만 둠 (잡화 노점 없음)
     var n = 0, base = new T.InstancedMesh(new T.BoxGeometry(2.6, 1.7, 1.8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .8 }), n);
     var roof = new T.InstancedMesh(new T.BoxGeometry(3.1, .35, 2.4), new T.MeshStandardMaterial({ color: 0xffffff, roughness: .7 }), n);
@@ -466,7 +486,7 @@
     this.canvas = canvas; this.site = site; this.opts = opts;
     this.mobile = matchMedia("(max-width: 760px)").matches;
     // 휴대폰·태블릿(가로로 돌린 폰 포함)은 가벼운 설정: 그림자 없음, 군중 절반, 해상도 상한 1.5배
-    this.lite = this.mobile || matchMedia("(pointer: coarse)").matches;
+    this.lite = !opts.hq && (this.mobile || matchMedia("(pointer: coarse)").matches); // ?hq: 프리비즈 렌더용 (세로 화면에서도 그림자·군중 전체)
     this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     var r = rng(20261120);
     var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: "high-performance", preserveDrawingBuffer: !!opts.preserve });
@@ -474,7 +494,9 @@
     renderer.setPixelRatio(this.dpr);
     this.renderer = renderer;
     var scene = new T.Scene(); this.scene = scene;
-    scene.fog = new T.Fog(0xcfd8dc, 140, 900);
+    // ?hq = 영상용 프리비즈: 실사 변환을 방해하는 것(안개·사람 점·유람선·간판 글자·만화 캐릭터)은 빼고 지형·건물·노점만
+    this.hq = !!opts.hq;
+    scene.fog = this.hq ? new T.Fog(0xc9dcea, 520, 1300) : new T.Fog(0xcfd8dc, 140, 900); // 프리비즈는 먼 지평선만 하늘색으로 흐림
     scene.add(sky());
     scene.add(new T.HemisphereLight(0xe8f1f8, 0x6d675f, .55));
     var sun = new T.DirectionalLight(0xfff4e6, .78); sun.position.set(-40, 70, 46); scene.add(sun);
@@ -490,6 +512,7 @@
     var obs = new Obstacles(); this.obstacles = obs;
     var plaza = buildPlaza(r, obs); scene.add(plaza);
     this.boats = plaza.children[plaza.children.length - 1].userData.boats;
+    if (this.hq) this.boats.forEach(function (bt) { bt.visible = false; });
     [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(function (s2) { obs.add(s2[0] * 17.6, s2[1] * 17.6, 5.4); }); // 탑 다리
 
     // 탑 아래 장터: 폰팔이 여섯 + 이름 없는 노점
@@ -497,8 +520,8 @@
     DEALERS.forEach(function (id, i) {
       var d = site.dealers[id], p = dealerPos(i);
       var holder = new T.Group(); holder.position.copy(p); holder.lookAt(0, 0, 0);
-      holder.add(buildBooth(id, d.color, r, d.short));
-      var ch = buildDealer(id, d.color); holder.add(ch);
+      holder.add(buildBooth(id, d.color, r, self.hq ? null : d.short));
+      var ch = buildDealer(id, d.color); holder.add(ch); if (self.hq) ch.visible = false;
       scene.add(holder);
       self.dealers[id] = { group: ch, holder: holder, index: i };
       ch.traverse(function (o) { if (o.isMesh) self.hitTargets.push(o); });
@@ -511,7 +534,7 @@
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
       obs.add(b.position.x, b.position.z, 3.1);
     }
-    this.crowd = buildCrowd(r, this.lite ? 490 : 975, obs); scene.add(this.crowd);
+    this.crowd = buildCrowd(r, this.hq ? 0 : this.lite ? 490 : 975, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
     this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });

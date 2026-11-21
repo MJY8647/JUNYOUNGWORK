@@ -53,6 +53,7 @@
         onDealer: function (id) { if (shopping()) return; var i = indexOf(id); if (i !== cur) go(i); else openDealer(id); },
         onHover: function (id) { onDealerHover(id); },
         preserve: /[?&]shot/.test(location.search),
+        hq: /[?&]hq/.test(location.search),
       });
     } catch (e) { console.warn(e); world = null; }
   }
