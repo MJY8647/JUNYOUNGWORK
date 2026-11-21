@@ -146,19 +146,14 @@
   var RIVER = { s: -100, n: -145 };            // 남쪽·북쪽 강둑 z
   function walkable(x, z) {
     var d = Math.hypot(x, z);
-    if (d >= 14 && d <= 72) return true;                                 // 탑 아래 광장
-    if (Math.abs(x) < 58 && z > 0 && z < 300) return true;               // 샹드마르스 길·잔디 가장자리
-    if (Math.abs(x) < 26 && z > -90 && z <= 0) return true;              // 탑 → 이에나 다리 길
-    if (Math.abs(x) < 220 && z > -98 && z < -86) return true;            // 브랑리 강변 산책로
-    if (Math.abs(x) < 6.5 && z >= RIVER.n - 2 && z <= -86) return true;  // 이에나 다리 인도
-    return false;
+    return d >= 14 && d <= 58;                                           // 사람은 에펠탑 주위 광장에만
   }
   // 사람·노점이 놓일 자리: 구역별 비율로 고름
   function spot(r, kind) {
     var t = r();
     for (var k = 0; k < 40; k++) {
       var x, z;
-      if (t < .46) { var a = r() * Math.PI * 2, rad = (kind ? 26 : 15) + r() * (kind ? 44 : 56); x = Math.cos(a) * rad; z = Math.sin(a) * rad; }
+      if (!kind || t < .46) { var a = r() * Math.PI * 2, rad = (kind ? 26 : 15) + r() * (kind ? 30 : 42); x = Math.cos(a) * rad; z = Math.sin(a) * rad; } // 사람은 탑 주위에만
       else if (t < .82) { z = 8 + r() * 280; x = (kind ? (r() < .5 ? -1 : 1) * (36 + r() * 18) : (r() - .5) * 112); }
       else if (t < .97) { x = (r() - .5) * 400; z = kind ? -89 : -96 + r() * 9; }
       else { if (kind) { t = r() * .82; continue; } x = (r() - .5) * 11; z = RIVER.n - 1 + r() * (RIVER.n * -1 - 88); }
@@ -534,7 +529,7 @@
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
       obs.add(b.position.x, b.position.z, 3.1);
     }
-    this.crowd = buildCrowd(r, this.hq ? 0 : this.lite ? 490 : 975, obs); scene.add(this.crowd);
+    this.crowd = buildCrowd(r, this.hq ? 0 : this.lite ? 160 : 320, obs); scene.add(this.crowd);
 
     this.shots = buildShots();
     this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
