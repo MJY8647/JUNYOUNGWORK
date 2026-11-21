@@ -7,19 +7,19 @@
 
   // 영상의 카메라 구도를 장면 순서대로 (pos, look, fov)
   var DEALERS = ["designer", "quick", "price", "safe", "used", "allinone"];
-  var DEALER_R = 10.5;
-  function dealerAngle(i) { return Math.PI / 2 + (i - 2.5) * (Math.PI / 3.4); }
-  function dealerPos(i) { var a = dealerAngle(i); return new T.Vector3(Math.cos(a) * DEALER_R, 0, Math.sin(a) * DEALER_R); }
+  // 노점 여섯 개는 탑 앞(샹드마르스 쪽)에 반원으로, 손님(샹드마르스)을 바라봄. 탑은 노점 뒤로 보임
+  var DEALER_C = new T.Vector3(0, 0, 26), DEALER_R = 14;
+  function dealerOut(i) { var a = (i - 2.5) * .42; return new T.Vector3(Math.sin(a), 0, Math.cos(a)); }   // 노점이 바라보는 방향
+  function dealerPos(i) { return DEALER_C.clone().add(dealerOut(i).multiplyScalar(DEALER_R)); }
 
   function buildShots() {
     var s = [
       { pos: [0, 150, 330], look: [0, 42, 0], fov: 38 },   // 광장 전경
       { pos: [10, 175, 52], look: [0, 0, 6], fov: 46 },    // 탑 위에서 내려다보기
-      { pos: [0, 4.5, 36], look: [0, 10, 0], fov: 55 },    // 아치 아래 노점
+      { pos: [0, 6, 72], look: [0, 9, 18], fov: 55 },      // 탑 앞 노점 거리 (뒤로 탑 아치)
     ];
     DEALERS.forEach(function (id, i) {
-      var p = dealerPos(i), dir = p.clone().setY(0).normalize();
-      var cam = p.clone().sub(dir.clone().multiplyScalar(7.6)); cam.y = 3.2;
+      var p = dealerPos(i), cam = p.clone().add(dealerOut(i).multiplyScalar(7.6)); cam.y = 3.2; // 손님 자리에서 노점과 뒤의 탑을 봄
       s.push({ pos: cam.toArray(), look: [p.x, 3.3, p.z], fov: 54, dealer: id });
     });
     s.push({ pos: [0, 2.6, 30], look: [0, 30, -6], fov: 62 });  // 마무리: 탑 올려다보기
@@ -304,7 +304,8 @@
   };
 
   // 군중: 몸통 + 머리 (사람 모양), 장애물을 피해 걸음
-  function buildCrowd(r, n, obs) {
+  function buildCrowd(r, n, obs, CS) { // CS: 사람 크기 배율 (프리비즈는 노점·실사 폰팔이 비율에 맞춰 키움)
+    CS = CS || 1;
     var bodyG = new T.CylinderGeometry(.19, .25, 1.18, 8); bodyG.translate(0, .62, 0);
     var headG = new T.SphereGeometry(.17, 10, 8); headG.translate(0, 1.42, 0);
     var mat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: .85 });
@@ -314,18 +315,18 @@
     var skins = [0xf1c9a5, 0xe0ac85, 0xc68863, 0x9a6648, 0xf6d8bf];
     for (var i = 0; i < n; i++) {
       var x, z, tries = 0;
-      do { var sp = spot(r, 0); x = sp[0]; z = sp[1]; tries++; } while (obs.hit(x, z, .5) && tries < 20);
-      people.push({ x: x, z: z, h: r() * Math.PI * 2, v: .6 + r() * .9, s: .88 + r() * .25, turn: 0 });
+      do { var sp = spot(r, 0); x = sp[0]; z = sp[1]; tries++; } while (obs.hit(x, z, .5 * CS) && tries < 20);
+      people.push({ x: x, z: z, h: r() * Math.PI * 2, v: (.6 + r() * .9) * CS, s: .88 + r() * .25, turn: 0 });
       bodies.setColorAt(i, c.setHex(clothes[i % clothes.length]));
       heads.setColorAt(i, c.setHex(skins[i % skins.length]));
     }
     var m = new T.Matrix4(), q = new T.Quaternion();
     people.forEach(function (p, k) { // 움직임 줄이기 설정에서도 제자리에 서 있도록 처음 위치를 기록
-      m.compose(new T.Vector3(p.x, 0, p.z), q.setFromAxisAngle(UP, -p.h), new T.Vector3(1, p.s, 1)); bodies.setMatrixAt(k, m); heads.setMatrixAt(k, m);
+      m.compose(new T.Vector3(p.x, 0, p.z), q.setFromAxisAngle(UP, -p.h), new T.Vector3(CS, p.s * CS, CS)); bodies.setMatrixAt(k, m); heads.setMatrixAt(k, m);
     });
     bodies.instanceMatrix.setUsage(T.DynamicDrawUsage); heads.instanceMatrix.setUsage(T.DynamicDrawUsage);
     var g = new T.Group(); g.add(bodies, heads);
-    g.userData = { people: people, bodies: bodies, heads: heads };
+    g.userData = { people: people, bodies: bodies, heads: heads, cs: CS };
     return g;
   }
 
@@ -491,7 +492,7 @@
     renderer.setPixelRatio(this.dpr);
     this.renderer = renderer;
     var scene = new T.Scene(); this.scene = scene;
-    // ?hq = 영상용 프리비즈: 실사 변환을 방해하는 것(안개·사람 점·유람선·간판 글자·만화 캐릭터)은 빼고 지형·건물·노점만
+    // ?hq = 영상용 프리비즈: 유람선·간판 글자·만화 캐릭터는 빼고, 여행객은 노점 비율에 맞춰 키워서 둠
     this.hq = !!opts.hq;
     scene.fog = this.hq ? new T.Fog(0xc9dcea, 520, 1300) : new T.Fog(0xcfd8dc, 140, 900); // 프리비즈는 먼 지평선만 하늘색으로 흐림
     scene.add(sky());
@@ -516,7 +517,7 @@
     this.dealers = {}; this.hitTargets = [];
     DEALERS.forEach(function (id, i) {
       var d = site.dealers[id], p = dealerPos(i);
-      var holder = new T.Group(); holder.position.copy(p); holder.lookAt(0, 0, 0);
+      var holder = new T.Group(); holder.position.copy(p); holder.lookAt(p.clone().add(dealerOut(i)));
       holder.add(buildBooth(id, d.color, r, self.hq ? null : d.short));
       var ch = buildDealer(id, d.color); holder.add(ch); if (self.hq) ch.visible = false;
       scene.add(holder);
@@ -531,7 +532,7 @@
       b.position.set(Math.cos(a) * rad, 0, Math.sin(a) * rad); b.lookAt(0, 0, 0); scene.add(b);
       obs.add(b.position.x, b.position.z, 3.1);
     }
-    this.crowd = buildCrowd(r, this.hq ? 0 : this.lite ? 160 : 320, obs); scene.add(this.crowd);
+    this.crowd = buildCrowd(r, this.lite && !this.hq ? 160 : 320, obs, this.hq ? 2.6 : 1); scene.add(this.crowd);
 
     this.shots = buildShots();
     this.stopOf = {}; var so = this.stopOf; this.shots.forEach(function (sh, i) { if (sh.dealer) so[sh.dealer] = i; });
@@ -618,10 +619,10 @@
       else p.h += Math.sin(time * .3 + i) * .4 * dt;
       var nx = p.x + Math.cos(p.h) * p.v * dt, nz = p.z + Math.sin(p.h) * p.v * dt, d = Math.hypot(nx, nz);
       if (!walkable(nx, nz)) { p.h += Math.PI; }
-      else if (obs.hit(nx, nz, .35)) { if (p.turn <= 0) { p.turn = .5 + Math.random() * .6; p.turnDir = Math.random() < .5 ? -1 : 1; } }
+      else if (obs.hit(nx, nz, .35 * cd.cs)) { if (p.turn <= 0) { p.turn = .5 + Math.random() * .6; p.turnDir = Math.random() < .5 ? -1 : 1; } }
       else { p.x = nx; p.z = nz; }
-      var bob = Math.abs(Math.sin(time * 6 * p.v + i)) * .05;
-      q.setFromAxisAngle(UP, -p.h); sc.set(1, p.s, 1); pos.set(p.x, bob, p.z);
+      var bob = Math.abs(Math.sin(time * 6 * p.v / cd.cs + i)) * .05 * cd.cs;
+      q.setFromAxisAngle(UP, -p.h); sc.set(cd.cs, p.s * cd.cs, cd.cs); pos.set(p.x, bob, p.z);
       m.compose(pos, q, sc); cd.bodies.setMatrixAt(i, m); cd.heads.setMatrixAt(i, m);
     }
     cd.bodies.instanceMatrix.needsUpdate = true; cd.heads.instanceMatrix.needsUpdate = true;
