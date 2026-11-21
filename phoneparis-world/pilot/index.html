@@ -13,7 +13,8 @@
   .stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
   .stage video.on { opacity: 1; }
   .stage.tall { background: linear-gradient(#5b8fd6, #a9cdf0); }
-  .stage.tall video { object-fit: contain; } /* 세로 영상: 가로 화면에서는 가운데에 세로로, 휴대폰에서는 꽉 차게 */
+  .stage.tall video { object-fit: contain; } /* 세로 영상: 가로로 넓은 화면에서는 가운데에 세로로 */
+  @media (max-aspect-ratio: 9/16) { .stage.tall video { object-fit: cover; } } /* 9:16보다 긴 휴대폰은 꽉 차게 (양옆 조금 잘림) */
   .track { position: relative; height: 500vh; height: 500svh; }
   .title { position: fixed; left: 20px; top: 20px; max-width: min(520px, calc(100vw - 40px)); padding: 16px 20px 18px; border-radius: 20px; background: rgba(255,255,255,.82); transition: opacity .35s, transform .45s; }
   .title.off { opacity: 0; transform: translateY(12px); }
