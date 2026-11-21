@@ -1,1 +1,1 @@
-window.READY = ["00-square-to-dive","01-dive-to-market"];
+window.READY = ["00-square-to-dive","01-dive-to-market","02-market-to-designer"];
