@@ -146,14 +146,15 @@
   var RIVER = { s: -100, n: -145 };            // 남쪽·북쪽 강둑 z
   function walkable(x, z) {
     var d = Math.hypot(x, z);
-    return d >= 14 && d <= 58;                                           // 사람은 에펠탑 주위 광장에만
+    if (Math.abs(x) < 24 && Math.abs(z) < 24) return false;              // 탑 바로 아래(네 다리 사이)는 지나다니는 사람이 거의 없음
+    return d >= 14 && d <= 62;                                           // 사람은 에펠탑 주위 광장에만
   }
   // 사람·노점이 놓일 자리: 구역별 비율로 고름
   function spot(r, kind) {
     var t = r();
     for (var k = 0; k < 40; k++) {
       var x, z;
-      if (!kind || t < .46) { var a = r() * Math.PI * 2, rad = (kind ? 26 : 15) + r() * (kind ? 30 : 42); x = Math.cos(a) * rad; z = Math.sin(a) * rad; } // 사람은 탑 주위에만
+      if (!kind || t < .46) { var a = r() * Math.PI * 2, rad = (kind ? 26 : 24) + r() * (kind ? 30 : 38); x = Math.cos(a) * rad; z = Math.sin(a) * rad; } // 사람은 탑 주위에만 (탑 아래 제외)
       else if (t < .82) { z = 8 + r() * 280; x = (kind ? (r() < .5 ? -1 : 1) * (36 + r() * 18) : (r() - .5) * 112); }
       else if (t < .97) { x = (r() - .5) * 400; z = kind ? -89 : -96 + r() * 9; }
       else { if (kind) { t = r() * .82; continue; } x = (r() - .5) * 11; z = RIVER.n - 1 + r() * (RIVER.n * -1 - 88); }
