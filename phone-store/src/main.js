@@ -379,6 +379,8 @@ function updateBadges() {
 
 // ---------- 라우터 ----------
 function route() {
+  // '#main' 같은 페이지 내 이동(본문 바로가기)은 화면 전환이 아님
+  if (location.hash && !location.hash.startsWith('#/')) return;
   cleanup?.();
   cleanup = null;
   const [path, qs] = (location.hash.slice(1) || '/').split('?');
