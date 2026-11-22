@@ -28,3 +28,13 @@ export const SUPPORT_TYPES = [
 export const MONTHS = [0, 12, 24, 30, 36];
 export const INSTALLMENT_RATE = 0.059; // 연 5.9% 할부수수료
 export const PLAN_DISCOUNT_RATE = 0.25;
+
+// 소셜 로그인 앱 키. 각 개발자센터(카카오 developers, 네이버 developers, Google Cloud Console)에서 발급받아 넣으면
+// 실제 로그인 창으로 연결된다. 비어 있으면 데모 계정으로 동작한다. client secret은 절대 여기 넣지 말고 서버에 둔다.
+export const SOCIAL = {
+  kakao: { clientId: '', redirectUri: '' },
+  naver: { clientId: '', redirectUri: '' },
+  google: { clientId: '', redirectUri: '' },
+};
+
+export const CARRIERS = ['KT', 'SKT', 'LG U+', '알뜰폰'];

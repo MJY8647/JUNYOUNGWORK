@@ -3,6 +3,8 @@ import { PRODUCTS } from './products.js';
 import { STORE, PLANS, JOIN_TYPES, SUPPORT_TYPES, MONTHS } from './config.js';
 import { quote, retailPrice, won } from './pricing.js';
 import { cart } from './cart.js';
+import { account } from './account.js';
+import { createPurchase } from './purchase.js';
 
 const app = document.getElementById('app');
 const byId = (id) => PRODUCTS.find((p) => p.id === id);
@@ -28,7 +30,8 @@ function cartCount() { return cart.items().length; }
 
 function shell(content, active) {
   const n = cartCount();
-  const nav = [['#/', '홈', 'home'], ['#/products', '휴대폰', 'products'], ['#/cart', '장바구니', 'cart'], ['#/login', '로그인', 'login']];
+  const me = account.current();
+  const nav = [['#/', '홈', 'home'], ['#/products', '휴대폰', 'products'], ['#/cart', '장바구니', 'cart'], me?.signupDone ? ['#/mypage', '마이', 'login'] : ['#/login', '로그인', 'login']];
   return `
   <header class="hdr">
     <a class="logo" href="#/"><span class="logo-mark" aria-hidden="true"></span>${STORE.name}</a>
@@ -343,12 +346,14 @@ function viewDetail(id) {
     const bar = document.getElementById('buybar');
     bar.innerHTML = soldout
       ? `<div><span class="muted">품절</span></div><button type="button" class="btn" id="restock">재입고 알림</button>`
-      : `<div><span class="muted">월 예상</span><b>${qt ? won(qt.totalMonthly) : '-'}</b></div><button type="button" class="btn" id="add" ${qt ? '' : 'disabled'}>장바구니 담기</button>`;
+      : `<div><span class="muted">월 예상</span><b>${qt ? won(qt.totalMonthly) : '-'}</b></div>
+         <div class="buy-btns"><button type="button" class="btn ghost" id="add" ${qt ? '' : 'disabled'}>장바구니</button><button type="button" class="btn" id="buy" ${qt ? '' : 'disabled'}>바로 구매</button></div>`;
     document.getElementById('add')?.addEventListener('click', () => {
       cart.add({ productId: p.id, ...s, colorName: colors[s.color].name });
       toast('장바구니에 담았어요');
       updateBadges();
     });
+    document.getElementById('buy')?.addEventListener('click', () => purchase.startBuy({ productId: p.id, ...s, colorName: colors[s.color].name }));
     document.getElementById('restock')?.addEventListener('click', () => toast('프로토타입이라 알림 신청은 아직 저장되지 않아요.'));
   }
 
@@ -412,52 +417,22 @@ function viewCart() {
               <p class="muted">${plan.name} · ${it.months ? `${it.months}개월 할부` : '일시납'}</p>
               <p class="line-price">월 ${won(q.totalMonthly)}${q.upfront ? ` <span class="muted">+ 일시납 ${won(q.upfront)}</span>` : ''}</p>
             </div>
-            <button type="button" class="x" data-key="${it.key}" aria-label="${p.name} 삭제">삭제</button>
+            <div class="line-act">
+              <button type="button" class="btn small" data-buy="${it.key}">주문하기</button>
+              <button type="button" class="x" data-key="${it.key}" aria-label="${p.name} 삭제">삭제</button>
+            </div>
           </li>`).join('')}
       </ul>
       <p class="total"><span>월 예상 합계</span><b>${won(total)}</b></p>
-      <a class="btn block" href="#/checkout">주문서 작성</a>` : `
+      <p class="note">휴대폰은 회선마다 개통 신청을 따로 해서, 한 대씩 주문해요.</p>` : `
       <p class="empty">장바구니가 비어 있어요.</p><a class="btn" href="#/products">휴대폰 보러 가기</a>`}
     </section>`, 'cart');
   app.querySelectorAll('.x').forEach((b) => { b.onclick = () => { cart.remove(b.dataset.key); viewCart(); }; });
+  app.querySelectorAll('[data-buy]').forEach((b) => { b.onclick = () => purchase.startBuy(cart.items().find((i) => i.key === b.dataset.buy)); });
 }
 
-// ---------- 주문서 · 로그인 (화면만) ----------
-function demoForm(title, fields, submitLabel, active) {
-  app.innerHTML = shell(`
-    <section class="sec narrow">
-      <h1 class="page-title">${title}</h1>
-      <p class="demo-note">프로토타입 화면이에요. 입력한 정보는 전송·저장되지 않아요.</p>
-      <form class="form" novalidate>
-        ${fields}
-        <button class="btn block" type="submit">${submitLabel}</button>
-        <p class="form-msg" role="status" aria-live="polite"></p>
-      </form>
-    </section>`, active);
-  const form = app.querySelector('form');
-  form.onsubmit = (e) => {
-    e.preventDefault();
-    const bad = [...form.querySelectorAll('[required]')].find((el) => (el.type === 'checkbox' ? !el.checked : !el.value.trim()));
-    const msg = form.querySelector('.form-msg');
-    if (bad) { msg.textContent = '필수 항목을 확인해 주세요.'; bad.focus(); return; }
-    msg.textContent = '실제 접수 기능이 아직 연결되지 않아 주문·로그인이 진행되지 않았어요.';
-  };
-}
-
-function viewCheckout() {
-  if (!cartCount()) { location.hash = '#/cart'; return; }
-  demoForm('주문서 작성', `
-    <label>이름 <input name="name" autocomplete="name" required></label>
-    <label>휴대폰 번호 <input name="tel" type="tel" inputmode="numeric" autocomplete="tel" required></label>
-    <label>배송 주소 <input name="addr" autocomplete="street-address" required></label>
-    <label class="check"><input type="checkbox" required> (필수) 개인정보 수집·이용에 동의합니다</label>`, '주문 신청', 'cart');
-}
-
-function viewLogin() {
-  demoForm('로그인', `
-    <label>아이디 <input name="id" autocomplete="username" required></label>
-    <label>비밀번호 <input name="pw" type="password" autocomplete="current-password" required></label>`, '로그인', 'login');
-}
+// ---------- 구매 · 회원 ----------
+const purchase = createPurchase({ app, shell, toast, asset, byId, lineQuote });
 
 function viewNotFound() {
   app.innerHTML = shell('<section class="sec narrow center"><h1 class="page-title">페이지를 찾을 수 없어요</h1><a class="btn" href="#/">홈으로</a></section>', '');
@@ -485,8 +460,14 @@ function route() {
   else if (parts[0] === 'products' && parts[1]) viewDetail(parts[1]);
   else if (parts[0] === 'products') viewProducts(params);
   else if (parts[0] === 'cart') viewCart();
-  else if (parts[0] === 'checkout') viewCheckout();
-  else if (parts[0] === 'login') viewLogin();
+  else if (parts[0] === 'buy') purchase.viewBuy();
+  else if (parts[0] === 'order' && parts[1] === 'done') purchase.viewOrderDone(params);
+  else if (parts[0] === 'order') purchase.viewOrder();
+  else if (parts[0] === 'orders') purchase.viewOrders();
+  else if (parts[0] === 'login') purchase.viewLogin(params);
+  else if (parts[0] === 'signup') purchase.viewSignup(params);
+  else if (parts[0] === 'mypage') purchase.viewMyPage();
+  else if (parts[0] === 'checkout') location.hash = '#/cart';
   else viewNotFound();
 }
 
