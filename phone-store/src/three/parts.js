@@ -38,24 +38,24 @@ export function person({ body, cap, hair = C.hair, pack }) {
   };
   const legs = [-0.13, 0.13].map((x) => { const l = limb('#4b5d8a', 0.32); l.position.set(x, 0.58, 0); g.add(l); return l; });
   const arms = [-0.36, 0.36].map((x) => { const a = limb(body, 0.3); a.position.set(x, 1.2, 0); a.rotation.z = x < 0 ? -0.15 : 0.15; g.add(a); return a; });
-  const torso = mesh(new THREE.CapsuleGeometry(0.29, 0.34, 6, 14), toon(body), { thickness: 0.02 });
+  const torso = mesh(new THREE.CapsuleGeometry(0.29, 0.34, 4, 10), toon(body), { thickness: 0.02 });
   torso.position.y = 0.98;
   const head = new THREE.Group();
   head.position.y = 1.66;
-  head.add(mesh(new THREE.SphereGeometry(0.31, 24, 16), toon(C.skin), { thickness: 0.02 }));
+  head.add(mesh(new THREE.SphereGeometry(0.31, 16, 12), toon(C.skin), { thickness: 0.02 }));
   const eyeMat = new THREE.MeshBasicMaterial({ color: C.ink });
-  [-0.1, 0.1].forEach((x) => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8), eyeMat); e.position.set(x, 0.02, 0.285); head.add(e); });
+  [-0.1, 0.1].forEach((x) => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 4), eyeMat); e.position.set(x, 0.02, 0.285); head.add(e); });
   const cheek = new THREE.MeshBasicMaterial({ color: '#ff9d86' });
   [-0.18, 0.18].forEach((x) => { const e = new THREE.Mesh(new THREE.CircleGeometry(0.045, 12), cheek); e.position.set(x, -0.07, 0.29); e.lookAt(x * 3, -0.07, 2); head.add(e); });
   if (cap) {
-    const top = mesh(new THREE.SphereGeometry(0.325, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), toon(cap), { thickness: 0.02 });
+    const top = mesh(new THREE.SphereGeometry(0.325, 16, 6, 0, Math.PI * 2, 0, Math.PI * 0.5), toon(cap), { thickness: 0.02 });
     top.position.y = 0.04;
-    const brim = mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.04, 20, 1, false, -Math.PI / 2, Math.PI), toon(cap), { thickness: 0.015 });
+    const brim = mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.04, 12, 1, false, -Math.PI / 2, Math.PI), toon(cap), { thickness: 0.015 });
     brim.position.set(0, 0.06, 0.26);
     brim.scale.z = 1.3;
     head.add(top, brim);
   } else {
-    const h = mesh(new THREE.SphereGeometry(0.325, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), toon(hair), { thickness: 0.02 });
+    const h = mesh(new THREE.SphereGeometry(0.325, 16, 6, 0, Math.PI * 2, 0, Math.PI * 0.55), toon(hair), { thickness: 0.02 });
     h.position.y = 0.03; h.rotation.x = -0.3;
     head.add(h);
   }

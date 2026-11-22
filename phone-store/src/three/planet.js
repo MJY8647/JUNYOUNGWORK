@@ -123,14 +123,14 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
   const hemi = new THREE.HemisphereLight('#fff6e6', '#9cc7a0', 1.5);
   const sun = new THREE.DirectionalLight('#fff1dc', 2.3);
   sun.castShadow = true;
-  sun.shadow.mapSize.setScalar(mobile ? 1024 : 2048);
-  Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 1, far: 80 });
+  sun.shadow.mapSize.setScalar(1024);
+  Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 15, bottom: -15, near: 1, far: 70 });
   sun.shadow.bias = -0.0006;
   sun.shadow.normalBias = 0.04;
   scene.add(hemi, sun, sun.target);
 
   // ---------- 행성 ----------
-  const ground = mesh(new THREE.SphereGeometry(RP, 128, 96), toon(C.grass), { thickness: 0.12, cast: false });
+  const ground = mesh(new THREE.SphereGeometry(RP, 96, 64), toon(C.grass), { thickness: 0.12, cast: false });
   scene.add(ground);
   const pole = new THREE.Vector3(0, 1, 0);
   scene.add(cap(pole, 13 * DEG, C.stone, 0.02), cap(pole, 13.8 * DEG, C.stoneDark, 0.015));
@@ -216,24 +216,24 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
       addCircle(ld, 0.25);
     });
     zones.push({ name: s.name, color: s.color, c: n.clone().multiplyScalar(RP), r: 10, shop: s });
-    return { shop: s, n, lon, fwd, door, npc, group };
+    return { shop: s, n, lon, fwd, door, npc, group, doorP: door.clone().multiplyScalar(RP), tagP: n.clone().multiplyScalar(RP + 6.6), npcFwd: northAt(npcDir), turned: false };
   });
   scene.add(instanced(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: '#f5f5f5' }), stripeMx, { outline: false, cast: false }));
 
   // 가로등 (도로 양옆)
-  for (let i = 0; i < 20; i++) {
-    const lon = (i / 20) * Math.PI * 2 + 0.25 + Math.PI / 20;
-    [1, -1].forEach((sgn) => {
-      const n = dirLL(ROAD_LAT + sgn * (ROAD_HALF + 1.3) / RP, lon);
-      const post = mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.8, 8), toon('#5a4a42'), { thickness: 0.02 });
-      post.position.y = 1.4;
-      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), new THREE.MeshBasicMaterial({ color: '#fff1b8' }));
-      bulb.position.y = 2.9;
-      const g = new THREE.Group(); g.add(post, bulb);
-      place(g, n, 0, northAt(n));
-      scene.add(g);
-      addCircle(n, 0.2);
-    });
+  {
+    const postMx = [], bulbMx = [];
+    for (let i = 0; i < 20; i++) {
+      const lon = (i / 20) * Math.PI * 2 + 0.25 + Math.PI / 20;
+      [1, -1].forEach((sgn) => {
+        const n = dirLL(ROAD_LAT + sgn * (ROAD_HALF + 1.3) / RP, lon);
+        postMx.push(matrixAt(n, 1.4, northAt(n)));
+        bulbMx.push(matrixAt(n, 2.9, northAt(n)));
+        addCircle(n, 0.2);
+      });
+    }
+    scene.add(instanced(new THREE.CylinderGeometry(0.08, 0.1, 2.8, 8), toon('#5a4a42'), postMx, { thickness: 0.02 }));
+    scene.add(instanced(new THREE.SphereGeometry(0.22, 12, 10), new THREE.MeshBasicMaterial({ color: '#fff1b8' }), bulbMx, { outline: false, cast: false }));
   }
 
   // ---------- 육교 ----------
@@ -285,9 +285,11 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     scene.add(sg2);
     zones.push({ name: '무지개 육교', color: '#3d6f99', c: bridgeC.clone().multiplyScalar(RP), r: 6 });
   }
+  const bridgeP = bridgeC.clone().multiplyScalar(RP), bd = new THREE.Vector3(), bl = { s: 0, w: 0 };
   const bridgeLocal = (p) => {
-    const d = p.clone().sub(bridgeC.clone().multiplyScalar(RP));
-    return { s: d.dot(bridgeF), w: d.dot(bridgeR) };
+    bd.copy(p).sub(bridgeP);
+    bl.s = bd.dot(bridgeF); bl.w = bd.dot(bridgeR);
+    return bl;
   };
 
   // ---------- 버스정류장 ----------
@@ -388,21 +390,23 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
       if (nearRoute(n)) continue;
       mx.push(matrixAt(n, 0.12, northAt(n), 0.7 + rand() * 0.5, 0.7, 0.7));
     }
-    scene.add(instanced(new THREE.SphereGeometry(0.13, 8, 6), new THREE.MeshBasicMaterial({ color: col }), mx, { outline: false, cast: false }));
+    scene.add(instanced(new THREE.OctahedronGeometry(0.14, 0), new THREE.MeshBasicMaterial({ color: col }), mx, { outline: false, cast: false }));
   });
 
   // ---------- 구름 ----------
   const clouds = new THREE.Group();
-  for (let i = 0; i < 12; i++) {
-    const c = new THREE.Group();
-    for (let j = 0; j < 4; j++) {
-      const b = mesh(new THREE.SphereGeometry(1 + rand() * 0.8, 12, 10), toon('#ffffff'), { thickness: 0.05, cast: false });
-      b.position.set(j * 1.2 - 1.8, rand() * 0.5, rand() * 0.6);
-      c.add(b);
+  {
+    const puffMx = [], m = new THREE.Matrix4(), off = new THREE.Matrix4();
+    for (let i = 0; i < 12; i++) {
+      const n = new THREE.Vector3(rand() * 2 - 1, rand() * 2 - 1, rand() * 2 - 1).normalize();
+      m.copy(matrixAt(n, 12 + rand() * 4, northAt(n)));
+      for (let j = 0; j < 4; j++) {
+        const r = 1 + rand() * 0.8;
+        off.compose(new THREE.Vector3(j * 1.2 - 1.8, rand() * 0.5, rand() * 0.6), new THREE.Quaternion(), new THREE.Vector3(r, r, r));
+        puffMx.push(m.clone().multiply(off));
+      }
     }
-    const n = new THREE.Vector3(rand() * 2 - 1, rand() * 2 - 1, rand() * 2 - 1).normalize();
-    place(c, n, 12 + rand() * 4, northAt(n));
-    clouds.add(c);
+    clouds.add(instanced(new THREE.IcosahedronGeometry(1, 1), toon('#ffffff'), puffMx, { thickness: 0.05, cast: false }));
   }
   scene.add(clouds);
 
@@ -551,15 +555,19 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
   const groundH = () => (onBridge ? profile(bridgeLocal(pos).s) : 0);
 
   // ---------- 충돌 ----------
+  const rn = new THREE.Vector3(), rd = new THREE.Vector3();
   function resolve(p) {
-    const n = p.clone().normalize();
+    const n = rn.copy(p).normalize();
     for (const { c, r } of colliders.circles) {
-      const d = p.clone().sub(c); d.addScaledVector(n, -n.dot(d));
-      const len = d.length(), min = r + PLAYER_R;
+      const min = r + PLAYER_R;
+      if (Math.abs(p.x - c.x) > min + 1 || Math.abs(p.y - c.y) > min + 1 || Math.abs(p.z - c.z) > min + 1) continue; // 먼 것은 건너뜀
+      const d = rd.copy(p).sub(c); d.addScaledVector(n, -n.dot(d));
+      const len = d.length();
       if (len < min && len > 1e-4) p.addScaledVector(d, (min - len) / len);
     }
     for (const b of colliders.boxes) {
-      const d = p.clone().sub(b.c);
+      if (p.distanceToSquared(b.c) > 64) continue;
+      const d = rd.copy(p).sub(b.c);
       const lx = d.dot(b.right), lz = d.dot(b.fwd);
       const ox = b.hw + PLAYER_R - Math.abs(lx), oz = b.hd + PLAYER_R - Math.abs(lz);
       if (ox > 0 && oz > 0 && Math.abs(d.dot(n)) < 4) {
@@ -584,17 +592,25 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
   });
   let talkShop = null, typed = 0, nearId = null, zoneName = null;
   const planetSphere = new THREE.Sphere(new THREE.Vector3(), RP * 0.985);
+  const occRay = new THREE.Ray(), occHit = new THREE.Vector3();
   const hiddenByPlanet = (pt) => {
-    const dir = pt.clone().sub(camera.position); const len = dir.length(); dir.normalize();
-    const r = new THREE.Ray(camera.position, dir);
-    const hit = r.intersectSphere(planetSphere, new THREE.Vector3());
-    return hit && hit.distanceTo(camera.position) < len;
+    occRay.origin.copy(camera.position);
+    occRay.direction.copy(pt).sub(camera.position);
+    const len = occRay.direction.length();
+    occRay.direction.divideScalar(len);
+    return !!occRay.intersectSphere(planetSphere, occHit) && occHit.distanceTo(camera.position) < len;
   };
 
   // ---------- 카메라 ----------
+  // 캔버스 크기는 리사이즈 때만 읽는다 (매 프레임 읽으면 레이아웃 재계산으로 끊김)
+  let W = 1, H = 1;
+  const maxDpr = renderer.getPixelRatio();
+  let dpr = maxDpr;
   function resize() {
     const w = canvas.clientWidth, hh = canvas.clientHeight;
     if (!w || !hh) return;
+    W = w; H = hh;
+    renderer.setPixelRatio(dpr);
     renderer.setSize(w, hh, false);
     camera.aspect = w / hh;
     camera.fov = w / hh < 0.9 ? 55 : 45;
@@ -609,26 +625,55 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     camPos.copy(pos).addScaledVector(n, 30).addScaledVector(camFwd, -20); // 우주에서 내려오며 시작
   }
 
+  // 매 프레임 재사용하는 임시 벡터 (새로 만들지 않아 GC 끊김 방지)
   const move = new THREE.Vector3(), v = new THREE.Vector3(), prev = new THREE.Vector3();
+  const n = new THREE.Vector3(), right = new THREE.Vector3(), to = new THREE.Vector3();
+  const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), target = new THREE.Vector3(), want = new THREE.Vector3();
+  const zAxis = new THREE.Vector3(0, 0, 1);
+  const TURN_SPEED = 4.2;   // 캐릭터 회전 최대 속도 (rad/s)
+  const CAM_FOLLOW = 0.9;   // 카메라가 캐릭터 방향을 따라가는 빠르기 (작을수록 느긋함)
+  const CAM_MAX_TURN = 0.9; // 카메라 최대 회전 속도 (rad/s, 약 50°/초)
+  let camVel = 0;           // 카메라 회전 속도 (가속·감속을 부드럽게)
+  let lightState = null, beaconOn = null, bubbleText = '', bubbleHalf = 60;
+  let frames = 0, frameTime = 0;
+  const signedAngle = (a, b, axis) => Math.atan2(tmpA.crossVectors(a, b).dot(axis), a.dot(b));
+  const projectTo = (p, el, clampHalf = 0) => {
+    v.copy(p).project(camera);
+    const off = v.z > 1 || Math.abs(v.x) > 1.2 || Math.abs(v.y) > 1.2 || hiddenByPlanet(p);
+    let x = (v.x * 0.5 + 0.5) * W;
+    if (clampHalf) x = THREE.MathUtils.clamp(x, clampHalf, W - clampHalf);
+    el.style.transform = `translate3d(${x.toFixed(1)}px, ${((-v.y * 0.5 + 0.5) * H).toFixed(1)}px, 0) translate(-50%, -100%)`;
+    return !off;
+  };
 
   const stop = createLoop(renderer, canvas, (dt, t) => {
     nowT = t;
-    let n = pos.clone().normalize();
+    // 성능이 부족하면 렌더 해상도를 낮추고, 여유가 생기면 다시 올린다
+    frames++; frameTime += dt;
+    if (frameTime > 1.5) {
+      const avg = frameTime / frames;
+      const next = avg > 1 / 45 ? Math.max(1, dpr - 0.25) : avg < 1 / 57 ? Math.min(maxDpr, dpr + 0.25) : dpr;
+      if (next !== dpr) { dpr = next; renderer.setPixelRatio(dpr); renderer.setSize(W, H, false); }
+      frames = 0; frameTime = 0;
+    }
+
+    n.copy(pos).normalize();
     // 시점 기준 벡터를 현재 위치의 접평면으로 옮긴다 (평행 이동)
-    camFwd = tangent(n, camFwd); sunRef = tangent(n, sunRef); facing = tangent(n, facing);
-    const right = new THREE.Vector3().crossVectors(camFwd, n);
+    camFwd.addScaledVector(n, -n.dot(camFwd)).normalize();
+    sunRef.addScaledVector(n, -n.dot(sunRef)).normalize();
+    facing.addScaledVector(n, -n.dot(facing)).normalize();
+    right.crossVectors(camFwd, n);
 
     move.set(0, 0, 0);
-    let viaRoute = false;
     if (inputOn) {
       if (keys.has('w') || keys.has('arrowup')) move.add(camFwd);
       if (keys.has('s') || keys.has('arrowdown')) move.sub(camFwd);
       if (keys.has('a') || keys.has('arrowleft')) move.sub(right);
       if (keys.has('d') || keys.has('arrowright')) move.add(right);
       while (!move.lengthSq() && route.length) {
-        const to = route[0].clone().sub(pos); to.addScaledVector(n, -n.dot(to));
+        to.copy(route[0]).sub(pos); to.addScaledVector(n, -n.dot(to));
         if (to.length() < (route.length > 1 ? 0.9 : 0.3)) { route.shift(); stuck = 0; continue; }
-        move.copy(to); viaRoute = true;
+        move.copy(to);
       }
     }
     const moving = move.lengthSq() > 1e-6;
@@ -646,13 +691,18 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
         if (profile(s) <= 0.7 || h >= profile(s) - 0.3) onBridge = true; else pos.copy(prev);
       }
       if (route.length && prev.distanceTo(pos) < SPEED * dt * 0.2) { stuck += dt; if (stuck > 0.7) { route.shift(); stuck = 0; } } else stuck = 0;
-      facing.lerp(move, Math.min(1, dt * 12)).normalize();
-      // 탭·바로가기로 걸을 때는 카메라가 진행 방향 뒤로 천천히 돌아간다
-      if (viaRoute && t - lastDrag > 1.2) {
-        const ang = Math.atan2(v.crossVectors(camFwd, facing).dot(n), camFwd.dot(facing));
-        camFwd.applyAxisAngle(n, ang * Math.min(1, dt * 1.2));
-      }
-      n = pos.clone().normalize();
+      n.copy(pos).normalize();
+      // 캐릭터는 진행 방향으로 부드럽게 돈다 (최대 회전 속도 제한)
+      const turn = signedAngle(facing, move, n);
+      facing.applyAxisAngle(n, THREE.MathUtils.clamp(turn * (1 - Math.exp(-dt * 8)), -TURN_SPEED * dt, TURN_SPEED * dt));
+      // 카메라는 캐릭터가 보는 방향 뒤로 느긋하게 따라 돈다.
+      // 직접 시점을 돌린 직후, 또는 뒤로 걸어 카메라 쪽을 볼 때는 따라가지 않는다.
+      const camTurn = signedAngle(camFwd, facing, n);
+      const wantVel = t - lastDrag > 1.5 && Math.abs(camTurn) < 2.2 ? THREE.MathUtils.clamp(camTurn * CAM_FOLLOW, -CAM_MAX_TURN, CAM_MAX_TURN) : 0;
+      camVel += (wantVel - camVel) * (1 - Math.exp(-dt * 3));
+    } else camVel *= Math.exp(-dt * 4); // 멈추면 카메라 회전도 서서히 멈춤
+    if (Math.abs(camVel) > 1e-4) {
+      camFwd.applyAxisAngle(n, camVel * dt);
     }
     // 점프·중력
     vy += GRAVITY * dt; h += vy * dt;
@@ -660,53 +710,61 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     if (h <= gh) { h = gh; vy = 0; }
     if (onBridge && Math.abs(bridgeLocal(pos).s) >= BRIDGE.half - 0.05) onBridge = false;
 
-    place(player, n, h, tangent(n, facing));
+    place(player, n, h, facing);
     animatePerson(player, moving && h <= gh + 0.01, dt, t);
-    place(blob, n, groundH() + 0.04, northAt(n)); blob.rotateX(-Math.PI / 2);
-    blob.material.opacity = 0.14 / (1 + (h - groundH()) * 0.6);
-    marker.material.opacity = Math.max(0, marker.material.opacity - dt * 1.2);
+    place(blob, n, gh + 0.04, northAt(n)); blob.rotateX(-Math.PI / 2);
+    blob.material.opacity = 0.14 / (1 + (h - gh) * 0.6);
+    if (marker.material.opacity > 0) marker.material.opacity = Math.max(0, marker.material.opacity - dt * 1.2);
 
     // 자동차: 앞에 사람이 있으면 멈춘다
-    cars.forEach((c) => {
+    for (const c of cars) {
       const cosL = Math.cos(c.lat);
-      const here = dirLL(c.lat, c.lon);
-      const east = new THREE.Vector3(-Math.sin(c.lon), 0, Math.cos(c.lon));
-      const fwd = east.clone().multiplyScalar(c.lane);
-      const ahead = here.clone().multiplyScalar(RP).addScaledVector(fwd, 3);
-      const blocked = (h < 1.5 && ahead.distanceTo(pos) < 2.8) || cars.some((o) => o !== c && o.lane === c.lane && (((o.lon - c.lon) * c.lane + Math.PI * 4) % (Math.PI * 2)) * cosL * RP < 5);
+      tmpA.set(Math.cos(c.lat) * Math.cos(c.lon), Math.sin(c.lat), Math.cos(c.lat) * Math.sin(c.lon)); // 현재 위치 방향
+      tmpB.set(-Math.sin(c.lon) * c.lane, 0, Math.cos(c.lon) * c.lane);                               // 진행 방향
+      to.copy(tmpA).multiplyScalar(RP).addScaledVector(tmpB, 3);
+      let blocked = h < 1.5 && to.distanceTo(pos) < 2.8;
+      if (!blocked) for (const o of cars) if (o !== c && o.lane === c.lane && (((o.lon - c.lon) * c.lane + Math.PI * 4) % (Math.PI * 2)) * cosL * RP < 5) { blocked = true; break; }
       c.v = THREE.MathUtils.lerp(c.v, blocked ? 0 : 7, Math.min(1, dt * (blocked ? 6 : 1.5)));
       c.lon += (c.lane * c.v * dt) / (cosL * RP);
-      place(c.g, here, 0.02, fwd);
-    });
-    // 신호등 깜빡임 (장식)
+      place(c.g, tmpA, 0.02, tmpB);
+    }
+    // 신호등·통신탑 불빛 (상태가 바뀔 때만 색 변경)
     const greenOn = Math.floor(t / 4) % 2 === 0;
-    lights.forEach((l) => { l.userData.red.color.set(greenOn ? '#5a2a26' : '#ff5a4a'); l.userData.green.color.set(greenOn ? '#4ade80' : '#1f4a2e'); });
-    beacon_.material.color.set(Math.sin(t * 4) > 0 ? '#ff3b30' : '#5a1a16');
+    if (greenOn !== lightState) {
+      lightState = greenOn;
+      lights.forEach((l) => { l.userData.red.color.set(greenOn ? '#5a2a26' : '#ff5a4a'); l.userData.green.color.set(greenOn ? '#4ade80' : '#1f4a2e'); });
+    }
+    const bOn = Math.sin(t * 4) > 0;
+    if (bOn !== beaconOn) { beaconOn = bOn; beacon_.material.color.set(bOn ? '#ff3b30' : '#5a1a16'); }
     clouds.rotation.y += dt * 0.01;
     spout.scale.y = 0.55 + Math.sin(t * 3) * 0.06;
 
-    walkers.forEach((w) => {
+    for (const w of walkers) {
       w.lon += (w.dir * 1.6 * dt) / (Math.cos(w.lat) * RP);
-      const wn = dirLL(w.lat, w.lon);
-      place(w.g, wn, 0, new THREE.Vector3(-Math.sin(w.lon), 0, Math.cos(w.lon)).multiplyScalar(w.dir));
+      tmpA.set(Math.cos(w.lat) * Math.cos(w.lon), Math.sin(w.lat), Math.cos(w.lat) * Math.sin(w.lon));
+      tmpB.set(-Math.sin(w.lon) * w.dir, 0, Math.cos(w.lon) * w.dir);
+      place(w.g, tmpA, 0, tmpB);
       animatePerson(w.g, true, dt * 0.6, t);
-    });
+    }
 
     // 근접 · 구역
     let near = null, talk = null, zone = null, zd = Infinity;
     for (const s of shopObjs) {
-      const doorP = s.door.clone().multiplyScalar(RP);
-      if (doorP.distanceTo(pos) < 2.4 && h < 1) near = s;
+      if (s.doorP.distanceTo(pos) < 2.4 && h < 1) near = s;
       const npcP = s.npc.position;
       const close = npcP.distanceTo(pos) < 5.5;
       if (close) talk = s;
       const u = s.npc.userData;
       u.waving = close;
       u.arms[1].rotation.x = close ? -2.6 + Math.sin(t * 10) * 0.3 : THREE.MathUtils.lerp(u.arms[1].rotation.x, 0, 0.1);
-      const nn = npcP.clone().normalize();
-      const want = close ? tangent(nn, pos.clone().sub(npcP)) : northAt(nn);
-      const cur = new THREE.Vector3(0, 0, 1).applyQuaternion(s.npc.quaternion);
-      orient(s.npc, nn, tangent(nn, cur.lerp(want, Math.min(1, dt * 5))));
+      if (close || s.turned) {
+        tmpA.copy(npcP).normalize();
+        if (close) { tmpB.copy(pos).sub(npcP); tmpB.addScaledVector(tmpA, -tmpA.dot(tmpB)).normalize(); } else tmpB.copy(s.npcFwd);
+        to.copy(zAxis).applyQuaternion(s.npc.quaternion).lerp(tmpB, Math.min(1, dt * 5));
+        to.addScaledVector(tmpA, -tmpA.dot(to)).normalize();
+        orient(s.npc, tmpA, to);
+        s.turned = close || to.dot(s.npcFwd) < 0.999;
+      }
       animatePerson(s.npc, false, dt, t + s.lon);
     }
     for (const z of zones) { const d = z.c.distanceTo(pos); if (d < z.r && d < zd) { zone = z; zd = d; } }
@@ -717,10 +775,9 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     // 카메라: 플레이어 뒤·위에서, 행성의 위 방향을 따라 부드럽게
     const k = 1 - Math.pow(0.004, dt);
     camUp.lerp(n, k).normalize();
-    const target = pos.clone().addScaledVector(n, h + 1.3);
-    const want = target.clone().addScaledVector(camFwd, -camDist * Math.cos(camPitch)).addScaledVector(n, camDist * Math.sin(camPitch));
-    // 카메라가 땅 속으로 들어가지 않게
-    if (want.length() < RP + 1.2) want.setLength(RP + 1.2);
+    target.copy(pos).addScaledVector(n, h + 1.3);
+    want.copy(target).addScaledVector(camFwd, -camDist * Math.cos(camPitch)).addScaledVector(n, camDist * Math.sin(camPitch));
+    if (want.length() < RP + 1.2) want.setLength(RP + 1.2); // 땅 속으로 들어가지 않게
     camPos.lerp(want, k);
     look.lerp(target, Math.min(1, k * 1.6));
     camera.position.copy(camPos);
@@ -729,35 +786,30 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
 
     // 해와 하늘빛은 플레이어 기준으로 (행성 어디서든 낮)
     hemi.position.copy(n);
-    const sunDir = n.clone().multiplyScalar(1).addScaledVector(sunRef, 0.35).addScaledVector(new THREE.Vector3().crossVectors(sunRef, n), 0.45).normalize();
-    sun.position.copy(pos).addScaledVector(sunDir, 30);
+    tmpB.crossVectors(sunRef, n);
+    tmpA.copy(n).addScaledVector(sunRef, 0.35).addScaledVector(tmpB, 0.45).normalize();
+    sun.position.copy(pos).addScaledVector(tmpA, 30);
     sun.target.position.copy(pos);
 
     renderer.render(scene, camera);
 
-    // HTML 위치
-    const w = canvas.clientWidth, hh = canvas.clientHeight;
-    const project = (p, el) => {
-      v.copy(p).project(camera);
-      const off = v.z > 1 || Math.abs(v.x) > 1.2 || Math.abs(v.y) > 1.2 || hiddenByPlanet(p);
-      el.style.transform = `translate(${(v.x * 0.5 + 0.5) * w}px, ${(-v.y * 0.5 + 0.5) * hh}px) translate(-50%, -100%)`;
-      return !off;
-    };
+    // HTML 위치 (쓰기만 하고 레이아웃 값은 읽지 않는다)
     shopObjs.forEach((s, i) => {
-      const top = s.n.clone().multiplyScalar(RP + 6.6);
-      tags[i].classList.toggle('hide', !project(top, tags[i]) || zoneName === s.shop.name);
+      tags[i].classList.toggle('hide', !projectTo(s.tagP, tags[i]) || zoneName === s.shop.name);
     });
     if (talkShop) {
       const text = talkShop.shop.greeting;
       typed = Math.min(text.length, typed + dt * 32);
-      bubble.textContent = text.slice(0, Math.ceil(typed));
-      const head = talkShop.npc.position.clone().normalize().multiplyScalar(RP + 2.45);
-      const vis = project(head, bubble);
-      const half = bubble.offsetWidth / 2 + 8;
-      const bx = THREE.MathUtils.clamp((v.x * 0.5 + 0.5) * w, half, w - half);
-      bubble.style.transform = `translate(${bx}px, ${(-v.y * 0.5 + 0.5) * hh}px) translate(-50%, -100%)`;
-      bubble.classList.toggle('show', vis);
-    } else bubble.classList.remove('show');
+      const shown = text.slice(0, Math.ceil(typed));
+      if (shown !== bubbleText) {
+        bubbleText = shown;
+        bubble.textContent = shown;
+        if (shown.length === text.length) bubbleHalf = bubble.offsetWidth / 2 + 8; // 문장이 다 나왔을 때 한 번만 측정
+        else bubbleHalf = Math.max(bubbleHalf, 60);
+      }
+      to.copy(talkShop.npc.position).normalize().multiplyScalar(RP + 2.45);
+      bubble.classList.toggle('show', projectTo(to, bubble, bubbleHalf));
+    } else if (bubbleText) { bubbleText = ''; bubble.classList.remove('show'); }
   });
 
   return {
