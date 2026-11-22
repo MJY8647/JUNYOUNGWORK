@@ -16,24 +16,50 @@ export const toon = (color, extra = {}) =>
   new THREE.MeshToonMaterial({ color, gradientMap: gradientMap(), ...extra });
 
 // 법선 방향으로 부풀린 뒷면을 그려 외곽선을 만든다 (inverted hull).
-const outlineMat = new THREE.ShaderMaterial({
-  uniforms: { thickness: { value: 0.012 }, color: { value: new THREE.Color('#3a2a24') } },
-  vertexShader: `uniform float thickness;
-    void main(){ vec3 p = position + normal * thickness;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0); }`,
-  fragmentShader: `uniform vec3 color; void main(){ gl_FragColor = vec4(color,1.0); }`,
-  side: THREE.BackSide,
-});
+// 두께별로 공유하는 외곽선 재질. InstancedMesh에서도 동작.
+const outlineMats = new Map();
+function outlineMaterial(thickness) {
+  if (!outlineMats.has(thickness)) {
+    outlineMats.set(thickness, new THREE.ShaderMaterial({
+      uniforms: { thickness: { value: thickness }, color: { value: new THREE.Color('#3a2a24') } },
+      vertexShader: `uniform float thickness;
+        void main(){ vec4 p = vec4(position + normal * thickness, 1.0);
+          #ifdef USE_INSTANCING
+            p = instanceMatrix * p;
+          #endif
+          gl_Position = projectionMatrix * modelViewMatrix * p; }`,
+      fragmentShader: `uniform vec3 color; void main(){ gl_FragColor = vec4(color,1.0); }`,
+      side: THREE.BackSide,
+    }));
+  }
+  return outlineMats.get(thickness);
+}
+const isOutline = (m) => [...outlineMats.values()].includes(m);
 
-export function mesh(geometry, material, { outline = true, cast = true, receive = true } = {}) {
+export function mesh(geometry, material, { outline = true, cast = true, receive = true, thickness = 0.012 } = {}) {
   const m = new THREE.Mesh(geometry, material);
   m.castShadow = cast;
   m.receiveShadow = receive;
   if (outline) {
-    const o = new THREE.Mesh(geometry, outlineMat);
+    const o = new THREE.Mesh(geometry, outlineMaterial(thickness));
     o.raycast = () => {};
     m.add(o);
   }
+  return m;
+}
+
+// 나무·꽃처럼 반복되는 물체는 인스턴싱으로 한 번에 그린다
+export function instanced(geometry, material, matrices, { outline = true, thickness = 0.03, cast = true } = {}) {
+  const make = (mat) => {
+    const im = new THREE.InstancedMesh(geometry, mat, matrices.length);
+    matrices.forEach((mx, i) => im.setMatrixAt(i, mx));
+    im.instanceMatrix.needsUpdate = true;
+    return im;
+  };
+  const m = make(material);
+  m.castShadow = cast;
+  m.receiveShadow = true;
+  if (outline) { const o = make(outlineMaterial(thickness)); o.raycast = () => {}; m.add(o); }
   return m;
 }
 
@@ -110,7 +136,7 @@ export function createLoop(renderer, canvas, frame) {
   io.observe(canvas);
   const tick = (now) => {
     raf = requestAnimationFrame(tick);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     if (!visible || document.hidden) return;
     frame(dt, now / 1000);
@@ -133,7 +159,7 @@ export function disposeScene(scene, renderer) {
   scene.traverse((o) => {
     o.geometry?.dispose();
     const mats = Array.isArray(o.material) ? o.material : [o.material];
-    mats.forEach((m) => { if (m && m !== outlineMat) { m.map?.dispose(); m.dispose(); } });
+    mats.forEach((m) => { if (m && !isOutline(m)) { m.map?.dispose(); m.dispose(); } });
   });
   renderer.dispose();
 }

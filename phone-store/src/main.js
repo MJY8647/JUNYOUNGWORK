@@ -66,64 +66,102 @@ function card(p) {
   </a>`;
 }
 
-// ---------- 홈: 3D 디오라마 매장 ----------
+// ---------- 홈: 걸어서 둘러보는 쇼핑 마을 ----------
+const SHOPS = [
+  { id: 'samsung', name: '삼성 코너', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => sellable.filter((p) => p.brand === 'samsung') },
+  { id: 'apple', name: '애플 코너', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => sellable.filter((p) => p.brand === 'apple') },
+  { id: 'budget', name: '실속폰 마켓', color: '#ef9a2d', wall: '#fff3dc', screen: '#ffe08a', greeting: '부담 없는 가격의 폰만 모아뒀어요.', items: () => sellable.filter((p) => p.tier === 'budget' || p.brand === 'etc') },
+  { id: 'plans', name: '요금제 센터', color: '#2fae8f', wall: '#e6f7f1', screen: '#9fe3cf', greeting: '어떤 요금제가 맞을지 같이 골라봐요.', items: () => [] },
+  { id: 'soon', name: '신상 쇼룸', color: '#8f6fd8', wall: '#f1ebff', screen: '#d6c6ff', greeting: '곧 나올 신상폰을 미리 만나보세요!', items: () => upcoming },
+];
+
+function shopPanelHtml(s) {
+  const body = s.id === 'plans'
+    ? `<ul class="plan-list">${PLANS.map((pl) => `<li><b>${pl.name}</b><span>월 ${won(pl.fee)} · 요금할인 25% 적용 시 ${won(pl.fee * 0.75)}</span><small>${pl.data} · ${pl.share} · ${pl.roaming}</small></li>`).join('')}</ul>
+       <p class="note">KT 공식 상품 페이지(2026-05) 기준. 휴대폰 상세 화면에서 요금제를 고르면 월 예상 금액이 계산돼요.</p>`
+    : `<div class="grid">${s.items().map(card).join('')}</div>`;
+  return `
+    <div class="sp-head" style="--c:${s.color}">
+      <div><h2 id="sp-title">${s.name}</h2><p>${s.greeting}</p></div>
+      <button type="button" class="sp-close" aria-label="가게에서 나가기">나가기</button>
+    </div>
+    <div class="sp-body">${body}</div>`;
+}
+
 async function viewHome() {
-  const featured = best.filter((p) => p.status === 'available').slice(0, 6);
   app.innerHTML = shell(`
-    <section class="hero">
-      <canvas class="hero-canvas" aria-label="3D 휴대폰 매장. 진열대를 누르면 상품을 볼 수 있어요"></canvas>
-      <div class="hero-overlay" aria-hidden="false"></div>
-      <div class="hero-copy">
-        <h1>${STORE.tagline}</h1>
-        <p>진열대를 눌러 구경해 보세요</p>
-      </div>
-      <div class="sheet" id="sheet">
-        <div class="chips" role="list" aria-label="진열 상품 바로 보기">
-          ${featured.map((p, i) => `<button type="button" role="listitem" class="chip" data-i="${i}"><span class="dot" style="background:${p.tone}"></span>${p.name}</button>`).join('')}
+    <section class="town">
+      <canvas class="town-canvas" aria-label="휴대폰 쇼핑 마을. 캐릭터를 움직여 가게에 들어가 보세요"></canvas>
+      <div class="town-overlay"></div>
+      <div class="town-top">
+        <p class="town-help">WASD·방향키로 걷기 · 땅을 탭하면 그곳으로 이동</p>
+        <div class="chips" role="list" aria-label="가게 바로 가기">
+          ${SHOPS.map((s) => `<button type="button" role="listitem" class="chip" data-shop="${s.id}"><span class="dot" style="background:${s.color}"></span>${s.name}</button>`).join('')}
         </div>
       </div>
+      <p class="zone-title" aria-live="polite"></p>
+      <button type="button" class="enter-btn" hidden></button>
+      <div class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="sp-title" hidden></div>
     </section>
     <section class="sec">
       <div class="sec-head"><h2>지금 많이 찾는 폰</h2><a href="#/products">전체 보기</a></div>
       <div class="grid">${best.map(card).join('')}</div>
-    </section>
-    <section class="sec">
-      <div class="sec-head"><h2>곧 들어와요</h2></div>
-      <div class="grid">${upcoming.map(card).join('')}</div>
     </section>`, 'home');
 
-  const sheet = document.getElementById('sheet');
-  const chipsHtml = sheet.innerHTML;
-  const { createDiorama } = await import('./three/diorama.js');
-  if (!document.body.contains(sheet)) return; // 로딩 중 다른 화면으로 이동
-  const scene = createDiorama({
-    canvas: app.querySelector('.hero-canvas'),
-    overlay: app.querySelector('.hero-overlay'),
-    products: featured,
-    storeName: STORE.name,
-    onSelect(p) {
-      app.querySelector('.hero')?.classList.toggle('selected', !!p);
-      if (!p) { sheet.innerHTML = chipsHtml; bindChips(); sheet.classList.remove('open'); return; }
-      sheet.classList.add('open');
-      sheet.innerHTML = `
-        <div class="sel">
-          <img src="${asset(p.image)}" alt="" width="88" height="88">
-          <div class="sel-info">
-            <h2>${p.name}</h2>
-            <p class="orig">${won(p.listPrice)}</p>
-            <p class="deal"><span class="pct">${pct(p)}%</span>${won(p.dealPrice)}~</p>
-          </div>
-        </div>
-        <div class="sel-actions">
-          <button type="button" class="btn ghost" data-act="reset">매장 전체 보기</button>
-          <a class="btn" href="#/products/${p.id}">자세히 보기</a>
-        </div>`;
-      sheet.querySelector('[data-act=reset]').onclick = () => scene.reset();
+  const root = app.querySelector('.town');
+  const enterBtn = root.querySelector('.enter-btn');
+  const zoneEl = root.querySelector('.zone-title');
+  const panel = root.querySelector('.shop-panel');
+  let town = null, nearShop = null, lastFocus = null, zoneTimer = 0;
+
+  function openShop(s) {
+    lastFocus = document.activeElement;
+    panel.innerHTML = shopPanelHtml(s);
+    panel.hidden = false;
+    enterBtn.hidden = true;
+    town?.setInput(false);
+    panel.querySelector('.sp-close').onclick = closeShop;
+    panel.querySelector('h2').setAttribute('tabindex', '-1');
+    panel.querySelector('h2').focus();
+  }
+  function closeShop() {
+    panel.hidden = true;
+    town?.setInput(true);
+    enterBtn.hidden = !nearShop;
+    (lastFocus && document.body.contains(lastFocus) ? lastFocus : root.querySelector('.town-canvas')).focus?.();
+  }
+  const onKey = (e) => {
+    if (!panel.hidden) { if (e.key === 'Escape') closeShop(); return; }
+    if ((e.key === 'e' || e.key === 'E' || (e.key === 'Enter' && e.target === document.body)) && nearShop) { e.preventDefault(); openShop(nearShop); }
+  };
+  addEventListener('keydown', onKey);
+  enterBtn.onclick = () => nearShop && openShop(nearShop);
+
+  const { createTown } = await import('./three/town.js');
+  if (!document.body.contains(root)) { removeEventListener('keydown', onKey); return; }
+  town = createTown({
+    canvas: root.querySelector('.town-canvas'),
+    overlay: root.querySelector('.town-overlay'),
+    shops: SHOPS,
+    onNear(s) {
+      nearShop = s;
+      enterBtn.hidden = !s || !panel.hidden;
+      if (s) enterBtn.innerHTML = `${s.name} 들어가기 <kbd>E</kbd>`;
     },
+    onZone(s) {
+      if (!s) return;
+      zoneEl.textContent = s.name;
+      zoneEl.style.setProperty('--c', s.color);
+      zoneEl.classList.remove('show');
+      void zoneEl.offsetWidth;
+      zoneEl.classList.add('show');
+      clearTimeout(zoneTimer);
+      zoneTimer = setTimeout(() => zoneEl.classList.remove('show'), 2200);
+    },
+    onEnterShop: openShop,
   });
-  const bindChips = () => sheet.querySelectorAll('.chip').forEach((c) => { c.onclick = () => scene.select(+c.dataset.i); });
-  bindChips();
-  cleanup = () => scene.dispose();
+  root.querySelectorAll('[data-shop]').forEach((b) => { b.onclick = () => town.walkTo(b.dataset.shop); });
+  cleanup = () => { clearTimeout(zoneTimer); removeEventListener('keydown', onKey); town.dispose(); };
 }
 
 // ---------- 목록 ----------
