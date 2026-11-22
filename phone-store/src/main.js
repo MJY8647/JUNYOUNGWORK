@@ -91,16 +91,17 @@ function shopPanelHtml(s) {
 async function viewHome() {
   app.innerHTML = shell(`
     <section class="town">
-      <canvas class="town-canvas" aria-label="휴대폰 쇼핑 마을. 캐릭터를 움직여 가게에 들어가 보세요"></canvas>
+      <canvas class="town-canvas" aria-label="작은 행성 위의 휴대폰 쇼핑 마을. 캐릭터를 움직여 가게에 들어가 보세요"></canvas>
       <div class="town-overlay"></div>
       <div class="town-top">
-        <p class="town-help">WASD·방향키로 걷기 · 땅을 탭하면 그곳으로 이동</p>
+        <p class="town-help">드래그로 시점 돌리기 · 휠로 확대 · WASD 걷기 · Space 점프 · 땅을 클릭하면 이동</p>
         <div class="chips" role="list" aria-label="가게 바로 가기">
           ${SHOPS.map((s) => `<button type="button" role="listitem" class="chip" data-shop="${s.id}"><span class="dot" style="background:${s.color}"></span>${s.name}</button>`).join('')}
         </div>
       </div>
       <p class="zone-title" aria-live="polite"></p>
       <button type="button" class="enter-btn" hidden></button>
+      <button type="button" class="jump-btn" aria-label="점프">점프</button>
       <div class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="sp-title" hidden></div>
     </section>
     <section class="sec">
@@ -137,9 +138,9 @@ async function viewHome() {
   addEventListener('keydown', onKey);
   enterBtn.onclick = () => nearShop && openShop(nearShop);
 
-  const { createTown } = await import('./three/town.js');
+  const { createPlanet } = await import('./three/planet.js');
   if (!document.body.contains(root)) { removeEventListener('keydown', onKey); return; }
-  town = createTown({
+  town = createPlanet({
     canvas: root.querySelector('.town-canvas'),
     overlay: root.querySelector('.town-overlay'),
     shops: SHOPS,
@@ -161,6 +162,7 @@ async function viewHome() {
     onEnterShop: openShop,
   });
   root.querySelectorAll('[data-shop]').forEach((b) => { b.onclick = () => town.walkTo(b.dataset.shop); });
+  root.querySelector('.jump-btn').onclick = () => town.jump();
   cleanup = () => { clearTimeout(zoneTimer); removeEventListener('keydown', onKey); town.dispose(); };
 }
 

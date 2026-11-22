@@ -5,7 +5,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 let gradient;
 function gradientMap() {
   if (gradient) return gradient;
-  const data = new Uint8Array([90, 90, 90, 255, 180, 180, 180, 255, 255, 255, 255, 255]);
+  const data = new Uint8Array([125, 125, 125, 255, 195, 195, 195, 255, 255, 255, 255, 255]);
   gradient = new THREE.DataTexture(data, 3, 1, THREE.RGBAFormat);
   gradient.minFilter = gradient.magFilter = THREE.NearestFilter;
   gradient.needsUpdate = true;

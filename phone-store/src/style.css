@@ -104,7 +104,7 @@ button, input, select { font: inherit; color: inherit; }
 .npc-bubble.show { opacity: 1; }
 
 .zone-title {
-  position: absolute; top: 34%; left: 50%; margin: 0; transform: translate(-50%, -50%) scale(.9); opacity: 0; pointer-events: none;
+  position: absolute; top: 24%; left: 50%; margin: 0; transform: translate(-50%, -50%) scale(.9); opacity: 0; pointer-events: none;
   font: clamp(30px, 6vw, 54px) var(--display); color: #fff; -webkit-text-stroke: 6px #3a2a24; paint-order: stroke fill; letter-spacing: .02em;
   transition: opacity .35s, transform .35s cubic-bezier(.3,1.5,.5,1);
 }
@@ -255,3 +255,12 @@ button, input, select { font: inherit; color: inherit; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+.jump-btn {
+  position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  width: 64px; height: 64px; border-radius: 50%; border: 3px solid #3a2a24; background: #fff; color: #3a2a24;
+  font: 16px var(--display); box-shadow: 0 4px 0 #3a2a24; cursor: pointer; display: none;
+}
+.jump-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #3a2a24; }
+@media (hover: none) { .jump-btn { display: block; } }
+.town { background: linear-gradient(#9fdcf2 0%, #cdeefa 55%, #fff1dc 100%); }
