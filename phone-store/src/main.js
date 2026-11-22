@@ -70,17 +70,62 @@ function card(p) {
 // 가게 간판 이름이 곧 가게 이름. soon: 준비 중인 가게 (상품 없음)
 const SOON = { name: 'COMING SOON', greeting: '곧 문을 열어요! 조금만 기다려 주세요.', soon: true, items: () => [] };
 const SHOPS = [
-  { id: 'samsung', name: 'SAMSUNG', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => sellable.filter((p) => p.brand === 'samsung') },
-  { id: 'apple', name: 'Apple', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => sellable.filter((p) => p.brand === 'apple') },
+  { id: 'samsung', name: 'SAMSUNG', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => PRODUCTS.filter((p) => p.brand === 'samsung') },
+  { id: 'apple', name: 'Apple', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => PRODUCTS.filter((p) => p.brand === 'apple') },
   { id: 'soon-1', color: '#ef9a2d', wall: '#fff3dc', screen: '#ffe08a', ...SOON },
   { id: 'soon-2', color: '#2fae8f', wall: '#e6f7f1', screen: '#9fe3cf', ...SOON },
   { id: 'soon-3', color: '#8f6fd8', wall: '#f1ebff', screen: '#d6c6ff', ...SOON },
 ];
 
-function shopPanelHtml(s) {
-  const body = s.soon
-    ? '<p class="empty">준비 중인 가게예요. 곧 새로운 폰을 만나보실 수 있어요.</p>'
-    : `<div class="grid">${s.items().map(card).join('')}</div>`;
+// 가게 안 시리즈 분류. match는 위에서부터 먼저 맞는 시리즈로 들어가고, 화면에는 order 순서로 보여준다.
+const SERIES = {
+  samsung: {
+    order: ['fold', 'flip', 'ultra', 'basic'],
+    list: [
+      { id: 'fold', label: '폴드', match: (n) => n.includes('폴드') },
+      { id: 'flip', label: '플립', match: (n) => n.includes('플립') },
+      { id: 'ultra', label: '울트라', match: (n) => n.includes('울트라') },
+      { id: 'basic', label: '일반', match: () => true },
+    ],
+  },
+  apple: {
+    order: ['duo', 'pro', 'basic', 'se-air'],
+    list: [
+      { id: 'duo', label: '듀오', match: (n) => n.includes('듀오') },
+      { id: 'pro', label: '프로', match: (n) => n.includes('프로') },
+      { id: 'se-air', label: 'SE · Air', match: (n) => n.includes('에어') || /\de$/.test(n) },
+      { id: 'basic', label: '일반', match: () => true },
+    ],
+  },
+};
+// 최신순: 출시 예정 → 출시일 최근 순
+const isSoon = (p) => (p.status === 'upcoming' ? 1 : 0);
+const newestFirst = (a, b) => isSoon(b) - isSoon(a) || (b.release ?? '').localeCompare(a.release ?? '');
+function seriesOf(shop) {
+  const def = SERIES[shop.id];
+  const groups = Object.fromEntries(def.list.map((c) => [c.id, []]));
+  shop.items().forEach((p) => groups[def.list.find((c) => c.match(p.name)).id].push(p));
+  return def.order.map((id) => ({ ...def.list.find((c) => c.id === id), items: groups[id].sort(newestFirst) }));
+}
+
+function shopPanelHtml(s, catId = null) {
+  let body;
+  if (s.soon) body = '<p class="empty">준비 중인 가게예요. 곧 새로운 폰을 만나보실 수 있어요.</p>';
+  else if (!catId) {
+    body = `<div class="cat-grid">${seriesOf(s).map((c) => {
+      const cover = c.items.find((p) => p.image);
+      const soonN = c.items.filter((p) => p.status === 'upcoming').length;
+      return `<button type="button" class="cat-tile" data-cat="${c.id}" ${c.items.length ? '' : 'disabled'}>
+        <span class="cat-img">${cover ? `<img src="${asset(cover.image)}" alt="" width="120" height="120">` : ''}</span>
+        <span class="cat-name">${c.label}</span>
+        <span class="cat-count">${c.items.length ? `${c.items.length}개 모델${soonN ? ` · 출시 예정 ${soonN}` : ''}` : '준비 중'}</span>
+      </button>`;
+    }).join('')}</div>`;
+  } else {
+    const c = seriesOf(s).find((x) => x.id === catId);
+    body = `<div class="cat-bar"><button type="button" class="cat-back">← 시리즈 목록</button><h3 id="cat-title" tabindex="-1">${c.label} <span class="muted">${c.items.length}개 · 최신순</span></h3></div>
+      <div class="grid">${c.items.map(card).join('')}</div>`;
+  }
   return `
     <div class="sp-head" style="--c:${s.color}">
       <div><h2 id="sp-title">${s.name}</h2><p>${s.greeting}</p></div>
@@ -116,15 +161,23 @@ async function viewHome() {
   const panel = root.querySelector('.shop-panel');
   let town = null, nearShop = null, lastFocus = null, zoneTimer = 0;
 
+  function showShop(s, catId = null) {
+    panel.innerHTML = shopPanelHtml(s, catId);
+    panel.scrollTop = 0;
+    panel.querySelector('.sp-close').onclick = closeShop;
+    panel.querySelectorAll('.cat-tile').forEach((b) => { b.onclick = () => showShop(s, b.dataset.cat); });
+    const back = panel.querySelector('.cat-back');
+    if (back) back.onclick = () => { showShop(s); panel.querySelector(`.cat-tile[data-cat="${catId}"]`)?.focus(); };
+    const focusEl = panel.querySelector('#cat-title') ?? panel.querySelector('h2');
+    focusEl.setAttribute('tabindex', '-1');
+    if (!back || catId) focusEl.focus();
+  }
   function openShop(s) {
     lastFocus = document.activeElement;
-    panel.innerHTML = shopPanelHtml(s);
     panel.hidden = false;
     enterBtn.hidden = true;
     town?.setInput(false);
-    panel.querySelector('.sp-close').onclick = closeShop;
-    panel.querySelector('h2').setAttribute('tabindex', '-1');
-    panel.querySelector('h2').focus();
+    showShop(s);
   }
   function closeShop() {
     panel.hidden = true;
