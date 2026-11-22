@@ -67,18 +67,19 @@ function card(p) {
 }
 
 // ---------- 홈: 걸어서 둘러보는 쇼핑 마을 ----------
+// 가게 간판 이름이 곧 가게 이름. soon: 준비 중인 가게 (상품 없음)
+const SOON = { name: 'COMING SOON', greeting: '곧 문을 열어요! 조금만 기다려 주세요.', soon: true, items: () => [] };
 const SHOPS = [
-  { id: 'samsung', name: '삼성 코너', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => sellable.filter((p) => p.brand === 'samsung') },
-  { id: 'apple', name: '애플 코너', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => sellable.filter((p) => p.brand === 'apple') },
-  { id: 'budget', name: '실속폰 마켓', color: '#ef9a2d', wall: '#fff3dc', screen: '#ffe08a', greeting: '부담 없는 가격의 폰만 모아뒀어요.', items: () => sellable.filter((p) => p.tier === 'budget' || p.brand === 'etc') },
-  { id: 'plans', name: '요금제 센터', color: '#2fae8f', wall: '#e6f7f1', screen: '#9fe3cf', greeting: '어떤 요금제가 맞을지 같이 골라봐요.', items: () => [] },
-  { id: 'soon', name: '신상 쇼룸', color: '#8f6fd8', wall: '#f1ebff', screen: '#d6c6ff', greeting: '곧 나올 신상폰을 미리 만나보세요!', items: () => upcoming },
+  { id: 'samsung', name: 'SAMSUNG', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => sellable.filter((p) => p.brand === 'samsung') },
+  { id: 'apple', name: 'Apple', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => sellable.filter((p) => p.brand === 'apple') },
+  { id: 'soon-1', color: '#ef9a2d', wall: '#fff3dc', screen: '#ffe08a', ...SOON },
+  { id: 'soon-2', color: '#2fae8f', wall: '#e6f7f1', screen: '#9fe3cf', ...SOON },
+  { id: 'soon-3', color: '#8f6fd8', wall: '#f1ebff', screen: '#d6c6ff', ...SOON },
 ];
 
 function shopPanelHtml(s) {
-  const body = s.id === 'plans'
-    ? `<ul class="plan-list">${PLANS.map((pl) => `<li><b>${pl.name}</b><span>월 ${won(pl.fee)} · 요금할인 25% 적용 시 ${won(pl.fee * 0.75)}</span><small>${pl.data} · ${pl.share} · ${pl.roaming}</small></li>`).join('')}</ul>
-       <p class="note">KT 공식 상품 페이지(2026-05) 기준. 휴대폰 상세 화면에서 요금제를 고르면 월 예상 금액이 계산돼요.</p>`
+  const body = s.soon
+    ? '<p class="empty">준비 중인 가게예요. 곧 새로운 폰을 만나보실 수 있어요.</p>'
     : `<div class="grid">${s.items().map(card).join('')}</div>`;
   return `
     <div class="sp-head" style="--c:${s.color}">
@@ -96,7 +97,7 @@ async function viewHome() {
       <div class="town-top">
         <p class="town-help">드래그로 시점 돌리기 · 휠로 확대 · WASD 걷기 · Space 점프 · 땅을 클릭하면 이동</p>
         <div class="chips" role="list" aria-label="가게 바로 가기">
-          ${SHOPS.map((s) => `<button type="button" role="listitem" class="chip" data-shop="${s.id}"><span class="dot" style="background:${s.color}"></span>${s.name}</button>`).join('')}
+          ${SHOPS.filter((s) => !s.soon).map((s) => `<button type="button" role="listitem" class="chip" data-shop="${s.id}"><span class="dot" style="background:${s.color}"></span>${s.name}</button>`).join('')}
         </div>
       </div>
       <p class="zone-title" aria-live="polite"></p>
