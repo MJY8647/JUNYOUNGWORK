@@ -15,7 +15,8 @@ export function retailPrice(product, storageIdx) {
   return storageIdx === 0 ? product.listPrice : null;
 }
 
-export function quote({ product, storageIdx = 0, supportType = 'device', plan, months = 24 }) {
+// card: 선택한 제휴카드({ max }). 전월 실적 충족 시 받는 월 최대 청구할인으로, 월 납부액보다 커질 수 없다.
+export function quote({ product, storageIdx = 0, supportType = 'device', plan, months = 24, card = null }) {
   const retail = retailPrice(product, storageIdx);
   if (retail == null || !plan) return null;
   // 기기값 할인 = 수집 당시 표시된 최대 할인액(출고가 - 할인가). 실제 지원금은 조건에 따라 다름.
@@ -25,11 +26,16 @@ export function quote({ product, storageIdx = 0, supportType = 'device', plan, m
   const deviceMonthly = monthlyInstallment(principal, months);
   const planDiscount = supportType === 'plan' ? Math.round(plan.fee * PLAN_DISCOUNT_RATE) : 0;
   const planMonthly = plan.fee - planDiscount;
+  const beforeCard = deviceMonthly + planMonthly;
+  const cardDiscount = card ? Math.min(card.max, beforeCard) : 0;
   return {
     retail, deviceDiscount, principal, months, deviceMonthly,
     upfront: months === 0 ? principal : 0,
     planFee: plan.fee, planDiscount, planMonthly,
-    totalMonthly: deviceMonthly + planMonthly,
+    beforeCard, cardDiscount, totalMonthly: beforeCard - cardDiscount,
+    // 할인방법 비교용: 24개월 동안 받는 할인 총액
+    deviceDiscountTotal: Math.max(0, product.listPrice - product.dealPrice),
+    planDiscountTotal24: Math.round(plan.fee * PLAN_DISCOUNT_RATE) * 24,
   };
 }
 

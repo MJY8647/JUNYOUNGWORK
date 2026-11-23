@@ -1,6 +1,6 @@
 import './style.css';
 import { PRODUCTS } from './products.js';
-import { STORE, PLANS, JOIN_TYPES, SUPPORT_TYPES, MONTHS } from './config.js';
+import { STORE, PLANS, JOIN_TYPES, SUPPORT_TYPES, MONTHS, DEFAULT_PLAN, RECOMMENDED_PLANS, PLAN_GROUPS, planById, CHOICE_BENEFITS, AGE_BONUS, DELIVERY, GIFTS, CARDS, CONSULTS } from './config.js';
 import { quote, retailPrice, won } from './pricing.js';
 import { cart } from './cart.js';
 import { account } from './account.js';
@@ -271,7 +271,23 @@ function viewProducts(params) {
   document.getElementById('sort').onchange = (e) => { location.hash = q('sort', e.target.value); };
 }
 
-// ---------- 상세 ----------
+// ---------- 상세 (KT초이스 상세 구성: 옵션 → 요금제·혜택 → 할부·배송 → 사은품·제휴카드·상담 → 최종 주문서 → 상세정보·후기·유의사항) ----------
+const RECENT = 'tps-recent-v1';
+const recent = {
+  get() { try { return JSON.parse(localStorage.getItem(RECENT)) ?? []; } catch { return []; } },
+  push(id) { try { localStorage.setItem(RECENT, JSON.stringify([id, ...this.get().filter((x) => x !== id)].slice(0, 10))); } catch { /* 무시 */ } },
+};
+const NOTICES = [
+  ['통신사 공식신청서 작성', '개통하려면 주문 접수 후 통신사 공식신청서를 명의자 본인 정보로 작성해야 해요.'],
+  ['가입 유형', '다른 통신사에서 오시면 번호이동, 지금 KT를 쓰시면 기기변경을 선택해 주세요. 미성년자·외국인 명의는 법정대리인 동의나 추가 서류가 필요할 수 있어요.'],
+  ['지원금', '지원금은 선택한 요금제·가입유형에 따라 달라지고, 통신사 정책에 따라 예고 없이 바뀔 수 있어요. 최종 지원금은 개통 시점에 확정돼요.'],
+  ['요금제', '선택약정(요금할인 25%)은 약정 기간 안에 해지하면 할인반환금이 생길 수 있어요. 가입 후 요금제를 바꾸면 지원금·혜택 조건이 달라질 수 있어요.'],
+  ['사은품', '사은품은 재고에 따라 같은 급의 상품으로 바뀔 수 있고, 개통 취소·반품 시 회수되거나 해당 금액이 청구될 수 있어요.'],
+  ['결제·할부', '단말기 대금은 일시불 또는 최대 36개월 할부로 낼 수 있고, 할부 시 할부수수료(연 5.9%)가 붙어요. 신용 상태에 따라 할부 승인이 제한될 수 있어요.'],
+  ['배송', '개통이 끝나면 선택한 방법으로 보내드려요. 도서·산간 지역은 1~2일 더 걸릴 수 있고, 미개봉 정품으로 배송돼요.'],
+  ['취소·교환·환불', '개통 전 단순 변심은 받은 날부터 7일 안에 교환·반품할 수 있어요. 개통 후에는 통신사 정책과 관련 법령이 적용되고, 고객 부주의로 인한 파손은 교환·환불이 제한될 수 있어요.'],
+];
+
 function viewDetail(id) {
   const p = byId(id);
   if (!p) return viewNotFound();
@@ -284,9 +300,12 @@ function viewDetail(id) {
     document.getElementById('notify').onclick = () => toast('프로토타입이라 알림 신청은 아직 저장되지 않아요.');
     return;
   }
+  recent.push(p.id);
   const colors = p.colors ?? [{ name: '대표 색상', hex: p.tone }];
-  const s = { storageIdx: 0, color: 0, joinType: 'change', supportType: 'device', planId: 'choice-basic', months: 24 };
+  const gifts = GIFTS.filter((g) => g.brand === 'all' || g.brand === p.brand);
+  const s = { storageIdx: 0, color: 0, joinType: 'change', supportType: 'device', planId: DEFAULT_PLAN, benefit: CHOICE_BENEFITS[0].id, months: 24, delivery: 'parcel', cardId: '', consults: [] };
   const soldout = p.status === 'soldout';
+  let tab = 'info';
 
   const opt = (name, items, cur, labelFn, disabledFn = () => false) => `
     <div class="opts" role="radiogroup" aria-label="${name}">
@@ -296,16 +315,22 @@ function viewDetail(id) {
         return `<button type="button" role="radio" class="opt" data-k="${name}" data-v="${v}" aria-checked="${v === cur}" ${dis ? 'disabled' : ''}>${labelFn(it, i)}</button>`;
       }).join('')}
     </div>`;
+  const planLabel = (pl) => `${pl.name}<small>월 ${won(pl.fee)} · ${pl.data}${pl.roaming ? ` · ${pl.roaming}` : ''}</small>`;
 
   function render() {
-    const plan = PLANS.find((x) => x.id === s.planId);
-    const qt = quote({ product: p, storageIdx: s.storageIdx, supportType: s.supportType, plan, months: s.months });
+    const plan = planById(s.planId);
+    const card = CARDS.find((c) => c.id === s.cardId) ?? null;
+    const qt = quote({ product: p, storageIdx: s.storageIdx, supportType: s.supportType, plan, months: s.months, card });
+    const shownPlans = [...new Set([...RECOMMENDED_PLANS, s.planId])].map(planById);
+    const recents = recent.get().filter((x) => x !== p.id).map(byId).filter((x) => x && x.status !== 'upcoming').slice(0, 6);
+    const benefit = CHOICE_BENEFITS.find((b) => b.id === s.benefit);
     const info = document.getElementById('pdp-info');
     info.innerHTML = `
       <nav class="crumb"><a href="#/">홈</a> › <a href="#/products">휴대폰</a></nav>
       <h1>${p.name}</h1>
       <p class="orig">${won(p.listPrice)}</p>
       <p class="deal big"><span class="pct">${pct(p)}%</span>${won(p.dealPrice)}~</p>
+      <div class="pdp-tags"><span>할부원금 최대 ${won(qt?.deviceDiscountTotal ?? 0)} 할인</span><span>${STORE.sameDay}</span></div>
       ${soldout ? '<p class="warn">현재 품절된 상품이에요.</p>' : ''}
 
       <h2 class="opt-title">색상 <span class="muted">${colors[s.color].name}</span></h2>
@@ -315,36 +340,58 @@ function viewDetail(id) {
       ${p.colors ? '' : '<p class="note">색상 옵션 데이터가 없어 대표 색상만 보여드려요.</p>'}
 
       <h2 class="opt-title">용량</h2>
-      ${opt('storageIdx', p.storages, s.storageIdx, (st, i) => {
-        const r = retailPrice(p, i);
-        return `${st}<small>${r ? won(r) : '가격 문의'}</small>`;
-      }, (_, i) => retailPrice(p, i) == null)}
+      ${opt('storageIdx', p.storages, s.storageIdx, (st, i) => { const r = retailPrice(p, i); return `${st}<small>${r ? won(r) : '가격 문의'}</small>`; }, (_, i) => retailPrice(p, i) == null)}
 
       <h2 class="opt-title">가입 유형</h2>
       ${opt('joinType', JOIN_TYPES, s.joinType, (j) => `${j.label}<small>${j.desc}</small>`)}
 
       <h2 class="opt-title">할인 방법</h2>
-      ${opt('supportType', SUPPORT_TYPES, s.supportType, (j) => `${j.label}<small>${j.desc}</small>`)}
+      ${opt('supportType', SUPPORT_TYPES, s.supportType, (j) => `${j.label}<small>${j.id === 'device' ? `기기값 총 ${won(qt?.deviceDiscountTotal ?? 0)} 할인` : `24개월 총 ${won(qt?.planDiscountTotal24 ?? 0)} 할인`}</small>`)}
 
-      <h2 class="opt-title">요금제</h2>
-      ${opt('planId', PLANS, s.planId, (pl) => `${pl.name}<small>월 ${won(pl.fee)} · ${pl.data} · ${pl.roaming}</small>`)}
+      <h2 class="opt-title">요금제 <span class="muted">추천</span></h2>
+      ${opt('planId', shownPlans, s.planId, planLabel)}
+      <button type="button" class="btn ghost block" id="more-plans" ${soldout ? 'disabled' : ''}>다른 요금제 선택 <small class="muted">${PLANS.length}개</small></button>
+      <p class="note">${AGE_BONUS}</p>
+
+      ${plan.choice ? `<h2 class="opt-title">요금제 특별 혜택 <span class="muted">택1</span></h2>
+      ${opt('benefit', CHOICE_BENEFITS, s.benefit, (b) => `${b.label}<small>${b.desc}</small>`)}` : ''}
 
       <h2 class="opt-title">할부 기간</h2>
-      ${opt('months', MONTHS.map((m) => ({ id: m })), s.months, (m) => (m.id ? `${m.id}개월` : '일시납'))}
+      ${opt('months', MONTHS.map((m) => ({ id: m })), s.months, (m) => (m.id ? `${m.id}개월${m.id === 24 ? ' <small>추천</small>' : ''}` : '일시납'))}
+
+      <h2 class="opt-title">배송 방법</h2>
+      ${opt('delivery', DELIVERY, s.delivery, (d) => `${d.label}<small>${d.desc}</small>`)}
+
+      <h2 class="opt-title">${STORE.name} 기본 사은품 <span class="muted">100% 증정</span></h2>
+      <ul class="gifts">${gifts.map((g) => `<li><img src="${asset(g.image)}" alt="" width="64" height="64"><div><b>${g.label}</b><small>${g.desc}</small></div></li>`).join('')}</ul>
+
+      <h2 class="opt-title">추가 할인</h2>
+      <label class="card-pick">이용 중인 KT 제휴카드로 할인받기
+        <select id="card" ${soldout ? 'disabled' : ''}><option value="">선택 안 함</option>${CARDS.map((c) => `<option value="${c.id}" ${c.id === s.cardId ? 'selected' : ''}>${c.name} · 월 최대 ${won(c.max)}</option>`).join('')}</select>
+      </label>
+      <p class="note">전월 실적 조건을 채웠을 때 받는 최대 청구할인이에요. 조건은 카드사마다 달라요.</p>
+
+      <h2 class="opt-title">추가 상담이 필요하면 체크해 주세요 <span class="muted">여러 개 가능</span></h2>
+      <div class="opts">${CONSULTS.map((c) => `<button type="button" class="opt" role="checkbox" data-consult="${c.id}" aria-checked="${s.consults.includes(c.id)}">${c.label}<small>${c.desc}</small></button>`).join('')}</div>
 
       ${qt ? `
       <div class="summary" aria-live="polite">
-        <h2>월 예상 금액</h2>
+        <h2>최종 주문서</h2>
+        <p class="sum-item"><b>${p.name}</b> · ${colors[s.color].name} · ${p.storages[s.storageIdx]} · ${JOIN_TYPES.find((j) => j.id === s.joinType).label}<br><span class="muted">${plan.name}${plan.choice ? ` (${benefit.label})` : ''} · ${s.months ? `${s.months}개월 할부` : '일시납'} · ${DELIVERY.find((d) => d.id === s.delivery).label}</span></p>
         <dl>
           <dt>출고가</dt><dd>${won(qt.retail)}</dd>
-          <dt>기기값 할인</dt><dd>-${won(qt.deviceDiscount)}</dd>
+          <dt>지원금 (기기값 할인)</dt><dd>-${won(qt.deviceDiscount)}</dd>
+          <dt class="sub">ㄴ 공통지원금 · 추가지원금 구분</dt><dd class="sub">개통 시 확정</dd>
           <dt>할부원금</dt><dd>${won(qt.principal)}</dd>
-          ${qt.months ? `<dt>월 할부금 (${qt.months}개월, 연 5.9% 포함)</dt><dd>${won(qt.deviceMonthly)}</dd>` : `<dt>일시납 결제</dt><dd>${won(qt.upfront)}</dd>`}
+          ${qt.months ? `<dt>월 할부금 (${qt.months}개월, 할부이자 포함)</dt><dd>${won(qt.deviceMonthly)}</dd><dt class="sub">ㄴ 할부이자</dt><dd class="sub">연 5.9%</dd>` : `<dt>일시납 결제</dt><dd>${won(qt.upfront)}</dd>`}
           <dt>요금제 월정액</dt><dd>${won(qt.planFee)}</dd>
           ${qt.planDiscount ? `<dt>요금할인 25%</dt><dd>-${won(qt.planDiscount)}</dd>` : ''}
+          <dt>월 통신요금</dt><dd>${won(qt.planMonthly)}</dd>
+          ${card ? `<dt>제휴카드 할인 (실적 충족 시)</dt><dd>-${won(qt.cardDiscount)}</dd>` : ''}
         </dl>
-        <p class="total"><span>매달 내는 돈</span><b>${won(qt.totalMonthly)}</b></p>
-        <p class="note">기기값 할인은 수집 당시 표시된 최대 할인액 기준 예상치예요. 실제 지원금은 요금제·가입유형·개통 시점에 따라 달라지고, 상담 후 확정돼요.</p>
+        <p class="total"><span>월 예상 금액</span><b>${won(qt.totalMonthly)}</b></p>
+        <p class="note">부가세 포함 · 지원금은 수집 당시 표시된 최대 할인액 기준 예상치예요. 실제 지원금은 요금제·가입유형·개통 시점에 따라 달라지고 상담 후 확정돼요.</p>
+        <p class="sum-gifts">함께 받는 혜택: ${gifts.map((g) => g.label).join(' · ')}</p>
       </div>` : '<p class="warn">선택한 옵션의 가격 정보가 없어요.</p>'}`;
 
     info.querySelectorAll('[data-k]').forEach((b) => {
@@ -352,23 +399,86 @@ function viewDetail(id) {
         const k = b.dataset.k;
         s[k] = ['storageIdx', 'color', 'months'].includes(k) ? +b.dataset.v : b.dataset.v;
         if (k === 'color') viewer?.setColor(colors[s.color].hex);
+        audio.sfx('click');
         render();
         info.querySelector(`[data-k="${k}"][data-v="${b.dataset.v}"]`)?.focus();
       };
     });
+    info.querySelectorAll('[data-consult]').forEach((b) => {
+      b.onclick = () => {
+        const c = b.dataset.consult;
+        s.consults = s.consults.includes(c) ? s.consults.filter((x) => x !== c) : [...s.consults, c];
+        audio.sfx('click'); render();
+        info.querySelector(`[data-consult="${c}"]`)?.focus();
+      };
+    });
+    info.querySelector('#card').onchange = (e) => { s.cardId = e.target.value; render(); info.querySelector('#card').focus(); };
+    info.querySelector('#more-plans').onclick = openPlanPicker;
+
+    // 상세정보 · 구매후기 · 유의사항
+    const tabsEl = document.getElementById('pdp-tabs');
+    const tabs = [['info', '상세정보'], ['review', '구매후기'], ['notice', '유의사항']];
+    tabsEl.innerHTML = `
+      <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${k === tab}">${l}</button>`).join('')}</div>
+      <div class="tab-body">${tab === 'info' ? `
+        <dl class="kv spec">
+          <dt>제조사</dt><dd>${p.brand === 'samsung' ? '삼성전자' : p.brand === 'apple' ? 'Apple' : '기타'}</dd>
+          <dt>출시일</dt><dd>${p.release ? `${p.release.slice(0, 4)}.${p.release.slice(4, 6)}.${p.release.slice(6)}` : '-'}</dd>
+          <dt>용량</dt><dd>${p.storages.join(' · ')}</dd>
+          <dt>색상</dt><dd>${colors.map((c) => c.name).join(' · ')}</dd>
+          <dt>출고가</dt><dd>${won(p.listPrice)}</dd>
+          <dt>통신사</dt><dd>KT</dd>
+          <dt>기본 사은품</dt><dd>${gifts.map((g) => g.label).join(', ')}</dd>
+        </dl>
+        <img class="detail-photo" src="${asset(p.image)}" alt="${p.name} 상품 사진" loading="lazy">`
+      : tab === 'review' ? `<p class="empty">아직 등록된 구매후기가 없어요. 개통을 마친 고객만 후기를 남길 수 있어요.</p>`
+      : `<div class="notices">${NOTICES.map(([t, d]) => `<details><summary>${t}</summary><p>${d}</p></details>`).join('')}</div>`}</div>
+      ${recents.length ? `<h2 class="sub">최근 본 상품</h2><div class="recent">${recents.map((r) => `<a href="#/products/${r.id}"><img src="${asset(r.image)}" alt="" width="72" height="72"><span>${r.name}</span><b>${won(r.dealPrice)}</b></a>`).join('')}</div>` : ''}`;
+    tabsEl.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.tab; render(); tabsEl.querySelector(`[data-tab="${tab}"]`).focus(); }; });
+
     const bar = document.getElementById('buybar');
     bar.innerHTML = soldout
       ? `<div><span class="muted">품절</span></div><button type="button" class="btn" id="restock">재입고 알림</button>`
       : `<div><span class="muted">월 예상</span><b>${qt ? won(qt.totalMonthly) : '-'}</b></div>
          <div class="buy-btns"><button type="button" class="btn ghost" id="add" ${qt ? '' : 'disabled'}>장바구니</button><button type="button" class="btn" id="buy" ${qt ? '' : 'disabled'}>바로 구매</button></div>`;
-    document.getElementById('add')?.addEventListener('click', () => {
-      cart.add({ productId: p.id, ...s, colorName: colors[s.color].name });
-      audio.sfx('pop');
-      toast('장바구니에 담았어요');
-      updateBadges();
-    });
-    document.getElementById('buy')?.addEventListener('click', () => purchase.startBuy({ productId: p.id, ...s, colorName: colors[s.color].name }));
+    const item = () => ({ productId: p.id, ...s, colorName: colors[s.color].name });
+    document.getElementById('add')?.addEventListener('click', () => { cart.add(item()); audio.sfx('pop'); toast('장바구니에 담았어요'); updateBadges(); });
+    document.getElementById('buy')?.addEventListener('click', () => purchase.startBuy(item()));
     document.getElementById('restock')?.addEventListener('click', () => toast('프로토타입이라 알림 신청은 아직 저장되지 않아요.'));
+  }
+
+  // "다른 요금제 선택" 팝업: 분류 탭 + 요금제 목록
+  function openPlanPicker() {
+    const back = document.activeElement;
+    let group = planById(s.planId).group;
+    const m = document.createElement('div');
+    m.className = 'modal';
+    const draw = () => {
+      const list = PLANS.filter((pl) => pl.group === group);
+      const g = PLAN_GROUPS.find((x) => x.id === group);
+      m.innerHTML = `
+        <div class="modal-box plan-pop" role="dialog" aria-modal="true" aria-labelledby="pp-title">
+          <div class="pp-head"><h2 id="pp-title">요금제 선택</h2><button type="button" class="sp-close dark" data-close aria-label="닫기">닫기</button></div>
+          <div class="tabs pp-tabs" role="tablist">${PLAN_GROUPS.map((x) => `<button type="button" role="tab" data-g="${x.id}" aria-selected="${x.id === group}">${x.label}</button>`).join('')}</div>
+          <p class="note">${g.desc}</p>
+          <ul class="pp-list">${list.map((pl) => `
+            <li><button type="button" class="pp-item" data-plan="${pl.id}" aria-pressed="${pl.id === s.planId}">
+              <span class="pp-name">${pl.name}${RECOMMENDED_PLANS.includes(pl.id) ? '<em>추천</em>' : ''}</span>
+              <span class="pp-fee">월 ${won(pl.fee)}<small>요금할인 25% 시 ${won(pl.fee - Math.round(pl.fee * 0.25))}</small></span>
+              <span class="pp-desc">${[pl.data, pl.share, pl.roaming, pl.membership && `멤버십 ${pl.membership}`, pl.choice && '혜택 택1'].filter(Boolean).join(' · ')}</span>
+            </button></li>`).join('')}</ul>
+          <p class="note">KT 통합요금제 · 부가세 포함 · KT 공식 상품 페이지(2026년 7월·11월 게시) 기준</p>
+        </div>`;
+      m.querySelector('[data-close]').onclick = close;
+      m.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { group = b.dataset.g; audio.sfx('click'); draw(); m.querySelector(`[data-g="${group}"]`).focus(); }; });
+      m.querySelectorAll('[data-plan]').forEach((b) => { b.onclick = () => { s.planId = b.dataset.plan; audio.sfx('pop'); close(); render(); }; });
+    };
+    const close = () => { m.remove(); back?.focus?.(); };
+    m.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    m.addEventListener('click', (e) => { if (e.target === m) close(); });
+    document.body.appendChild(m);
+    draw();
+    m.querySelector('[aria-selected="true"]').focus();
   }
 
   app.innerHTML = shell(`
@@ -384,6 +494,7 @@ function viewDetail(id) {
       </div>
       <div class="pdp-info" id="pdp-info"></div>
     </section>
+    <section class="sec pdp-tabs" id="pdp-tabs"></section>
     <div class="buybar" id="buybar"></div>`, 'products');
 
   let viewer = null;
@@ -409,8 +520,9 @@ function viewDetail(id) {
 // ---------- 장바구니 ----------
 function lineQuote(it) {
   const p = byId(it.productId);
-  const plan = PLANS.find((x) => x.id === it.planId);
-  return p && { p, plan, q: quote({ product: p, storageIdx: it.storageIdx, supportType: it.supportType, plan, months: it.months }) };
+  const plan = planById(it.planId); // 예전 장바구니의 없어진 요금제는 기본 요금제로
+  const card = CARDS.find((c) => c.id === it.cardId) ?? null;
+  return p && { p, plan, card, q: quote({ product: p, storageIdx: it.storageIdx, supportType: it.supportType, plan, months: it.months, card }) };
 }
 
 function viewCart() {

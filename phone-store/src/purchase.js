@@ -1,5 +1,5 @@
 // 구매 흐름: 회원/비회원 선택 → 주문서 5단계 → 신청 완료 → 주문 조회, 그리고 로그인·3초 가입·마이페이지.
-import { JOIN_TYPES, SUPPORT_TYPES, CARRIERS } from './config.js';
+import { JOIN_TYPES, SUPPORT_TYPES, CARRIERS, DELIVERY, CHOICE_BENEFITS, CONSULTS, GIFTS } from './config.js';
 import { won } from './pricing.js';
 import { account, PROVIDERS, isRealLogin, startRealLogin } from './account.js';
 import { orders, STATUS_STEPS, digits, isValidPhone, isValidBirth, ageOn, needsStrongId, carrierError } from './orders.js';
@@ -23,10 +23,6 @@ const STRONG_ID = [
   { id: 'face', label: '안면인증', desc: '통신사 앱·PASS에서 신분증과 얼굴 사진을 대조' },
   { id: 'mobile-id', label: '모바일 신분증', desc: '행정안전부 모바일 신분증 앱으로 확인 (미리 발급 필요)' },
   { id: 'abstract', label: '주민등록초본', desc: '개통 당일 발급한 초본 제출' },
-];
-const DELIVERY = [
-  { id: 'parcel', label: '택배 (무료)', desc: '보통 1~2일, 도서·산간은 추가 소요' },
-  { id: 'quick', label: '당일 퀵', desc: '서울·수도권, 오후 4시 이전 개통 완료 시' },
 ];
 const PAY = [
   { id: 'card', label: '신용·체크카드' },
@@ -139,7 +135,12 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
   function itemSummary(item, compact = false) {
     const lq = lineQuote(item);
     if (!lq?.q) return '<p class="warn">주문할 상품 정보를 찾을 수 없어요.</p>';
-    const { p, plan, q } = lq;
+    const { p, plan, q, card } = lq;
+    const extras = [
+      plan.choice && `혜택 ${label(CHOICE_BENEFITS, item.benefit)}`,
+      card && `${card.name} (월 최대 ${won(card.max)})`,
+      item.consults?.length && `상담 요청: ${item.consults.map((c) => label(CONSULTS, c)).join(', ')}`,
+    ].filter(Boolean);
     return `
       <div class="osum ${compact ? 'compact' : ''}">
         <img src="${asset(p.image)}" alt="" width="80" height="80">
@@ -147,6 +148,7 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
           <h3>${p.name}</h3>
           <p class="muted">${esc(item.colorName)} · ${p.storages[item.storageIdx]} · ${label(JOIN_TYPES, item.joinType)} · ${label(SUPPORT_TYPES, item.supportType)}</p>
           <p class="muted">${plan.name} · ${item.months ? `${item.months}개월 할부` : '일시납'}</p>
+          ${extras.map((x) => `<p class="muted">${esc(x)}</p>`).join('')}
           <p class="line-price">월 ${won(q.totalMonthly)}${q.upfront ? ` <span class="muted">+ 일시납 ${won(q.upfront)}</span>` : ''}</p>
         </div>
       </div>`;
@@ -195,7 +197,7 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
       name: user?.name ?? '', birth: '', phone: '', carrier: item.joinType === 'change' ? 'KT' : '', code: '', verified: false, sentCode: '',
       guardian: false, strongId: '',
       recv: '', recvPhone: '', zip: user?.address?.zip ?? '', addr1: user?.address?.addr1 ?? '', addr2: user?.address?.addr2 ?? '',
-      delivery: 'parcel', memo: '', saveAddr: true, agrees: {}, pay: 'card',
+      delivery: item.delivery ?? 'parcel', memo: '', saveAddr: true, agrees: {}, pay: 'card',
     };
     let step = co.step ?? 0;
     // 인증은 인증번호를 받은 번호·통신사 그대로일 때만 유효하다
@@ -234,11 +236,12 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         <h2>배송 정보</h2>
         <label>받는 분 <input id="f-recv" autocomplete="name" value="${esc(f.recv || f.name)}"></label>
         <label>받는 분 연락처 <input id="f-recvPhone" type="tel" inputmode="numeric" autocomplete="tel" value="${esc(f.recvPhone || f.phone)}"></label>
+        <h3 class="opt-title">받는 방법</h3>${radios('delivery', DELIVERY, f.delivery)}
+        ${f.delivery === 'visit' ? '<p class="note">매장 방문수령은 주소를 입력하지 않아도 돼요. 방문 전에 연락 주세요.</p>' : `
         <label>우편번호 <input id="f-zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" value="${esc(f.zip)}"></label>
         <label>주소 <input id="f-addr1" autocomplete="address-line1" value="${esc(f.addr1)}"></label>
         <label>상세 주소 <input id="f-addr2" autocomplete="address-line2" value="${esc(f.addr2)}"></label>
-        <p class="note">실제 서비스에서는 우편번호 검색(주소 API)으로 입력해요.</p>
-        <h3 class="opt-title">배송 방법</h3>${radios('delivery', DELIVERY, f.delivery)}
+        <p class="note">실제 서비스에서는 우편번호 검색(주소 API)으로 입력해요.</p>`}
         <label>배송 요청사항 <select id="f-memo">${['', '문 앞에 놓아주세요', '경비실에 맡겨주세요', '배송 전 연락 주세요'].map((m) => `<option value="${m}" ${m === f.memo ? 'selected' : ''}>${m || '선택 안 함'}</option>`).join('')}</select></label>
         ${mode === 'member' ? `<label class="check"><input type="checkbox" id="f-saveAddr" ${f.saveAddr ? 'checked' : ''}> 기본 배송지로 저장</label>` : ''}`;
       if (step === 3) {
@@ -281,9 +284,11 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
       if (step === 2) {
         if (!f.recv.trim()) return ['f-recv', '받는 분 이름을 입력해 주세요.'];
         if (!isValidPhone(f.recvPhone)) return ['f-recvPhone', '받는 분 연락처를 확인해 주세요.'];
-        if (!/^\d{5}$/.test(f.zip)) return ['f-zip', '우편번호 5자리를 입력해 주세요.'];
-        if (!f.addr1.trim()) return ['f-addr1', '주소를 입력해 주세요.'];
-        if (!f.addr2.trim()) return ['f-addr2', '상세 주소를 입력해 주세요.'];
+        if (f.delivery !== 'visit') { // 매장 방문수령은 주소가 필요 없다
+          if (!/^\d{5}$/.test(f.zip)) return ['f-zip', '우편번호 5자리를 입력해 주세요.'];
+          if (!f.addr1.trim()) return ['f-addr1', '주소를 입력해 주세요.'];
+          if (!f.addr2.trim()) return ['f-addr2', '상세 주소를 입력해 주세요.'];
+        }
       }
       if (step === 3 && !['order', 'collect', 'third', 'carrier'].every((k) => f.agrees[k])) return [null, '필수 약관에 모두 동의해 주세요.'];
       return null;
@@ -350,6 +355,7 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         strongId: strong ? f.strongId : null,
         shipping: { recv: f.recv.trim(), phone: digits(f.recvPhone), zip: f.zip, addr1: f.addr1.trim(), addr2: f.addr2.trim(), method: f.delivery, memo: f.memo },
         pay: item.months ? 'installment' : f.pay, marketing: !!f.agrees.marketing,
+        gifts: GIFTS.filter((g) => g.brand === 'all' || g.brand === lq.p.brand).map((g) => g.label), consults: item.consults ?? [],
       });
       if (mode === 'member' && f.saveAddr) account.update({ address: { zip: f.zip, addr1: f.addr1.trim(), addr2: f.addr2.trim() } });
       if (item.key) cart.remove(item.key);
@@ -390,7 +396,7 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         <ol class="next-steps">
           <li><b>통신사 공식신청서 작성</b> — 명의자 정보로 KT 공식신청서를 작성해야 개통이 진행돼요.</li>
           ${o.strongId ? `<li><b>추가 본인확인</b> — 선택한 방법(${label(STRONG_ID, o.strongId)})으로 개통 전에 확인해요.</li>` : ''}
-          <li><b>개통 · 배송</b> — 개통이 끝나면 ${label(DELIVERY, o.shipping.method)}으로 보내드려요.</li>
+          <li><b>개통 · 배송</b> — 개통이 끝나면 선택한 방법(${label(DELIVERY, o.shipping.method)})으로 받으세요.</li>
         </ol>
         <button type="button" class="btn block" id="form">KT 공식신청서 작성하기</button>
         <div class="row2"><a class="btn ghost" href="${o.guest ? '#/orders' : '#/mypage'}">주문 조회</a><a class="btn ghost" href="#/">쇼핑 계속하기</a></div>
