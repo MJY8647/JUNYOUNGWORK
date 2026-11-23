@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isValidPhone, isValidBirth, ageOn, needsStrongId, carrierError, makeOrderNo, matchGuestOrder } from '../src/orders.js';
+import { formatPhone, isValidPhone, isValidBirth, ageOn, needsStrongId, carrierError, makeOrderNo, matchGuestOrder } from '../src/orders.js';
 
 test('휴대폰 번호 검증 (하이픈 허용)', () => {
   assert.equal(isValidPhone('010-1234-5678'), true);
@@ -47,4 +47,12 @@ test('비회원 주문조회는 이름·휴대폰·주문번호가 모두 맞아
   assert.equal(matchGuestOrder(o, { name: '홍길동', phone: '010-1234-5678', orderNo: 'ps261122000001' }), true);
   assert.equal(matchGuestOrder(o, { name: '홍길순', phone: '010-1234-5678', orderNo: 'PS261122000001' }), false);
   assert.equal(matchGuestOrder({ ...o, guest: false }, { name: '홍길동', phone: '01012345678', orderNo: 'PS261122000001' }), false);
+});
+
+test('휴대폰 번호 자동 하이픈', () => {
+  assert.equal(formatPhone('010'), '010');
+  assert.equal(formatPhone('0101234'), '010-1234');
+  assert.equal(formatPhone('0101234567'), '010-123-4567');
+  assert.equal(formatPhone('01012345678'), '010-1234-5678');
+  assert.equal(formatPhone('010-1234-56789'), '010-1234-5678');
 });

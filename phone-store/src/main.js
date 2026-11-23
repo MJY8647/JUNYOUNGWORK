@@ -271,6 +271,16 @@ function viewProducts(params) {
   document.getElementById('sort').onchange = (e) => { location.hash = q('sort', e.target.value); };
 }
 
+// 최종 주문서 지원금 행: 공시(공통)지원금 + 판매점 추가지원금
+function subsidyRows(q) {
+  if (q.subsidySource === 'table') return `
+    <dt>공시지원금 (KT 공통지원금)</dt><dd>-${won(q.commonSubsidy)}</dd>
+    <dt>판매점 추가지원금</dt><dd>-${won(q.extraSubsidy)}</dd>`;
+  return `
+    <dt>지원금 (예상)</dt><dd>-${won(q.deviceDiscount)}</dd>
+    <dt class="sub">ㄴ 공시지원금 · 판매점 추가지원금</dt><dd class="sub">지원금표 입력 후 구분 표시</dd>`;
+}
+
 // ---------- 상세 (KT초이스 상세 구성: 옵션 → 요금제·혜택 → 할부·배송 → 사은품·제휴카드·상담 → 최종 주문서 → 상세정보·후기·유의사항) ----------
 const RECENT = 'tps-recent-v1';
 const recent = {
@@ -320,7 +330,7 @@ function viewDetail(id) {
   function render() {
     const plan = planById(s.planId);
     const card = CARDS.find((c) => c.id === s.cardId) ?? null;
-    const qt = quote({ product: p, storageIdx: s.storageIdx, supportType: s.supportType, plan, months: s.months, card });
+    const qt = quote({ product: p, storageIdx: s.storageIdx, supportType: s.supportType, plan, months: s.months, card, joinType: s.joinType });
     const shownPlans = [...new Set([...RECOMMENDED_PLANS, s.planId])].map(planById);
     const recents = recent.get().filter((x) => x !== p.id).map(byId).filter((x) => x && x.status !== 'upcoming').slice(0, 6);
     const benefit = CHOICE_BENEFITS.find((b) => b.id === s.benefit);
@@ -340,7 +350,9 @@ function viewDetail(id) {
       ${p.colors ? '' : '<p class="note">색상 옵션 데이터가 없어 대표 색상만 보여드려요.</p>'}
 
       <h2 class="opt-title">용량</h2>
-      ${opt('storageIdx', p.storages, s.storageIdx, (st, i) => { const r = retailPrice(p, i); return `${st}<small>${r ? won(r) : '가격 문의'}</small>`; }, (_, i) => retailPrice(p, i) == null)}
+      ${opt('storageIdx', p.storages, s.storageIdx, (st, i) => { const r = retailPrice(p, i); return `${st}<small>${r ? `${won(r)}${p.storageEstimated && i ? ' (예상)' : ''}` : '상담 후 안내'}</small>`; }, (_, i) => retailPrice(p, i) == null)}
+      ${p.storages.some((_, i) => retailPrice(p, i) == null) ? `<p class="note">'상담 후 안내' 용량은 KT 출고가를 아직 받지 못해 온라인으로 바로 주문할 수 없어요. 상담으로 가격을 안내해 드려요. (${STORE.phone})</p>` : ''}
+      ${p.storageEstimated ? '<p class="note">(예상) 가격은 애플 공식몰 용량별 가격 차이로 계산한 예상 출고가예요. 개통 시 KT 출고가로 확정돼요.</p>' : ''}
 
       <h2 class="opt-title">가입 유형</h2>
       ${opt('joinType', JOIN_TYPES, s.joinType, (j) => `${j.label}<small>${j.desc}</small>`)}
@@ -380,8 +392,7 @@ function viewDetail(id) {
         <p class="sum-item"><b>${p.name}</b> · ${colors[s.color].name} · ${p.storages[s.storageIdx]} · ${JOIN_TYPES.find((j) => j.id === s.joinType).label}<br><span class="muted">${plan.name}${plan.choice ? ` (${benefit.label})` : ''} · ${s.months ? `${s.months}개월 할부` : '일시납'} · ${DELIVERY.find((d) => d.id === s.delivery).label}</span></p>
         <dl>
           <dt>출고가</dt><dd>${won(qt.retail)}</dd>
-          <dt>지원금 (기기값 할인)</dt><dd>-${won(qt.deviceDiscount)}</dd>
-          <dt class="sub">ㄴ 공통지원금 · 추가지원금 구분</dt><dd class="sub">개통 시 확정</dd>
+          ${subsidyRows(qt)}
           <dt>할부원금</dt><dd>${won(qt.principal)}</dd>
           ${qt.months ? `<dt>월 할부금 (${qt.months}개월, 할부이자 포함)</dt><dd>${won(qt.deviceMonthly)}</dd><dt class="sub">ㄴ 할부이자</dt><dd class="sub">연 5.9%</dd>` : `<dt>일시납 결제</dt><dd>${won(qt.upfront)}</dd>`}
           <dt>요금제 월정액</dt><dd>${won(qt.planFee)}</dd>
@@ -390,7 +401,7 @@ function viewDetail(id) {
           ${card ? `<dt>제휴카드 할인 (실적 충족 시)</dt><dd>-${won(qt.cardDiscount)}</dd>` : ''}
         </dl>
         <p class="total"><span>월 예상 금액</span><b>${won(qt.totalMonthly)}</b></p>
-        <p class="note">부가세 포함 · 지원금은 수집 당시 표시된 최대 할인액 기준 예상치예요. 실제 지원금은 요금제·가입유형·개통 시점에 따라 달라지고 상담 후 확정돼요.</p>
+        <p class="note">부가세 포함 · ${qt.subsidySource === 'table' ? `지원금은 ${qt.subsidyDate} 공시 기준이에요.` : '지원금표가 입력되지 않은 상품이라 수집 당시 표시된 최대 할인액을 예상 지원금으로 보여드려요.'} 최종 지원금은 개통 시점에 확정돼요.</p>
         <p class="sum-gifts">함께 받는 혜택: ${gifts.map((g) => g.label).join(' · ')}</p>
       </div>` : '<p class="warn">선택한 옵션의 가격 정보가 없어요.</p>'}`;
 
@@ -522,7 +533,7 @@ function lineQuote(it) {
   const p = byId(it.productId);
   const plan = planById(it.planId); // 예전 장바구니의 없어진 요금제는 기본 요금제로
   const card = CARDS.find((c) => c.id === it.cardId) ?? null;
-  return p && { p, plan, card, q: quote({ product: p, storageIdx: it.storageIdx, supportType: it.supportType, plan, months: it.months, card }) };
+  return p && { p, plan, card, q: quote({ product: p, storageIdx: it.storageIdx, supportType: it.supportType, plan, months: it.months, card, joinType: it.joinType }) };
 }
 
 function viewCart() {
@@ -558,7 +569,7 @@ function viewCart() {
 }
 
 // ---------- 구매 · 회원 ----------
-const purchase = createPurchase({ app, shell, toast, asset, byId, lineQuote });
+const purchase = createPurchase({ app, shell, toast, asset, byId, lineQuote, subsidyRows });
 
 function viewNotFound() {
   app.innerHTML = shell('<section class="sec narrow center"><h1 class="page-title">페이지를 찾을 수 없어요</h1><a class="btn" href="#/">홈으로</a></section>', '');

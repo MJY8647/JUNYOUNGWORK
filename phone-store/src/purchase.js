@@ -1,8 +1,8 @@
 // 구매 흐름: 회원/비회원 선택 → 주문서 5단계 → 신청 완료 → 주문 조회, 그리고 로그인·3초 가입·마이페이지.
-import { JOIN_TYPES, SUPPORT_TYPES, CARRIERS, DELIVERY, CHOICE_BENEFITS, CONSULTS, GIFTS } from './config.js';
+import { JOIN_TYPES, SUPPORT_TYPES, CARRIERS, DELIVERY, CHOICE_BENEFITS, CONSULTS, GIFTS, MONTHS, STORE } from './config.js';
 import { won } from './pricing.js';
 import { account, PROVIDERS, isRealLogin, startRealLogin } from './account.js';
-import { orders, STATUS_STEPS, digits, isValidPhone, isValidBirth, ageOn, needsStrongId, carrierError } from './orders.js';
+import { orders, STATUS_STEPS, digits, formatPhone, isValidPhone, isValidBirth, ageOn, needsStrongId, carrierError } from './orders.js';
 import { cart } from './cart.js';
 import { audio } from './audio.js';
 
@@ -30,7 +30,31 @@ const PAY = [
   { id: 'vbank', label: '무통장 입금' },
 ];
 
-export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
+// 휴대폰 번호는 숫자만 입력해도 010-1234-5678 형태로 맞춘다
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if (el.matches?.('input[type=tel]')) { const v = formatPhone(el.value); if (v !== el.value) el.value = v; }
+});
+
+// 도로명 주소 검색: 카카오(다음) 우편번호 서비스. 키 없이 무료. 불러오지 못하면(오프라인·보안정책) 직접 입력으로 전환.
+let postcodeLoading = null;
+function loadPostcode() {
+  if (window.daum?.Postcode) return Promise.resolve(true);
+  if (!postcodeLoading) {
+    postcodeLoading = new Promise((resolve) => {
+      const sc = document.createElement('script');
+      // 카카오 공지: t1.daumcdn.net 도메인은 2026-11-30 종료, t1.kakaocdn.net으로 변경
+      sc.src = 'https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      const t = setTimeout(() => resolve(false), 6000);
+      sc.onload = () => { clearTimeout(t); resolve(Boolean(window.daum?.Postcode)); };
+      sc.onerror = () => { clearTimeout(t); resolve(false); };
+      document.head.appendChild(sc);
+    }).then((ok) => { if (!ok) postcodeLoading = null; return ok; });
+  }
+  return postcodeLoading;
+}
+
+export function createPurchase({ app, shell, toast, asset, byId, lineQuote, subsidyRows }) {
   // ---------- 소셜 로그인 버튼 ----------
   const socialHtml = (verb = '3초 가입 · 로그인') => `
     <div class="social">
@@ -189,12 +213,12 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
     const user = signedIn();
     const mode = user ? 'member' : co.mode === 'guest' ? 'guest' : null;
     if (!mode) { location.hash = '#/buy'; return; }
-    const lq = lineQuote(co.item);
+    let lq = lineQuote(co.item);
     if (!lq?.q) { location.hash = '#/cart'; return; }
     const item = co.item;
     const strong = needsStrongId(item.joinType);
     const f = co.form ?? {
-      name: user?.name ?? '', birth: '', phone: '', carrier: item.joinType === 'change' ? 'KT' : '', code: '', verified: false, sentCode: '',
+      name: user?.name ?? '', birth: '', phone: '', carrier: item.joinType === 'change' ? 'KT' : '', code: '', verified: false, sentCode: '', addrQuery: '', addrManual: false,
       guardian: false, strongId: '',
       recv: '', recvPhone: '', zip: user?.address?.zip ?? '', addr1: user?.address?.addr1 ?? '', addr2: user?.address?.addr2 ?? '',
       delivery: item.delivery ?? 'parcel', memo: '', saveAddr: true, agrees: {}, pay: 'card',
@@ -209,14 +233,31 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
 
     function stepBody() {
       const age = isValidBirth(f.birth) ? ageOn(f.birth) : null;
-      if (step === 0) return `
+      if (step === 0) {
+        const q = lq.q;
+        const alt = MONTHS.map((m) => ({ m, q: lineQuote({ ...item, months: m }).q }));
+        return `
         <h2>주문할 상품</h2>${itemSummary(item)}
+        <div class="paynow">
+          <p>매달 내는 돈</p><b>${won(q.totalMonthly)}</b>
+          <p class="formula">${q.months ? `기기 할부금 ${won(q.deviceMonthly)} (${q.months}개월)` : '기기값 일시납 (할부금 없음)'} + 월 통신요금 ${won(q.planMonthly)}${q.cardDiscount ? ` − 제휴카드 ${won(q.cardDiscount)}` : ''}</p>
+          <p class="note">${q.months ? `할부가 끝나는 ${q.months + 1}개월째부터는 월 통신요금 ${won(q.planMonthly)}만 나가요.${q.months > 24 && q.planDiscount ? ' (요금할인 25%는 약정 24개월 동안 적용)' : ''}` : `오늘 기기값 ${won(q.upfront)}을 한 번에 내고, 매달은 요금제만 나가요.`}</p>
+        </div>
+        <h3 class="opt-title">결제 방법 바꾸기</h3>
+        <div class="paycmp" role="radiogroup" aria-label="결제 방법">
+          ${alt.map(({ m, q: a }) => `<button type="button" role="radio" class="pc-row" data-months="${m}" aria-checked="${m === item.months}">
+            <span class="pc-name">${m ? `${m}개월 할부` : '일시납'}</span>
+            <span class="pc-today">오늘 ${won(a.upfront)}</span>
+            <span class="pc-month">매달 <b>${won(a.totalMonthly)}</b></span>
+            <span class="pc-sub">${m ? `할부금 ${won(a.deviceMonthly)} + 요금 ${won(a.planMonthly)} · 할부이자 총 ${won(a.totalInterest)}` : `요금 ${won(a.planMonthly)}만`}</span>
+          </button>`).join('')}
+        </div>
         <dl class="kv">
-          <dt>출고가</dt><dd>${won(lq.q.retail)}</dd><dt>기기값 할인</dt><dd>-${won(lq.q.deviceDiscount)}</dd>
-          <dt>할부원금</dt><dd>${won(lq.q.principal)}</dd><dt>월 할부금</dt><dd>${won(lq.q.deviceMonthly)}</dd>
-          <dt>월 통신요금</dt><dd>${won(lq.q.planMonthly)}</dd>
+          <dt>출고가</dt><dd>${won(q.retail)}</dd>${subsidyRows(q)}
+          <dt>할부원금</dt><dd>${won(q.principal)}</dd>
         </dl>
-        <p class="note">지원금은 개통 시점 정책으로 확정돼요. 옵션을 바꾸려면 <a href="#/products/${item.productId}">상품 화면</a>으로 돌아가세요.</p>`;
+        <p class="note">지원금은 개통 시점에 확정돼요. 다른 옵션을 바꾸려면 <a href="#/products/${item.productId}">상품 화면</a>으로 돌아가세요.</p>`;
+      }
       if (step === 1) return `
         <h2>가입자(명의자) 본인인증</h2>
         <p class="note">개통할 휴대폰의 명의자 정보를 입력해 주세요. 다른 사람 명의로는 신청할 수 없어요.</p>
@@ -237,11 +278,15 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         <label>받는 분 <input id="f-recv" autocomplete="name" value="${esc(f.recv || f.name)}"></label>
         <label>받는 분 연락처 <input id="f-recvPhone" type="tel" inputmode="numeric" autocomplete="tel" value="${esc(f.recvPhone || f.phone)}"></label>
         <h3 class="opt-title">받는 방법</h3>${radios('delivery', DELIVERY, f.delivery)}
-        ${f.delivery === 'visit' ? '<p class="note">매장 방문수령은 주소를 입력하지 않아도 돼요. 방문 전에 연락 주세요.</p>' : `
+        ${f.delivery === 'visit' ? '<p class="note">매장 방문수령은 주소를 입력하지 않아도 돼요. 방문 전에 연락 주세요.</p>' : f.addrManual ? `
+        <p class="warnbox">주소 검색 서비스에 연결하지 못했어요. 주소를 직접 입력해 주세요.</p>
+        <label>도로명 주소 <input id="f-addr1" autocomplete="address-line1" value="${esc(f.addr1)}"></label>
         <label>우편번호 <input id="f-zip" inputmode="numeric" maxlength="5" autocomplete="postal-code" value="${esc(f.zip)}"></label>
-        <label>주소 <input id="f-addr1" autocomplete="address-line1" value="${esc(f.addr1)}"></label>
-        <label>상세 주소 <input id="f-addr2" autocomplete="address-line2" value="${esc(f.addr2)}"></label>
-        <p class="note">실제 서비스에서는 우편번호 검색(주소 API)으로 입력해요.</p>`}
+        <label>상세 주소 <input id="f-addr2" autocomplete="address-line2" placeholder="동·호수 등" value="${esc(f.addr2)}"></label>` : `
+        <label>도로명 주소 <span class="inline"><input id="f-addrq" placeholder="예: 와우산로 76-1" value="${esc(f.addrQuery)}" enterkeyhint="search"><button type="button" class="btn ghost" id="addr-search">주소 검색</button></span></label>
+        <div id="postcode-box" class="postcode-box" hidden></div>
+        ${f.addr1 ? `<div class="addr-picked"><b>${esc(f.addr1)}</b><span>우편번호 ${esc(f.zip)}</span></div>
+        <label>상세 주소 <input id="f-addr2" autocomplete="address-line2" placeholder="동·호수 등" value="${esc(f.addr2)}"></label>` : '<p class="note">도로명과 건물번호만 입력하고 검색하면 주소와 우편번호가 자동으로 들어가요.</p>'}`}
         <label>배송 요청사항 <select id="f-memo">${['', '문 앞에 놓아주세요', '경비실에 맡겨주세요', '배송 전 연락 주세요'].map((m) => `<option value="${m}" ${m === f.memo ? 'selected' : ''}>${m || '선택 안 함'}</option>`).join('')}</select></label>
         ${mode === 'member' ? `<label class="check"><input type="checkbox" id="f-saveAddr" ${f.saveAddr ? 'checked' : ''}> 기본 배송지로 저장</label>` : ''}`;
       if (step === 3) {
@@ -261,8 +306,43 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
             </div>
           </div>`;
       }
+      const q = lq.q;
+      const benefitTxt = lq.plan.choice ? ` (${label(CHOICE_BENEFITS, item.benefit)})` : '';
       return `
-        <h2>결제</h2>${itemSummary(item, true)}
+        <h2>주문 내용 최종 확인</h2>
+        <p class="note">신청하기 전에 고른 옵션과 금액을 한 번 더 확인해 주세요.</p>
+        <div class="final">
+          <h3>상품 · 옵션</h3>
+          <dl class="kv">
+            <dt>상품</dt><dd>${lq.p.name}</dd><dt>색상</dt><dd>${esc(item.colorName)}</dd><dt>용량</dt><dd>${lq.p.storages[item.storageIdx]}</dd>
+            <dt>가입 유형</dt><dd>${label(JOIN_TYPES, item.joinType)}</dd><dt>할인 방법</dt><dd>${label(SUPPORT_TYPES, item.supportType)}</dd>
+            <dt>요금제</dt><dd>${lq.plan.name}${benefitTxt}</dd><dt>결제 방법</dt><dd>${item.months ? `${item.months}개월 할부` : '일시납'}</dd>
+            <dt>받는 방법</dt><dd>${label(DELIVERY, f.delivery)}</dd>
+            ${lq.card ? `<dt>제휴카드</dt><dd>${lq.card.name}</dd>` : ''}
+            ${item.consults?.length ? `<dt>상담 요청</dt><dd>${item.consults.map((c) => label(CONSULTS, c)).join(', ')}</dd>` : ''}
+            <dt>사은품</dt><dd>${GIFTS.filter((g) => g.brand === 'all' || g.brand === lq.p.brand).map((g) => g.label).join(', ')}</dd>
+          </dl>
+          <h3>기기값</h3>
+          <dl class="kv">
+            <dt>출고가</dt><dd>${won(q.retail)}</dd>${subsidyRows(q)}
+            <dt>할부원금</dt><dd>${won(q.principal)}</dd>
+            ${q.months ? `<dt>월 할부금 (${q.months}개월)</dt><dd>${won(q.deviceMonthly)}</dd><dt>할부이자 (연 5.9%) 총액</dt><dd>${won(q.totalInterest)}</dd>` : `<dt>일시납 결제</dt><dd>${won(q.upfront)}</dd>`}
+          </dl>
+          <h3>통신요금</h3>
+          <dl class="kv">
+            <dt>요금제 월정액</dt><dd>${won(q.planFee)}</dd>
+            ${q.planDiscount ? `<dt>요금할인 25%</dt><dd>-${won(q.planDiscount)}</dd>` : ''}
+            <dt>월 통신요금</dt><dd>${won(q.planMonthly)}</dd>
+            ${q.cardDiscount ? `<dt>제휴카드 할인 (실적 충족 시)</dt><dd>-${won(q.cardDiscount)}</dd>` : ''}
+          </dl>
+          <p class="total"><span>매달 내는 돈</span><b>${won(q.totalMonthly)}</b></p>
+          <h3>명의자 · 배송</h3>
+          <dl class="kv">
+            <dt>명의자</dt><dd>${esc(f.name)} · ${formatPhone(f.phone)}</dd>
+            <dt>받는 분</dt><dd>${esc(f.recv)} · ${formatPhone(f.recvPhone)}</dd>
+            ${f.delivery === 'visit' ? '' : `<dt>주소</dt><dd>(${esc(f.zip)}) ${esc(f.addr1)} ${esc(f.addr2)}</dd>`}
+          </dl>
+        </div>
         ${item.months ? `<div class="paybox"><p>오늘 결제할 금액</p><b>0원</b>
           <p class="note">할부 구매는 지금 결제하지 않아요. 단말 할부금(월 ${won(lq.q.deviceMonthly)})은 개통 후 통신요금과 함께 매달 청구돼요.</p></div>`
         : `<div class="paybox"><p>오늘 결제할 금액 (일시납)</p><b>${won(lq.q.upfront)}</b></div>
@@ -285,8 +365,8 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         if (!f.recv.trim()) return ['f-recv', '받는 분 이름을 입력해 주세요.'];
         if (!isValidPhone(f.recvPhone)) return ['f-recvPhone', '받는 분 연락처를 확인해 주세요.'];
         if (f.delivery !== 'visit') { // 매장 방문수령은 주소가 필요 없다
-          if (!/^\d{5}$/.test(f.zip)) return ['f-zip', '우편번호 5자리를 입력해 주세요.'];
-          if (!f.addr1.trim()) return ['f-addr1', '주소를 입력해 주세요.'];
+          if (!f.addr1.trim()) return [f.addrManual ? 'f-addr1' : 'f-addrq', f.addrManual ? '주소를 입력해 주세요.' : '도로명 주소를 검색해 주세요.'];
+          if (!/^\d{5}$/.test(f.zip)) return [f.addrManual ? 'f-zip' : 'f-addrq', '우편번호를 확인해 주세요.'];
           if (!f.addr2.trim()) return ['f-addr2', '상세 주소를 입력해 주세요.'];
         }
       }
@@ -296,7 +376,7 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
 
     function readInputs() {
       const val = (id) => document.getElementById(id)?.value;
-      [['f-name', 'name'], ['f-birth', 'birth'], ['f-carrier', 'carrier'], ['f-phone', 'phone'], ['f-code', 'code'], ['f-recv', 'recv'], ['f-recvPhone', 'recvPhone'], ['f-zip', 'zip'], ['f-addr1', 'addr1'], ['f-addr2', 'addr2'], ['f-memo', 'memo']]
+      [['f-addrq', 'addrQuery'], ['f-name', 'name'], ['f-birth', 'birth'], ['f-carrier', 'carrier'], ['f-phone', 'phone'], ['f-code', 'code'], ['f-recv', 'recv'], ['f-recvPhone', 'recvPhone'], ['f-zip', 'zip'], ['f-addr1', 'addr1'], ['f-addr2', 'addr2'], ['f-memo', 'memo']]
         .forEach(([id, k]) => { const v = val(id); if (v != null) f[k] = v; });
       const g = document.getElementById('f-guardian'); if (g) f.guardian = g.checked;
       const sa = document.getElementById('f-saveAddr'); if (sa) f.saveAddr = sa.checked;
@@ -318,6 +398,35 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         </section>`, 'cart');
       const msg = app.querySelector('.form-msg');
       app.querySelectorAll('[data-r]').forEach((b) => { b.onclick = () => { readInputs(); f[b.dataset.r] = b.dataset.v; persist(); render(); }; });
+      // 결제 방법(일시납·할부 개월) 바꾸기
+      app.querySelectorAll('[data-months]').forEach((b) => {
+        b.onclick = () => {
+          item.months = +b.dataset.months; co.item = item; lq = lineQuote(item);
+          if (item.key) cart.update?.(item.key, { months: item.months });
+          audio.sfx('click'); persist(); render(); app.querySelector(`[data-months="${item.months}"]`)?.focus();
+        };
+      });
+      // 도로명 주소 검색 → 주소·우편번호 자동 입력
+      const searchAddr = async () => {
+        readInputs();
+        const box = document.getElementById('postcode-box');
+        if (!f.addrQuery.trim()) { msg.textContent = '도로명과 건물번호를 입력해 주세요. (예: 와우산로 76-1)'; document.getElementById('f-addrq').focus(); return; }
+        msg.textContent = '주소를 찾는 중이에요…';
+        const ok = await loadPostcode();
+        if (!ok) { f.addrManual = true; f.addr1 = f.addr1 || f.addrQuery; persist(); render('f-zip'); return; }
+        msg.textContent = '';
+        box.hidden = false;
+        new window.daum.Postcode({
+          width: '100%', height: '100%',
+          oncomplete(d) {
+            const extra = d.buildingName && d.apartment === 'Y' ? ` (${d.buildingName})` : '';
+            f.addr1 = (d.roadAddress || d.address) + extra; f.zip = d.zonecode; f.addrQuery = d.roadAddress || f.addrQuery;
+            persist(); render('f-addr2');
+          },
+        }).embed(box, { q: f.addrQuery, autoClose: true });
+      };
+      document.getElementById('addr-search')?.addEventListener('click', searchAddr);
+      document.getElementById('f-addrq')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); searchAddr(); } });
       const all = document.getElementById('agree-all');
       if (all) {
         const boxes = [...app.querySelectorAll('[data-agree]')];
@@ -394,10 +503,14 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
         ${timeline(o)}
         <h2 class="sub">다음 단계</h2>
         <ol class="next-steps">
-          <li><b>통신사 공식신청서 작성</b> — 명의자 정보로 KT 공식신청서를 작성해야 개통이 진행돼요.</li>
+          <li><b>KT 공식신청서 작성</b> — 상담원이 신청서 링크를 문자로 보내드려요. 링크에서 명의자 본인인증과 요금 납부 정보를 입력하면 개통이 진행돼요.</li>
           ${o.strongId ? `<li><b>추가 본인확인</b> — 선택한 방법(${label(STRONG_ID, o.strongId)})으로 개통 전에 확인해요.</li>` : ''}
           <li><b>개통 · 배송</b> — 개통이 끝나면 선택한 방법(${label(DELIVERY, o.shipping.method)})으로 받으세요.</li>
         </ol>
+        <details class="why"><summary>공식신청서는 왜 따로 써야 하나요?</summary>
+          <p>휴대폰 가입 계약은 명의자 본인과 KT가 직접 맺는 계약이에요. 그래서 KT는 온라인 가입 때 명의자가 직접 본인인증을 하고 요금 납부 정보(본인 명의 카드·계좌)를 입력하도록 정해 두었어요. 판매점이 대신 작성하면 명의도용·부정가입이 될 수 있어서 대신 써 드릴 수 없어요.</p>
+          <p>그 대신 ${STORE.name}가 주문 내용으로 신청서를 미리 준비하고, 막히는 부분은 전화(${STORE.phone})로 함께 진행해 드려요.</p>
+        </details>
         <button type="button" class="btn block" id="form">KT 공식신청서 작성하기</button>
         <div class="row2"><a class="btn ghost" href="${o.guest ? '#/orders' : '#/mypage'}">주문 조회</a><a class="btn ghost" href="#/">쇼핑 계속하기</a></div>
       </section>`, 'cart');

@@ -5,6 +5,15 @@ const KEY = 'tps-orders-v1';
 
 export const digits = (s = '') => String(s).replace(/\D/g, '');
 
+// 휴대폰 번호 표시: 숫자만 입력해도 입력하는 동안 010-1234-5678 형태로 맞춘다
+export function formatPhone(s) {
+  const d = digits(s).slice(0, 11);
+  if (d.length < 4) return d;
+  if (d.length < 8) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  if (d.length < 11) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+}
+
 // 휴대폰 번호: 010·011·016~019, 10~11자리
 export const isValidPhone = (s) => /^01[016789]\d{7,8}$/.test(digits(s));
 

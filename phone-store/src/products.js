@@ -1,5 +1,6 @@
 // 생성: 사용자 제공 ZIP(2026-11-19 수집 표시값)에서 추출. tone은 상품 이미지에서 계산한 3D 표시용 색.
 // 실제 판매 전 공식 출고가·지원금·재고로 교체해야 합니다.
+// storageEstimated: 추가 용량 출고가를 애플 공식몰(2026-11-23) 용량별 가격 차이로 추정한 상품.
 export const PRODUCTS = [
   {
     "id": "63",
@@ -32,7 +33,14 @@ export const PRODUCTS = [
     "tier": null,
     "status": "available",
     "image": "products/52.webp",
-    "tone": "#ebeae8"
+    "tone": "#ebeae8",
+    "storagePrices": [
+      3300000,
+      3600000,
+      4200000,
+      5100000
+    ],
+    "storageEstimated": true
   },
   {
     "id": "61",
@@ -49,7 +57,12 @@ export const PRODUCTS = [
     "status": "available",
     "image": "products/61.webp",
     "tone": "#ebdfef",
-    "best": 3
+    "best": 3,
+    "storagePrices": [
+      1452000,
+      1752000
+    ],
+    "storageEstimated": true
   },
   {
     "id": "51",
@@ -67,7 +80,14 @@ export const PRODUCTS = [
     "tier": null,
     "status": "available",
     "image": "products/51.webp",
-    "tone": "#a3b0c3"
+    "tone": "#a3b0c3",
+    "storagePrices": [
+      2200000,
+      2500000,
+      3100000,
+      4000000
+    ],
+    "storageEstimated": true
   },
   {
     "id": "50",

@@ -16,6 +16,7 @@ export const cart = {
   items: read,
   add(item) { write([...read(), { ...item, key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }]); },
   remove(key) { write(read().filter((i) => i.key !== key)); },
+  update(key, patch) { write(read().map((i) => (i.key === key ? { ...i, ...patch } : i))); },
   clear() { write([]); },
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 };

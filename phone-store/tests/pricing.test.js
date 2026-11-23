@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { monthlyInstallment, quote, retailPrice } from '../src/pricing.js';
 import { PRODUCTS } from '../src/products.js';
 import { PLANS } from '../src/config.js';
+import { SUBSIDIES } from '../src/subsidies.js';
 
 const p50 = PRODUCTS.find((p) => p.id === '50');
 const basic = PLANS.find((p) => p.id === 'choice-90'); // 월 90,000원
@@ -56,4 +57,25 @@ test('공식 통합요금제: 초이스 3종 + 베이직 14종, 요금할인 25%
   assert.equal(PLANS.filter((p) => p.id.startsWith('basic-')).length, 14);
   const q = quote({ product: p50, plan: PLANS.find((p) => p.id === 'basic-110'), supportType: 'plan' });
   assert.equal(q.planMonthly, 51750); // KT 공식: 베이직110GB 선택약정 시 51,750원
+});
+
+test('지원금표가 있으면 공통지원금 + 판매점 추가지원금, 선택약정은 추가지원금만', () => {
+  SUBSIDIES['50'] = { updatedAt: '2026-11-23', common: { default: { change: 300000, port: 450000, new: 300000 } }, extra: { change: 0, port: 100000, new: 0 } };
+  try {
+    const dev = quote({ product: p50, plan: basic, joinType: 'port' });
+    assert.equal(dev.commonSubsidy, 450000);
+    assert.equal(dev.extraSubsidy, 100000);
+    assert.equal(dev.principal, 1991000 - 550000);
+    assert.equal(dev.subsidySource, 'table');
+    const plan = quote({ product: p50, plan: basic, joinType: 'port', supportType: 'plan' });
+    assert.equal(plan.commonSubsidy, 0);
+    assert.equal(plan.extraSubsidy, 100000);
+    assert.equal(plan.planMonthly, 67500);
+  } finally { delete SUBSIDIES['50']; }
+});
+
+test('할부이자 총액 = 월 할부금 × 개월 - 할부원금, 일시납은 0', () => {
+  const q = quote({ product: p50, plan: basic, months: 24 });
+  assert.equal(q.totalInterest, q.deviceMonthly * 24 - q.principal);
+  assert.equal(quote({ product: p50, plan: basic, months: 0 }).totalInterest, 0);
 });
