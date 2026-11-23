@@ -34,6 +34,7 @@ function shell(content, active) {
   const me = account.current();
   const nav = [['#/', '홈', 'home'], ['#/products', '휴대폰', 'products'], ['#/cart', '장바구니', 'cart'], me?.signupDone ? ['#/mypage', '마이', 'login'] : ['#/login', '로그인', 'login']];
   return `
+  ${STORE.demo ? `<p class="demo-bar">데모 사이트예요. 실제 주문·결제·개통은 되지 않아요.</p>` : ''}
   <header class="hdr">
     <a class="logo" href="#/"><span class="logo-mark" aria-hidden="true"></span>${STORE.name}</a>
     <nav class="hdr-nav" aria-label="주 메뉴">
@@ -138,9 +139,21 @@ function shopPanelHtml(s, catId = null) {
     <div class="sp-body">${body}</div>`;
 }
 
+// 3D 마을을 띄울 수 있는지: WebGL이 없거나 데이터 절약 모드면 가벼운 가게 목록으로 대신한다
+function canRun3D() {
+  try {
+    if (navigator.connection?.saveData) return false;
+    const c = document.createElement('canvas');
+    return Boolean(c.getContext('webgl2') || c.getContext('webgl'));
+  } catch { return false; }
+}
+
 async function viewHome() {
+  const lite = !canRun3D();
   app.innerHTML = shell(`
-    <section class="town">
+    <section class="town ${lite ? 'lite' : ''}">
+      ${lite ? `<div class="lite-shops"><h1>어느 가게에 들를까요?</h1><p class="note">이 기기에서는 3D 마을 대신 가게 목록으로 보여드려요.</p>
+        <div class="lite-grid">${SHOPS.map((s) => `<button type="button" class="lite-shop" data-lite="${s.id}" style="--c:${s.color}" ${s.soon ? 'disabled' : ''}><b>${s.name}</b><span>${s.soon ? '준비 중' : s.greeting}</span></button>`).join('')}</div></div>` : ''}
       <canvas class="town-canvas" aria-label="작은 행성 위의 휴대폰 쇼핑 마을. 캐릭터를 움직여 가게에 들어가 보세요"></canvas>
       <div class="town-overlay"></div>
       <div class="town-top">
@@ -193,7 +206,7 @@ async function viewHome() {
     panel.hidden = true;
     town?.setInput(true);
     enterBtn.hidden = !nearShop;
-    (lastFocus && document.body.contains(lastFocus) ? lastFocus : root.querySelector('.town-canvas')).focus?.();
+    (lastFocus && document.body.contains(lastFocus) ? lastFocus : root.querySelector('.town-canvas'))?.focus?.();
   }
   const onKey = (e) => {
     if (!panel.hidden) { if (e.key === 'Escape') closeShop(); return; }
@@ -202,6 +215,11 @@ async function viewHome() {
   addEventListener('keydown', onKey);
   enterBtn.onclick = () => nearShop && openShop(nearShop);
 
+  if (lite) {
+    root.querySelectorAll('[data-lite]').forEach((b) => { b.onclick = () => openShop(SHOPS.find((x) => x.id === b.dataset.lite)); });
+    cleanup = () => removeEventListener('keydown', onKey);
+    return;
+  }
   const { createPlanet } = await import('./three/planet.js');
   if (!document.body.contains(root)) { removeEventListener('keydown', onKey); return; }
   town = createPlanet({

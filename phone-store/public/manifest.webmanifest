@@ -1,0 +1,15 @@
+{
+  "name": "작은폰가게",
+  "short_name": "작은폰가게",
+  "description": "작은 행성 마을을 걸으며 고르는 휴대폰",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8f0",
+  "theme_color": "#fff8f0",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

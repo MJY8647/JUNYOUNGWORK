@@ -5,6 +5,7 @@ export const STORE = {
   phone: '0000-0000', // TODO: 실제 상담 번호
   hours: '평일 09:00 ~ 18:00',
   business: null, // TODO: 상호, 대표자, 사업자등록번호, 통신판매업 신고번호
+  demo: true, // 실제 운영 시 false (상단 '데모 사이트' 안내 띠)
   sameDay: '오후 4시 이전 신청 시 당일 발송', // TODO: 실제 판매점 배송 정책
 };
 

@@ -19,6 +19,15 @@ npm test         # 가격 계산 테스트
 npm run build    # dist/ 에 정적 파일 생성 (어느 경로에 올려도 동작)
 ```
 
+## 공개 배포
+
+`npm run build`로 만든 `dist/` 폴더는 정적 파일이라 어디든 올릴 수 있어요(상대 경로 빌드).
+
+- **Netlify:** app.netlify.com → Add new site → Deploy manually → `dist` 폴더를 끌어다 놓기
+- **Vercel:** 저장소를 연결하고 Root Directory `phone-store`, Build Command `npm run build`, Output `dist`
+- 실제 운영 전: `src/config.js`에서 `STORE.demo`를 `false`로, 매장 이름·사업자 정보·상담 번호를 실제 값으로 바꾸고, 지원금표·출고가를 넣어 주세요.
+- 휴대폰 홈 화면에 추가하면 앱처럼 열려요(웹 앱 매니페스트·아이콘 포함). 3D를 못 쓰는 기기나 데이터 절약 모드에서는 가벼운 가게 목록으로 보여줘요.
+
 ## 구성
 
 | 화면 | 동작 |
