@@ -5,6 +5,7 @@ import { quote, retailPrice, won } from './pricing.js';
 import { cart } from './cart.js';
 import { account } from './account.js';
 import { createPurchase } from './purchase.js';
+import { audio } from './audio.js';
 
 const app = document.getElementById('app');
 const byId = (id) => PRODUCTS.find((p) => p.id === id);
@@ -71,10 +72,10 @@ function card(p) {
 
 // ---------- 홈: 걸어서 둘러보는 쇼핑 마을 ----------
 // 가게 간판 이름이 곧 가게 이름. soon: 준비 중인 가게 (상품 없음)
-const SOON = { name: 'COMING SOON', greeting: '곧 문을 열어요! 조금만 기다려 주세요.', soon: true, items: () => [] };
+const SOON = { name: 'COMING SOON', voice: 0.8, greeting: '곧 문을 열어요! 조금만 기다려 주세요.', soon: true, items: () => [] };
 const SHOPS = [
-  { id: 'samsung', name: 'SAMSUNG', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => PRODUCTS.filter((p) => p.brand === 'samsung') },
-  { id: 'apple', name: 'Apple', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => PRODUCTS.filter((p) => p.brand === 'apple') },
+  { id: 'samsung', name: 'SAMSUNG', color: '#3d7be0', wall: '#eaf2ff', screen: '#a9c8ff', voice: 0.95, greeting: '어서 오세요! 갤럭시 신제품 구경하고 가세요.', items: () => PRODUCTS.filter((p) => p.brand === 'samsung') },
+  { id: 'apple', name: 'Apple', color: '#5f6b7a', wall: '#f6f6f8', screen: '#ffd1e0', voice: 1.2, greeting: '아이폰 찾으세요? 안으로 들어오세요!', items: () => PRODUCTS.filter((p) => p.brand === 'apple') },
   { id: 'soon-1', color: '#ef9a2d', wall: '#fff3dc', screen: '#ffe08a', ...SOON },
   { id: 'soon-2', color: '#2fae8f', wall: '#e6f7f1', screen: '#9fe3cf', ...SOON },
   { id: 'soon-3', color: '#8f6fd8', wall: '#f1ebff', screen: '#d6c6ff', ...SOON },
@@ -151,6 +152,10 @@ async function viewHome() {
       <p class="zone-title" aria-live="polite"></p>
       <button type="button" class="enter-btn" hidden></button>
       <button type="button" class="jump-btn" aria-label="점프">점프</button>
+      <div class="sound-btns" role="group" aria-label="소리 설정">
+        <button type="button" class="snd" id="snd-music" aria-pressed="${audio.prefs.music}">♪ 음악</button>
+        <button type="button" class="snd" id="snd-sfx" aria-pressed="${audio.prefs.sfx}">효과음</button>
+      </div>
       <div class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="sp-title" hidden></div>
     </section>
     <section class="sec">
@@ -168,7 +173,7 @@ async function viewHome() {
     panel.innerHTML = shopPanelHtml(s, catId);
     panel.scrollTop = 0;
     panel.querySelector('.sp-close').onclick = closeShop;
-    panel.querySelectorAll('.cat-tile').forEach((b) => { b.onclick = () => showShop(s, b.dataset.cat); });
+    panel.querySelectorAll('.cat-tile').forEach((b) => { b.onclick = () => { audio.sfx('click'); showShop(s, b.dataset.cat); }; });
     const back = panel.querySelector('.cat-back');
     if (back) back.onclick = () => { showShop(s); panel.querySelector(`.cat-tile[data-cat="${catId}"]`)?.focus(); };
     const focusEl = panel.querySelector('#cat-title') ?? panel.querySelector('h2');
@@ -176,6 +181,7 @@ async function viewHome() {
     if (!back || catId) focusEl.focus();
   }
   function openShop(s) {
+    audio.sfx('enter');
     lastFocus = document.activeElement;
     panel.hidden = false;
     enterBtn.hidden = true;
@@ -183,6 +189,7 @@ async function viewHome() {
     showShop(s);
   }
   function closeShop() {
+    audio.sfx('close');
     panel.hidden = true;
     town?.setInput(true);
     enterBtn.hidden = !nearShop;
@@ -208,6 +215,7 @@ async function viewHome() {
     },
     onZone(s) {
       if (!s) return;
+      audio.sfx('zone');
       zoneEl.textContent = s.name;
       zoneEl.style.setProperty('--c', s.color);
       zoneEl.classList.remove('show');
@@ -220,7 +228,12 @@ async function viewHome() {
   });
   root.querySelectorAll('[data-shop]').forEach((b) => { b.onclick = () => town.walkTo(b.dataset.shop); });
   root.querySelector('.jump-btn').onclick = () => town.jump();
-  cleanup = () => { clearTimeout(zoneTimer); removeEventListener('keydown', onKey); town.dispose(); };
+  const music = root.querySelector('#snd-music'), sfxBtn = root.querySelector('#snd-sfx');
+  music.onclick = () => audio.setMusic(!audio.prefs.music);
+  sfxBtn.onclick = () => audio.setSfx(!audio.prefs.sfx);
+  const offAudio = audio.subscribe(() => { music.setAttribute('aria-pressed', audio.prefs.music); sfxBtn.setAttribute('aria-pressed', audio.prefs.sfx); });
+  audio.playMusic();
+  cleanup = () => { clearTimeout(zoneTimer); removeEventListener('keydown', onKey); offAudio(); audio.stopMusic(); town.dispose(); };
 }
 
 // ---------- 목록 ----------
@@ -350,6 +363,7 @@ function viewDetail(id) {
          <div class="buy-btns"><button type="button" class="btn ghost" id="add" ${qt ? '' : 'disabled'}>장바구니</button><button type="button" class="btn" id="buy" ${qt ? '' : 'disabled'}>바로 구매</button></div>`;
     document.getElementById('add')?.addEventListener('click', () => {
       cart.add({ productId: p.id, ...s, colorName: colors[s.color].name });
+      audio.sfx('pop');
       toast('장바구니에 담았어요');
       updateBadges();
     });

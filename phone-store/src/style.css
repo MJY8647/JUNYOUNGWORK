@@ -367,3 +367,9 @@ button, input, select { font: inherit; color: inherit; }
 .modal-box label { display: grid; gap: 6px; font-weight: 500; font-size: 14px; }
 .modal-box input { min-height: 48px; padding: 0 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); }
 .modal-box .row2 { margin-top: 4px; }
+
+/* 소리 켜기·끄기 */
+.sound-btns { position: absolute; top: 12px; right: max(16px, env(safe-area-inset-right, 0px)); display: flex; gap: 6px; }
+.snd { padding: 6px 10px; border-radius: 999px; border: 2px solid #3a2a24; background: #fff; color: #3a2a24; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 0 #3a2a24; }
+.snd[aria-pressed='false'] { background: #e9e2dc; color: #8a776c; text-decoration: line-through; }
+@media (max-width: 760px) { .sound-btns { top: auto; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); flex-direction: column; } }

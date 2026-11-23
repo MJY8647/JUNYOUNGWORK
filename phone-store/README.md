@@ -33,6 +33,7 @@ npm run build    # dist/ 에 정적 파일 생성 (어느 경로에 올려도 �
 - `src/products.js` 상품 데이터
 - `src/config.js` 매장 정보·요금제·정책
 - `src/pricing.js` 가격 계산
+- `src/audio.js` 효과음·배경음악 (Web Audio로 직접 합성, 음원 파일 없음. 첫 입력 후 재생, 마을 화면에서 음악·효과음 각각 끄기 가능)
 - `src/purchase.js` 구매 흐름 화면, `src/account.js` 회원·소셜 로그인, `src/orders.js` 주문 저장·검증 규칙
 - `src/three/planet.js` 행성 마을 (배치·이동·카메라·육교·차)
 - `src/three/parts.js` 사람·가게 건물 모델

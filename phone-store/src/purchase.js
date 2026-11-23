@@ -4,6 +4,7 @@ import { won } from './pricing.js';
 import { account, PROVIDERS, isRealLogin, startRealLogin } from './account.js';
 import { orders, STATUS_STEPS, digits, isValidPhone, isValidBirth, ageOn, needsStrongId, carrierError } from './orders.js';
 import { cart } from './cart.js';
+import { audio } from './audio.js';
 
 const CHECKOUT = 'tps-checkout-v1';
 export const checkout = {
@@ -328,14 +329,14 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
       document.getElementById('verify')?.addEventListener('click', () => {
         readInputs();
         if (f.sentTo !== idKey()) { msg.textContent = '번호나 통신사가 바뀌었어요. 인증번호를 다시 받아 주세요.'; return; }
-        if (f.code === f.sentCode) { f.verified = true; persist(); render(); toast('본인인증이 완료됐어요'); } else { msg.textContent = '인증번호가 맞지 않아요.'; document.getElementById('f-code').focus(); }
+        if (f.code === f.sentCode) { f.verified = true; persist(); render(); audio.sfx('pop'); toast('본인인증이 완료됐어요'); } else { msg.textContent = '인증번호가 맞지 않아요.'; document.getElementById('f-code').focus(); }
       });
       document.getElementById('prev')?.addEventListener('click', () => { readInputs(); step--; persist(); render(); scrollTo(0, 0); });
       document.getElementById('next').onclick = () => {
         readInputs();
         const err = validate();
-        if (err) { msg.textContent = err[1]; (err[0] && document.getElementById(err[0]))?.focus(); persist(); return; }
-        if (step < STEPS.length - 1) { step++; persist(); render(); scrollTo(0, 0); return; }
+        if (err) { audio.sfx('error'); msg.textContent = err[1]; (err[0] && document.getElementById(err[0]))?.focus(); persist(); return; }
+        if (step < STEPS.length - 1) { audio.sfx('click'); step++; persist(); render(); scrollTo(0, 0); return; }
         submit();
       };
       if (focusId) document.getElementById(focusId)?.focus();
@@ -377,6 +378,7 @@ export function createPurchase({ app, shell, toast, asset, byId, lineQuote }) {
   function viewOrderDone(params) {
     const o = orders.get(params.get('no'));
     if (!o) { location.hash = '#/orders'; return; }
+    audio.sfx('success');
     app.innerHTML = shell(`
       <section class="sec narrow">
         <p class="step-eyebrow">데모 주문 · 실제 접수되지 않았어요</p>

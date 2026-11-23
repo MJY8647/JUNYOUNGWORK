@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { toon, mesh, rbox, instanced, createLoop, createRenderer, disposeScene } from './toon.js';
 import { C, rng, person, animatePerson, buildShop } from './parts.js';
+import { audio } from '../audio.js';
 
 // 작은 행성 위의 휴대폰 쇼핑 마을.
 // 북극: 광장과 분수 → 순환 도로(횡단보도·신호등·육교·버스정류장) → 적도 부근 가게 5곳
@@ -519,6 +520,7 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     place(marker, n, 0.06, northAt(n));
     marker.rotateX(-Math.PI / 2);
     marker.material.opacity = 0.9;
+    audio.sfx('tick');
   }
 
   // 분수를 가로지르면 옆으로 돌아간다
@@ -551,7 +553,7 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     route.push(s.door.clone().multiplyScalar(RP));
   }
 
-  function jump() { if (h <= groundH() + 0.01) vy = JUMP_V; }
+  function jump() { if (h <= groundH() + 0.01) { vy = JUMP_V; audio.sfx('jump'); } }
   const groundH = () => (onBridge ? profile(bridgeLocal(pos).s) : 0);
 
   // ---------- 충돌 ----------
@@ -626,6 +628,7 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
   }
 
   // 매 프레임 재사용하는 임시 벡터 (새로 만들지 않아 GC 끊김 방지)
+  let lastStep = 0;
   const move = new THREE.Vector3(), v = new THREE.Vector3(), prev = new THREE.Vector3();
   const n = new THREE.Vector3(), right = new THREE.Vector3(), to = new THREE.Vector3();
   const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), target = new THREE.Vector3(), want = new THREE.Vector3();
@@ -707,11 +710,14 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
     // 점프·중력
     vy += GRAVITY * dt; h += vy * dt;
     const gh = groundH();
-    if (h <= gh) { h = gh; vy = 0; }
+    if (h <= gh) { if (vy < -4) audio.sfx('land'); h = gh; vy = 0; }
     if (onBridge && Math.abs(bridgeLocal(pos).s) >= BRIDGE.half - 0.05) onBridge = false;
 
     place(player, n, h, facing);
     animatePerson(player, moving && h <= gh + 0.01, dt, t);
+    // 발소리: 걸음 주기(반 바퀴)마다 한 번, 육교 위에서는 나무 소리
+    const stepIdx = Math.floor(player.userData.phase / Math.PI);
+    if (stepIdx !== lastStep) { lastStep = stepIdx; if (moving && h <= gh + 0.01) audio.sfx(onBridge ? 'stepWood' : 'step'); }
     place(blob, n, gh + 0.04, northAt(n)); blob.rotateX(-Math.PI / 2);
     blob.material.opacity = 0.14 / (1 + (h - gh) * 0.6);
     if (marker.material.opacity > 0) marker.material.opacity = Math.max(0, marker.material.opacity - dt * 1.2);
@@ -723,6 +729,8 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
       tmpB.set(-Math.sin(c.lon) * c.lane, 0, Math.cos(c.lon) * c.lane);                               // 진행 방향
       to.copy(tmpA).multiplyScalar(RP).addScaledVector(tmpB, 3);
       let blocked = h < 1.5 && to.distanceTo(pos) < 2.8;
+      // 사람 때문에 급히 멈추면 빵빵 (차마다 4초에 한 번)
+      if (blocked && c.v > 3 && t - (c.honkAt ?? -9) > 4) { c.honkAt = t; audio.sfx('honk'); }
       if (!blocked) for (const o of cars) if (o !== c && o.lane === c.lane && (((o.lon - c.lon) * c.lane + Math.PI * 4) % (Math.PI * 2)) * cosL * RP < 5) { blocked = true; break; }
       c.v = THREE.MathUtils.lerp(c.v, blocked ? 0 : 7, Math.min(1, dt * (blocked ? 6 : 1.5)));
       c.lon += (c.lane * c.v * dt) / (cosL * RP);
@@ -804,6 +812,8 @@ export function createPlanet({ canvas, overlay, shops, onNear, onZone, onEnterSh
       if (shown !== bubbleText) {
         bubbleText = shown;
         bubble.textContent = shown;
+        // 점원 목소리: 글자가 나올 때마다 짧은 소리 (공백은 건너뜀, 두 글자에 한 번)
+        if (shown.length % 2 === 0 && shown.trim().length && !/\s$/.test(shown)) audio.sfx('talk', talkShop.shop.voice ?? 1);
         if (shown.length === text.length) bubbleHalf = bubble.offsetWidth / 2 + 8; // 문장이 다 나왔을 때 한 번만 측정
         else bubbleHalf = Math.max(bubbleHalf, 60);
       }
