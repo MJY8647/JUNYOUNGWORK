@@ -178,18 +178,8 @@ button, input, select { font: inherit; color: inherit; }
 .sort select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
 
 /* 상세 */
-.pdp { max-width: 1200px; margin: 0 auto; padding: 24px 16px 40px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: start; }
-.pdp-media { position: sticky; top: calc(var(--hdr) + 16px); aspect-ratio: 1; border-radius: 28px; overflow: hidden; background: radial-gradient(circle at 50% 35%, #fff4e6, #ffd5b8); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .pdp-media { background: radial-gradient(circle at 50% 35%, #4a3326, #241a15); } }
-.pdp-canvas, .pdp-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pdp-photo { object-fit: contain; padding: 10%; }
-.seg { position: absolute; top: 14px; left: 14px; display: flex; background: #fff9; border-radius: 999px; padding: 4px; backdrop-filter: blur(6px); }
-.seg button { border: 0; background: none; padding: 6px 14px; border-radius: 999px; font-weight: 700; cursor: pointer; color: #3a2a24; }
-.seg button[aria-selected='true'] { background: #3a2a24; color: #fff; }
-.hint { position: absolute; bottom: 12px; width: 100%; text-align: center; margin: 0; font-size: 13px; color: #7a5a4a; pointer-events: none; }
 .crumb { font-size: 13px; color: var(--muted); }
 .crumb a { text-decoration: none; }
-.pdp-info h1 { margin: 6px 0 0; font: 34px/1.2 var(--display); }
 .opt-title { margin: 28px 0 10px; font-size: 16px; font-weight: 700; }
 .opt-title .muted { font-weight: 400; margin-left: 6px; }
 .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
@@ -219,10 +209,7 @@ button, input, select { font: inherit; color: inherit; }
 .buybar .btn { min-width: 160px; }
 @media (min-width: 761px) { .buybar { max-width: 1200px; margin: 0 auto; border-radius: 20px 20px 0 0; box-shadow: 0 -6px 20px #0001; } }
 @media (max-width: 760px) {
-  .pdp { grid-template-columns: 1fr; gap: 16px; padding-top: 12px; }
-  .pdp-media { position: relative; top: 0; aspect-ratio: 1 / 0.95; }
   .buybar { bottom: var(--tab); }
-  .pdp-info h1 { font-size: 28px; }
 }
 
 /* 장바구니 · 폼 */
@@ -395,7 +382,6 @@ button, input, select { font: inherit; color: inherit; }
 .tab-body { max-width: 760px; }
 .spec { font-size: 15px; gap: 10px 16px; grid-template-columns: 96px minmax(0, 1fr); }
 .spec dd { text-align: left; }
-.detail-photo { width: min(420px, 100%); margin: 20px auto 0; }
 .notices { display: grid; gap: 8px; }
 .notices details { background: var(--surface); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow); }
 .notices summary { cursor: pointer; font-weight: 700; }
@@ -445,3 +431,82 @@ button, input, select { font: inherit; color: inherit; }
 .why { background: var(--bg-2); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; font-size: 14px; }
 .why summary { cursor: pointer; font-weight: 700; }
 .why p { margin: 8px 0 0; line-height: 1.6; }
+
+/* ---------- 상세: 한눈에 보는 묶음 구성 ---------- */
+.pdp2 { max-width: 1200px; margin: 0 auto; padding: 16px 16px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.pdp-head { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: center; margin-bottom: 14px; }
+.pdp-head img { width: 88px; height: 88px; object-fit: contain; border-radius: 16px; background: var(--bg-2); }
+.pdp-head h1 { margin: 0; font: 26px/1.2 var(--display); }
+.head-price { margin: 2px 0 0; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.head-price .orig { margin: 0; }
+.head-price b { font-size: 20px; }
+.pdp-head .pdp-tags { margin-top: 6px; }
+.pdp-head .pdp-tags span { font-size: 12px; padding: 2px 8px; }
+.so-tag { background: var(--muted) !important; color: #fff !important; }
+.groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grp { background: var(--surface); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); display: grid; gap: 8px; align-content: start; }
+.grp h2 { margin: 0; font: 17px var(--display); display: flex; align-items: center; gap: 8px; }
+.grp h2 span { width: 22px; height: 22px; border-radius: 50%; background: var(--coral); color: #fff; display: grid; place-items: center; font: 700 12px 'Noto Sans KR', sans-serif; }
+.g-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; align-items: start; }
+.g-label { font-size: 13px; font-weight: 700; color: var(--muted); padding-top: 8px; }
+.g-label small { display: block; font-weight: 500; color: var(--ink); }
+.g-body { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.g-note { margin: 0; font-size: 12px; color: var(--muted); }
+.chips-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.ch { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-height: 38px; padding: 4px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 14px; cursor: pointer; line-height: 1.2; }
+.ch small { font-weight: 500; font-size: 11px; color: var(--muted); }
+.ch[aria-checked='true'], .ch.on { border-color: var(--coral); background: color-mix(in srgb, var(--coral) 10%, var(--surface)); }
+.ch:disabled { opacity: .4; cursor: not-allowed; }
+.ch.more { border-style: dashed; color: var(--coral); }
+.swatches .sw { width: 30px; height: 30px; }
+.gift-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.gift { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; background: var(--bg-2); font-size: 12px; font-weight: 700; }
+.gift img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.pdp-summary { position: sticky; top: calc(var(--hdr) + 12px); margin-top: 0 !important; }
+.pdp-summary h2 { font-size: 20px; }
+.sum-toggle { display: none; border: 0; background: none; text-align: left; cursor: pointer; color: var(--ink); padding: 0; }
+.sum-toggle b { display: block; font-size: 22px; color: var(--coral); }
+@media (max-width: 980px) { .groups { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .pdp2 { grid-template-columns: 1fr; padding-top: 10px; }
+  .pdp-head { grid-template-columns: 64px minmax(0, 1fr); }
+  .pdp-head img { width: 64px; height: 64px; }
+  .pdp-head h1 { font-size: 22px; }
+  .g-row { grid-template-columns: 56px minmax(0, 1fr); }
+  .ch { min-height: 36px; padding: 3px 10px; font-size: 13px; }
+  /* 요약은 하단 바의 '매달' 버튼으로 펼치는 시트 */
+  .pdp-summary { position: fixed; left: 0; right: 0; bottom: calc(var(--tab) + 72px); top: auto; z-index: 14; max-height: 60vh; overflow: auto; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 30px #0003; transform: translateY(110%); transition: transform .25s; visibility: hidden; }
+  .pdp-summary.open { transform: none; visibility: visible; }
+  .sum-toggle { display: block; }
+}
+@media (min-width: 761px) { .sum-toggle { display: block; } }
+.buybar > .buy-btns { flex-direction: row; }
+.g-body > .sm .ch { min-height: 32px; font-size: 13px; padding: 2px 10px; }
+.summary dt.sub { white-space: nowrap; }
+@media (max-width: 760px) {
+  .pdp-head { margin-bottom: 10px; gap: 10px; }
+  .pdp-head .crumb { display: none; }
+  .pdp-head h1 { font-size: 20px; }
+  .head-price b { font-size: 17px; }
+  .groups { gap: 8px; }
+  .grp { padding: 10px 12px; gap: 6px; }
+  .grp h2 { font-size: 15px; }
+  /* 항목 이름은 위 한 줄, 칩은 한 줄에 4개씩 */
+  .g-row { grid-template-columns: 1fr; gap: 4px; }
+  .g-label { padding-top: 0; font-size: 12px; }
+  .g-label small { display: inline; margin-left: 4px; }
+  .g-body .chips-row:not(.swatches) { display: grid; grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); width: 100%; gap: 5px; }
+  .ch { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ch span.lg { display: none; }
+  .ch span.st { display: inline; }
+  .gift-chips { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .gift { font-size: 11px; min-width: 0; }
+  .ch.more { width: auto; }
+  .g-body { gap: 5px; }
+  .ch { min-height: 34px; padding: 2px 4px; font-size: 13px; border-radius: 10px; }
+  .ch small { font-size: 10px; }
+  .ch.more, #pick-card { width: 100%; }
+  .buybar { padding: 8px 16px; }
+  .buybar .btn { min-height: 44px; }
+}
+.ch .st { display: none; }

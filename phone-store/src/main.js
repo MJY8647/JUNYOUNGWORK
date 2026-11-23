@@ -278,7 +278,7 @@ function subsidyRows(q) {
     <dt>판매점 추가지원금</dt><dd>-${won(q.extraSubsidy)}</dd>`;
   return `
     <dt>지원금 (예상)</dt><dd>-${won(q.deviceDiscount)}</dd>
-    <dt class="sub">ㄴ 공시지원금 · 판매점 추가지원금</dt><dd class="sub">지원금표 입력 후 구분 표시</dd>`;
+    <dt class="sub">ㄴ 공시·추가지원금 구분</dt><dd class="sub">지원금표 입력 후</dd>`;
 }
 
 // ---------- 상세 (KT초이스 상세 구성: 옵션 → 요금제·혜택 → 할부·배송 → 사은품·제휴카드·상담 → 최종 주문서 → 상세정보·후기·유의사항) ----------
@@ -315,116 +315,112 @@ function viewDetail(id) {
   const gifts = GIFTS.filter((g) => g.brand === 'all' || g.brand === p.brand);
   const s = { storageIdx: 0, color: 0, joinType: 'change', supportType: 'device', planId: DEFAULT_PLAN, benefit: CHOICE_BENEFITS[0].id, months: 24, delivery: 'parcel', cardId: '', consults: [] };
   const soldout = p.status === 'soldout';
-  let tab = 'info';
+  let tab = 'info', sheetOpen = false;
 
-  const opt = (name, items, cur, labelFn, disabledFn = () => false) => `
-    <div class="opts" role="radiogroup" aria-label="${name}">
+  // 한 줄짜리 클릭 칩 (설명은 작은 글씨 한 줄)
+  // cols: 휴대폰 화면에서 한 줄에 놓을 칸 수, extra: 같은 줄 끝에 붙일 버튼
+  const chips = (name, items, cur, labelFn, { disabled = () => false, cols = items.length, extra = '', title = () => '' } = {}) => `
+    <div class="chips-row" role="radiogroup" aria-label="${name}" style="--cols:${cols}">
       ${items.map((it, i) => {
         const v = it.id ?? i;
-        const dis = soldout || disabledFn(it, i);
-        return `<button type="button" role="radio" class="opt" data-k="${name}" data-v="${v}" aria-checked="${v === cur}" ${dis ? 'disabled' : ''}>${labelFn(it, i)}</button>`;
-      }).join('')}
+        return `<button type="button" role="radio" class="ch" data-k="${name}" data-v="${v}" aria-checked="${v === cur}" title="${title(it)}" ${soldout || disabled(it, i) ? 'disabled' : ''}>${labelFn(it, i)}</button>`;
+      }).join('')}${extra}
     </div>`;
-  const planLabel = (pl) => `${pl.name}<small>월 ${won(pl.fee)} · ${pl.data}${pl.roaming ? ` · ${pl.roaming}` : ''}</small>`;
+  const row = (label, body) => `<div class="g-row"><span class="g-label">${label}</span><div class="g-body">${body}</div></div>`;
+
+  function summaryHtml(qt, plan, card, benefit) {
+    if (!qt) return '<p class="warn">선택한 옵션의 가격 정보가 없어요.</p>';
+    return `
+      <h2>최종 주문서</h2>
+      <p class="sum-item">${colors[s.color].name} · ${p.storages[s.storageIdx]} · ${JOIN_TYPES.find((j) => j.id === s.joinType).label} · ${plan.name}${plan.choice ? `(${benefit.label})` : ''} · ${s.months ? `${s.months}개월` : '일시납'}</p>
+      <dl>
+        <dt>출고가</dt><dd>${won(qt.retail)}</dd>
+        ${subsidyRows(qt)}
+        <dt>할부원금</dt><dd>${won(qt.principal)}</dd>
+        ${qt.months ? `<dt>월 할부금 (${qt.months}개월, 이자 포함)</dt><dd>${won(qt.deviceMonthly)}</dd>` : `<dt>일시납 결제</dt><dd>${won(qt.upfront)}</dd>`}
+        <dt>요금제 월정액</dt><dd>${won(qt.planFee)}</dd>
+        ${qt.planDiscount ? `<dt>요금할인 25%</dt><dd>-${won(qt.planDiscount)}</dd>` : ''}
+        ${card ? `<dt>제휴카드 할인</dt><dd>-${won(qt.cardDiscount)}</dd>` : ''}
+      </dl>
+      <p class="total"><span>매달 내는 돈</span><b>${won(qt.totalMonthly)}</b></p>
+      <p class="note">부가세 포함 · 할부이자 연 5.9% · ${qt.subsidySource === 'table' ? `지원금 ${qt.subsidyDate} 기준` : '지원금은 예상치'} · 개통 시 확정</p>
+      <p class="sum-gifts">사은품: ${gifts.map((g) => g.label).join(' · ')}</p>`;
+  }
 
   function render() {
     const plan = planById(s.planId);
     const card = CARDS.find((c) => c.id === s.cardId) ?? null;
     const qt = quote({ product: p, storageIdx: s.storageIdx, supportType: s.supportType, plan, months: s.months, card, joinType: s.joinType });
     const shownPlans = [...new Set([...RECOMMENDED_PLANS, s.planId])].map(planById);
-    const recents = recent.get().filter((x) => x !== p.id).map(byId).filter((x) => x && x.status !== 'upcoming').slice(0, 6);
     const benefit = CHOICE_BENEFITS.find((b) => b.id === s.benefit);
-    const info = document.getElementById('pdp-info');
-    info.innerHTML = `
-      <nav class="crumb"><a href="#/">홈</a> › <a href="#/products">휴대폰</a></nav>
-      <h1>${p.name}</h1>
-      <p class="orig">${won(p.listPrice)}</p>
-      <p class="deal big"><span class="pct">${pct(p)}%</span>${won(p.dealPrice)}~</p>
-      <div class="pdp-tags"><span>할부원금 최대 ${won(qt?.deviceDiscountTotal ?? 0)} 할인</span><span>${STORE.sameDay}</span></div>
-      ${soldout ? '<p class="warn">현재 품절된 상품이에요.</p>' : ''}
+    const recents = recent.get().filter((x) => x !== p.id).map(byId).filter((x) => x && x.status !== 'upcoming').slice(0, 6);
+    const missing = p.storages.some((_, i) => retailPrice(p, i) == null);
 
-      <h2 class="opt-title">색상 <span class="muted">${colors[s.color].name}</span></h2>
-      <div class="opts swatches" role="radiogroup" aria-label="색상">
-        ${colors.map((c, i) => `<button type="button" role="radio" class="sw" data-k="color" data-v="${i}" aria-checked="${i === s.color}" aria-label="${c.name}" style="--c:${c.hex}"></button>`).join('')}
+    document.getElementById('pdp-main').innerHTML = `
+      <div class="pdp-head">
+        <img src="${asset(p.image)}" alt="${p.name} 대표 사진" width="88" height="88">
+        <div>
+          <nav class="crumb"><a href="#/">홈</a> › <a href="#/products">휴대폰</a></nav>
+          <h1>${p.name}</h1>
+          <p class="head-price"><span class="orig">${won(p.listPrice)}</span> <span class="pct">${pct(p)}%</span><b>${won(p.dealPrice)}~</b></p>
+          <div class="pdp-tags"><span>할부원금 최대 ${won(qt?.deviceDiscountTotal ?? 0)} 할인</span><span>${STORE.sameDay}</span>${soldout ? '<span class="so-tag">품절</span>' : ''}</div>
+        </div>
       </div>
-      ${p.colors ? '' : '<p class="note">색상 옵션 데이터가 없어 대표 색상만 보여드려요.</p>'}
 
-      <h2 class="opt-title">용량</h2>
-      ${opt('storageIdx', p.storages, s.storageIdx, (st, i) => { const r = retailPrice(p, i); return `${st}<small>${r ? `${won(r)}${p.storageEstimated && i ? ' (예상)' : ''}` : '상담 후 안내'}</small>`; }, (_, i) => retailPrice(p, i) == null)}
-      ${p.storages.some((_, i) => retailPrice(p, i) == null) ? `<p class="note">'상담 후 안내' 용량은 KT 출고가를 아직 받지 못해 온라인으로 바로 주문할 수 없어요. 상담으로 가격을 안내해 드려요. (${STORE.phone})</p>` : ''}
-      ${p.storageEstimated ? '<p class="note">(예상) 가격은 애플 공식몰 용량별 가격 차이로 계산한 예상 출고가예요. 개통 시 KT 출고가로 확정돼요.</p>' : ''}
+      <div class="groups">
+        <section class="grp" aria-labelledby="g1"><h2 id="g1"><span>1</span>기기</h2>
+          ${row(`색상 <small>${colors[s.color].name}</small>`, `<div class="chips-row swatches" role="radiogroup" aria-label="색상">${colors.map((c, i) => `<button type="button" role="radio" class="sw" data-k="color" data-v="${i}" aria-checked="${i === s.color}" aria-label="${c.name}" title="${c.name}" style="--c:${c.hex}"></button>`).join('')}</div>`)}
+          ${row('용량', chips('storageIdx', p.storages, s.storageIdx, (st, i) => { const r = retailPrice(p, i); return `${st}<small>${r ? `${won(r)}${p.storageEstimated && i ? '*' : ''}` : '상담 안내'}</small>`; }, { disabled: (_, i) => retailPrice(p, i) == null, cols: Math.min(4, p.storages.length) }))}
+          ${missing || p.storageEstimated ? `<p class="g-note">${p.storageEstimated ? '* 애플 공식가 차액 기준 예상가 ' : ''}${missing ? `· '상담 안내' 용량은 상담(${STORE.phone})으로 가격 안내` : ''}</p>` : ''}
+        </section>
 
-      <h2 class="opt-title">가입 유형</h2>
-      ${opt('joinType', JOIN_TYPES, s.joinType, (j) => `${j.label}<small>${j.desc}</small>`)}
+        <section class="grp" aria-labelledby="g2"><h2 id="g2"><span>2</span>가입 조건</h2>
+          ${row('가입 유형', chips('joinType', JOIN_TYPES, s.joinType, (j) => j.label))}
+          ${row('할인 방법', chips('supportType', SUPPORT_TYPES, s.supportType, (j) => `${j.label}<small>${j.id === 'device' ? `총 -${won(qt?.deviceDiscountTotal ?? 0)}` : `24개월 -${won(qt?.planDiscountTotal24 ?? 0)}`}</small>`))}
+          <p class="g-note">${JOIN_TYPES.find((j) => j.id === s.joinType).desc}</p>
+        </section>
 
-      <h2 class="opt-title">할인 방법</h2>
-      ${opt('supportType', SUPPORT_TYPES, s.supportType, (j) => `${j.label}<small>${j.id === 'device' ? `기기값 총 ${won(qt?.deviceDiscountTotal ?? 0)} 할인` : `24개월 총 ${won(qt?.planDiscountTotal24 ?? 0)} 할인`}</small>`)}
+        <section class="grp" aria-labelledby="g3"><h2 id="g3"><span>3</span>요금제</h2>
+          ${row('추천', chips('planId', shownPlans, s.planId, (pl) => `${pl.name}<small>월 ${won(pl.fee)}</small>`, { cols: shownPlans.length + 1, extra: `<button type="button" class="ch more" id="more-plans" ${soldout ? 'disabled' : ''}>전체<small>${PLANS.length}개 ▸</small></button>` }))}
+          ${plan.choice ? row('혜택 택1', `<div class="sm">${chips('benefit', CHOICE_BENEFITS, s.benefit, (b) => `<span class="lg">${b.label}</span><span class="st">${b.short}</span>`, { cols: 4, title: (b) => b.label })}</div>`) : ''}
+          <p class="g-note">${plan.data}${plan.roaming ? ` · ${plan.roaming}` : ''}${plan.membership ? ` · 멤버십 ${plan.membership}` : ''} · 나이별 덤 자동 적용</p>
+        </section>
 
-      <h2 class="opt-title">요금제 <span class="muted">추천</span></h2>
-      ${opt('planId', shownPlans, s.planId, planLabel)}
-      <button type="button" class="btn ghost block" id="more-plans" ${soldout ? 'disabled' : ''}>다른 요금제 선택 <small class="muted">${PLANS.length}개</small></button>
-      <p class="note">${AGE_BONUS}</p>
+        <section class="grp" aria-labelledby="g4"><h2 id="g4"><span>4</span>결제 · 받는 방법</h2>
+          ${row('결제', chips('months', MONTHS.map((m) => ({ id: m })), s.months, (m) => (m.id ? `${m.id}개월` : '일시납'), { cols: 6 }))}
+          ${row('받는 방법', chips('delivery', DELIVERY, s.delivery, (d) => `<span class="lg">${d.label}</span><span class="st">${d.short}</span>`, { title: (d) => d.label }))}
+          <p class="g-note">${s.months ? `월 할부금 ${qt ? won(qt.deviceMonthly) : '-'} · 할부이자 연 5.9%` : `오늘 기기값 ${qt ? won(qt.upfront) : '-'} 한 번에 결제`} · ${DELIVERY.find((d) => d.id === s.delivery).desc}</p>
+        </section>
 
-      ${plan.choice ? `<h2 class="opt-title">요금제 특별 혜택 <span class="muted">택1</span></h2>
-      ${opt('benefit', CHOICE_BENEFITS, s.benefit, (b) => `${b.label}<small>${b.desc}</small>`)}` : ''}
+        <section class="grp" aria-labelledby="g5"><h2 id="g5"><span>5</span>혜택 · 상담</h2>
+          ${row('사은품', `<div class="gift-chips">${gifts.map((g) => `<span class="gift"><img src="${asset(g.image)}" alt="" width="28" height="28">${g.label}</span>`).join('')}</div>`)}
+          ${row('제휴카드', `<button type="button" class="ch ${card ? 'on' : ''}" id="pick-card" ${soldout ? 'disabled' : ''}>${card ? `${card.name}<small>월 최대 -${won(card.max)}</small>` : '선택 안 함 ▸'}</button>`)}
+          ${row('추가 상담', `<div class="chips-row" style="--cols:4">${CONSULTS.map((c) => `<button type="button" class="ch" role="checkbox" data-consult="${c.id}" aria-checked="${s.consults.includes(c.id)}" title="${c.label}: ${c.desc}"><span class="lg">${c.label}</span><span class="st">${c.short}</span></button>`).join('')}</div>`)}
+        </section>
+      </div>`;
 
-      <h2 class="opt-title">할부 기간</h2>
-      ${opt('months', MONTHS.map((m) => ({ id: m })), s.months, (m) => (m.id ? `${m.id}개월${m.id === 24 ? ' <small>추천</small>' : ''}` : '일시납'))}
+    const sum = document.getElementById('pdp-summary');
+    sum.innerHTML = summaryHtml(qt, plan, card, benefit);
+    sum.classList.toggle('open', sheetOpen);
 
-      <h2 class="opt-title">배송 방법</h2>
-      ${opt('delivery', DELIVERY, s.delivery, (d) => `${d.label}<small>${d.desc}</small>`)}
-
-      <h2 class="opt-title">${STORE.name} 기본 사은품 <span class="muted">100% 증정</span></h2>
-      <ul class="gifts">${gifts.map((g) => `<li><img src="${asset(g.image)}" alt="" width="64" height="64"><div><b>${g.label}</b><small>${g.desc}</small></div></li>`).join('')}</ul>
-
-      <h2 class="opt-title">추가 할인</h2>
-      <label class="card-pick">이용 중인 KT 제휴카드로 할인받기
-        <select id="card" ${soldout ? 'disabled' : ''}><option value="">선택 안 함</option>${CARDS.map((c) => `<option value="${c.id}" ${c.id === s.cardId ? 'selected' : ''}>${c.name} · 월 최대 ${won(c.max)}</option>`).join('')}</select>
-      </label>
-      <p class="note">전월 실적 조건을 채웠을 때 받는 최대 청구할인이에요. 조건은 카드사마다 달라요.</p>
-
-      <h2 class="opt-title">추가 상담이 필요하면 체크해 주세요 <span class="muted">여러 개 가능</span></h2>
-      <div class="opts">${CONSULTS.map((c) => `<button type="button" class="opt" role="checkbox" data-consult="${c.id}" aria-checked="${s.consults.includes(c.id)}">${c.label}<small>${c.desc}</small></button>`).join('')}</div>
-
-      ${qt ? `
-      <div class="summary" aria-live="polite">
-        <h2>최종 주문서</h2>
-        <p class="sum-item"><b>${p.name}</b> · ${colors[s.color].name} · ${p.storages[s.storageIdx]} · ${JOIN_TYPES.find((j) => j.id === s.joinType).label}<br><span class="muted">${plan.name}${plan.choice ? ` (${benefit.label})` : ''} · ${s.months ? `${s.months}개월 할부` : '일시납'} · ${DELIVERY.find((d) => d.id === s.delivery).label}</span></p>
-        <dl>
-          <dt>출고가</dt><dd>${won(qt.retail)}</dd>
-          ${subsidyRows(qt)}
-          <dt>할부원금</dt><dd>${won(qt.principal)}</dd>
-          ${qt.months ? `<dt>월 할부금 (${qt.months}개월, 할부이자 포함)</dt><dd>${won(qt.deviceMonthly)}</dd><dt class="sub">ㄴ 할부이자</dt><dd class="sub">연 5.9%</dd>` : `<dt>일시납 결제</dt><dd>${won(qt.upfront)}</dd>`}
-          <dt>요금제 월정액</dt><dd>${won(qt.planFee)}</dd>
-          ${qt.planDiscount ? `<dt>요금할인 25%</dt><dd>-${won(qt.planDiscount)}</dd>` : ''}
-          <dt>월 통신요금</dt><dd>${won(qt.planMonthly)}</dd>
-          ${card ? `<dt>제휴카드 할인 (실적 충족 시)</dt><dd>-${won(qt.cardDiscount)}</dd>` : ''}
-        </dl>
-        <p class="total"><span>월 예상 금액</span><b>${won(qt.totalMonthly)}</b></p>
-        <p class="note">부가세 포함 · ${qt.subsidySource === 'table' ? `지원금은 ${qt.subsidyDate} 공시 기준이에요.` : '지원금표가 입력되지 않은 상품이라 수집 당시 표시된 최대 할인액을 예상 지원금으로 보여드려요.'} 최종 지원금은 개통 시점에 확정돼요.</p>
-        <p class="sum-gifts">함께 받는 혜택: ${gifts.map((g) => g.label).join(' · ')}</p>
-      </div>` : '<p class="warn">선택한 옵션의 가격 정보가 없어요.</p>'}`;
-
-    info.querySelectorAll('[data-k]').forEach((b) => {
+    const main = document.getElementById('pdp-main');
+    main.querySelectorAll('[data-k]').forEach((b) => {
       b.onclick = () => {
         const k = b.dataset.k;
         s[k] = ['storageIdx', 'color', 'months'].includes(k) ? +b.dataset.v : b.dataset.v;
-        if (k === 'color') viewer?.setColor(colors[s.color].hex);
-        audio.sfx('click');
-        render();
-        info.querySelector(`[data-k="${k}"][data-v="${b.dataset.v}"]`)?.focus();
+        audio.sfx('click'); render();
+        main.querySelector(`[data-k="${k}"][data-v="${b.dataset.v}"]`)?.focus();
       };
     });
-    info.querySelectorAll('[data-consult]').forEach((b) => {
+    main.querySelectorAll('[data-consult]').forEach((b) => {
       b.onclick = () => {
         const c = b.dataset.consult;
         s.consults = s.consults.includes(c) ? s.consults.filter((x) => x !== c) : [...s.consults, c];
-        audio.sfx('click'); render();
-        info.querySelector(`[data-consult="${c}"]`)?.focus();
+        audio.sfx('click'); render(); main.querySelector(`[data-consult="${c}"]`)?.focus();
       };
     });
-    info.querySelector('#card').onchange = (e) => { s.cardId = e.target.value; render(); info.querySelector('#card').focus(); };
-    info.querySelector('#more-plans').onclick = openPlanPicker;
+    main.querySelector('#more-plans').onclick = openPlanPicker;
+    main.querySelector('#pick-card').onclick = openCardPicker;
 
     // 상세정보 · 구매후기 · 유의사항
     const tabsEl = document.getElementById('pdp-tabs');
@@ -440,9 +436,8 @@ function viewDetail(id) {
           <dt>출고가</dt><dd>${won(p.listPrice)}</dd>
           <dt>통신사</dt><dd>KT</dd>
           <dt>기본 사은품</dt><dd>${gifts.map((g) => g.label).join(', ')}</dd>
-        </dl>
-        <img class="detail-photo" src="${asset(p.image)}" alt="${p.name} 상품 사진" loading="lazy">`
-      : tab === 'review' ? `<p class="empty">아직 등록된 구매후기가 없어요. 개통을 마친 고객만 후기를 남길 수 있어요.</p>`
+        </dl>`
+      : tab === 'review' ? '<p class="empty">아직 등록된 구매후기가 없어요. 개통을 마친 고객만 후기를 남길 수 있어요.</p>'
       : `<div class="notices">${NOTICES.map(([t, d]) => `<details><summary>${t}</summary><p>${d}</p></details>`).join('')}</div>`}</div>
       ${recents.length ? `<h2 class="sub">최근 본 상품</h2><div class="recent">${recents.map((r) => `<a href="#/products/${r.id}"><img src="${asset(r.image)}" alt="" width="72" height="72"><span>${r.name}</span><b>${won(r.dealPrice)}</b></a>`).join('')}</div>` : ''}`;
     tabsEl.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.tab; render(); tabsEl.querySelector(`[data-tab="${tab}"]`).focus(); }; });
@@ -450,82 +445,82 @@ function viewDetail(id) {
     const bar = document.getElementById('buybar');
     bar.innerHTML = soldout
       ? `<div><span class="muted">품절</span></div><button type="button" class="btn" id="restock">재입고 알림</button>`
-      : `<div><span class="muted">월 예상</span><b>${qt ? won(qt.totalMonthly) : '-'}</b></div>
+      : `<button type="button" class="sum-toggle" id="sum-toggle" aria-expanded="${sheetOpen}"><span class="muted">매달 ${sheetOpen ? '▾' : '▴'}</span><b>${qt ? won(qt.totalMonthly) : '-'}</b></button>
          <div class="buy-btns"><button type="button" class="btn ghost" id="add" ${qt ? '' : 'disabled'}>장바구니</button><button type="button" class="btn" id="buy" ${qt ? '' : 'disabled'}>바로 구매</button></div>`;
     const item = () => ({ productId: p.id, ...s, colorName: colors[s.color].name });
+    document.getElementById('sum-toggle')?.addEventListener('click', () => { sheetOpen = !sheetOpen; render(); });
     document.getElementById('add')?.addEventListener('click', () => { cart.add(item()); audio.sfx('pop'); toast('장바구니에 담았어요'); updateBadges(); });
     document.getElementById('buy')?.addEventListener('click', () => purchase.startBuy(item()));
     document.getElementById('restock')?.addEventListener('click', () => toast('프로토타입이라 알림 신청은 아직 저장되지 않아요.'));
   }
 
-  // "다른 요금제 선택" 팝업: 분류 탭 + 요금제 목록
-  function openPlanPicker() {
+  // 공용 팝업 (요금제·제휴카드)
+  function popup(build) {
     const back = document.activeElement;
-    let group = planById(s.planId).group;
     const m = document.createElement('div');
     m.className = 'modal';
-    const draw = () => {
-      const list = PLANS.filter((pl) => pl.group === group);
-      const g = PLAN_GROUPS.find((x) => x.id === group);
-      m.innerHTML = `
-        <div class="modal-box plan-pop" role="dialog" aria-modal="true" aria-labelledby="pp-title">
-          <div class="pp-head"><h2 id="pp-title">요금제 선택</h2><button type="button" class="sp-close dark" data-close aria-label="닫기">닫기</button></div>
-          <div class="tabs pp-tabs" role="tablist">${PLAN_GROUPS.map((x) => `<button type="button" role="tab" data-g="${x.id}" aria-selected="${x.id === group}">${x.label}</button>`).join('')}</div>
-          <p class="note">${g.desc}</p>
-          <ul class="pp-list">${list.map((pl) => `
-            <li><button type="button" class="pp-item" data-plan="${pl.id}" aria-pressed="${pl.id === s.planId}">
-              <span class="pp-name">${pl.name}${RECOMMENDED_PLANS.includes(pl.id) ? '<em>추천</em>' : ''}</span>
-              <span class="pp-fee">월 ${won(pl.fee)}<small>요금할인 25% 시 ${won(pl.fee - Math.round(pl.fee * 0.25))}</small></span>
-              <span class="pp-desc">${[pl.data, pl.share, pl.roaming, pl.membership && `멤버십 ${pl.membership}`, pl.choice && '혜택 택1'].filter(Boolean).join(' · ')}</span>
-            </button></li>`).join('')}</ul>
-          <p class="note">KT 통합요금제 · 부가세 포함 · KT 공식 상품 페이지(2026년 7월·11월 게시) 기준</p>
-        </div>`;
-      m.querySelector('[data-close]').onclick = close;
-      m.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { group = b.dataset.g; audio.sfx('click'); draw(); m.querySelector(`[data-g="${group}"]`).focus(); }; });
-      m.querySelectorAll('[data-plan]').forEach((b) => { b.onclick = () => { s.planId = b.dataset.plan; audio.sfx('pop'); close(); render(); }; });
-    };
     const close = () => { m.remove(); back?.focus?.(); };
     m.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
     m.addEventListener('click', (e) => { if (e.target === m) close(); });
     document.body.appendChild(m);
-    draw();
-    m.querySelector('[aria-selected="true"]').focus();
+    build(m, close);
+  }
+
+  // "전체 요금제" 팝업: 분류 탭 + 요금제 목록
+  function openPlanPicker() {
+    let group = planById(s.planId).group;
+    popup((m, close) => {
+      const draw = () => {
+        const list = PLANS.filter((pl) => pl.group === group);
+        const g = PLAN_GROUPS.find((x) => x.id === group);
+        m.innerHTML = `
+          <div class="modal-box plan-pop" role="dialog" aria-modal="true" aria-labelledby="pp-title">
+            <div class="pp-head"><h2 id="pp-title">요금제 선택</h2><button type="button" class="sp-close dark" data-close aria-label="닫기">닫기</button></div>
+            <div class="tabs pp-tabs" role="tablist">${PLAN_GROUPS.map((x) => `<button type="button" role="tab" data-g="${x.id}" aria-selected="${x.id === group}">${x.label}</button>`).join('')}</div>
+            <p class="note">${g.desc}</p>
+            <ul class="pp-list">${list.map((pl) => `
+              <li><button type="button" class="pp-item" data-plan="${pl.id}" aria-pressed="${pl.id === s.planId}">
+                <span class="pp-name">${pl.name}${RECOMMENDED_PLANS.includes(pl.id) ? '<em>추천</em>' : ''}</span>
+                <span class="pp-fee">월 ${won(pl.fee)}<small>요금할인 25% 시 ${won(pl.fee - Math.round(pl.fee * 0.25))}</small></span>
+                <span class="pp-desc">${[pl.data, pl.share, pl.roaming, pl.membership && `멤버십 ${pl.membership}`, pl.choice && '혜택 택1'].filter(Boolean).join(' · ')}</span>
+              </button></li>`).join('')}</ul>
+            <p class="note">KT 통합요금제 · 부가세 포함 · KT 공식 상품 페이지(2026년 7월·11월 게시) 기준</p>
+          </div>`;
+        m.querySelector('[data-close]').onclick = close;
+        m.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { group = b.dataset.g; audio.sfx('click'); draw(); m.querySelector(`[data-g="${group}"]`).focus(); }; });
+        m.querySelectorAll('[data-plan]').forEach((b) => { b.onclick = () => { s.planId = b.dataset.plan; audio.sfx('pop'); close(); render(); }; });
+      };
+      draw();
+      m.querySelector('[aria-selected="true"]').focus();
+    });
+  }
+
+  // 제휴카드 팝업: 클릭으로 고르기
+  function openCardPicker() {
+    popup((m, close) => {
+      m.innerHTML = `
+        <div class="modal-box plan-pop" role="dialog" aria-modal="true" aria-labelledby="cp-title">
+          <div class="pp-head"><h2 id="cp-title">KT 제휴카드 할인</h2><button type="button" class="sp-close dark" data-close aria-label="닫기">닫기</button></div>
+          <p class="note">전월 실적 조건을 채웠을 때 받는 월 최대 청구할인이에요. 조건은 카드사마다 달라요.</p>
+          <ul class="pp-list">
+            <li><button type="button" class="pp-item" data-card="" aria-pressed="${!s.cardId}"><span class="pp-name">선택 안 함</span></button></li>
+            ${[...CARDS].sort((a, b) => b.max - a.max).map((c) => `<li><button type="button" class="pp-item" data-card="${c.id}" aria-pressed="${c.id === s.cardId}"><span class="pp-name">${c.name}</span><span class="pp-fee">월 최대 -${won(c.max)}</span></button></li>`).join('')}
+          </ul>
+        </div>`;
+      m.querySelector('[data-close]').onclick = close;
+      m.querySelectorAll('[data-card]').forEach((b) => { b.onclick = () => { s.cardId = b.dataset.card; audio.sfx('pop'); close(); render(); }; });
+      m.querySelector('[aria-pressed="true"]').focus();
+    });
   }
 
   app.innerHTML = shell(`
-    <section class="pdp">
-      <div class="pdp-media">
-        <canvas class="pdp-canvas" aria-label="${p.name} 3D 미리보기. 좌우로 끌어 돌려보세요"></canvas>
-        <img class="pdp-photo" src="${asset(p.image)}" alt="${p.name} 상품 사진" hidden>
-        <div class="seg" role="tablist">
-          <button type="button" role="tab" aria-selected="true" data-view="3d">3D</button>
-          <button type="button" role="tab" aria-selected="false" data-view="photo">사진</button>
-        </div>
-        <p class="hint">좌우로 끌어서 돌려보세요</p>
-      </div>
-      <div class="pdp-info" id="pdp-info"></div>
+    <section class="pdp2">
+      <div class="pdp-main" id="pdp-main"></div>
+      <aside class="pdp-summary summary" id="pdp-summary" aria-live="polite"></aside>
     </section>
     <section class="sec pdp-tabs" id="pdp-tabs"></section>
     <div class="buybar" id="buybar"></div>`, 'products');
-
-  let viewer = null;
   render();
-  const media = app.querySelector('.pdp-media');
-  media.querySelectorAll('[data-view]').forEach((b) => {
-    b.onclick = () => {
-      const photo = b.dataset.view === 'photo';
-      media.querySelectorAll('[data-view]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
-      media.querySelector('.pdp-photo').hidden = !photo;
-      media.querySelector('.pdp-canvas').hidden = photo;
-      media.querySelector('.hint').hidden = photo;
-    };
-  });
-  import('./three/viewer.js').then(({ createViewer }) => {
-    const canvas = app.querySelector('.pdp-canvas');
-    if (!canvas) return;
-    viewer = createViewer({ canvas, product: p, color: colors[s.color].hex });
-    cleanup = () => viewer.dispose();
-  });
 }
 
 // ---------- 장바구니 ----------

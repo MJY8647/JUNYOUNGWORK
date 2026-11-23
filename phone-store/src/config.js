@@ -35,13 +35,13 @@ export const PLAN_GROUPS = [
 export const planById = (id) => PLANS.find((p) => p.id === id) ?? PLANS.find((p) => p.id === DEFAULT_PLAN);
 // 초이스 요금제에서 고르는 혜택 (택1). KT 상품 목록에서 신규가입 가능한 초이스 항목 기준.
 export const CHOICE_BENEFITS = [
-  { id: 'disney', label: '디즈니+', desc: '스탠다드 기본 제공' },
-  { id: 'youtube', label: '유튜브 프리미엄', desc: '광고 없는 유튜브' },
-  { id: 'netflix', label: '넷플릭스', desc: '넷플릭스 시청' },
-  { id: 'tving', label: '티빙·지니·밀리', desc: '드라마·음악·전자책' },
-  { id: 'weverse', label: '위버스', desc: '팬 커뮤니티 혜택' },
-  { id: 'phonecare', label: '폰케어', desc: '단말 보험 할인' },
-  { id: 'google-ai', label: 'Google AI Plus', desc: 'AI 구독' },
+  { id: 'disney', label: '디즈니+', short: '디즈니+', desc: '스탠다드 기본 제공' },
+  { id: 'youtube', label: '유튜브 프리미엄', short: '유튜브', desc: '광고 없는 유튜브' },
+  { id: 'netflix', label: '넷플릭스', short: '넷플릭스', desc: '넷플릭스 시청' },
+  { id: 'tving', label: '티빙·지니·밀리', short: '티빙 외', desc: '드라마·음악·전자책' },
+  { id: 'weverse', label: '위버스', short: '위버스', desc: '팬 커뮤니티 혜택' },
+  { id: 'phonecare', label: '폰케어', short: '폰케어', desc: '단말 보험 할인' },
+  { id: 'google-ai', label: 'Google AI Plus', short: '구글 AI', desc: 'AI 구독' },
 ];
 // 연령별 덤: 나이에 따라 자동 적용 (KT 공식 페이지 기준)
 export const AGE_BONUS = '나이에 맞는 덤 혜택이 자동으로 붙어요: 스쿨덤(~만 18세) · Y덤(만 19~34세) · 65+덤(만 65~74세) · 75+덤(만 75세~)';
@@ -73,9 +73,9 @@ export const CARRIERS = ['KT', 'SKT', 'LG U+', '알뜰폰'];
 
 // 아래는 사용자 제공 ZIP(KT초이스 상세 화면, 2026-11-19 수집)의 구성. 실제 운영 전 판매점 정책으로 교체.
 export const DELIVERY = [
-  { id: 'parcel', label: '우체국택배', desc: '영업일 기준 1~2일 (도서·산간 +1~2일) · 송장번호로 조회' },
-  { id: 'quick', label: '당일 퀵 수령', desc: '주문 당일 수령 · 지역·시간대별 비용 별도 안내' },
-  { id: 'visit', label: '매장 방문수령', desc: '재고·개통 일정 확인을 위해 방문 전 연락 필요' },
+  { id: 'parcel', label: '우체국택배', short: '택배', desc: '영업일 기준 1~2일 (도서·산간 +1~2일) · 송장번호로 조회' },
+  { id: 'quick', label: '당일 퀵 수령', short: '당일 퀵', desc: '주문 당일 수령 · 지역·시간대별 비용 별도 안내' },
+  { id: 'visit', label: '매장 방문수령', short: '방문수령', desc: '재고·개통 일정 확인을 위해 방문 전 연락 필요' },
 ];
 export const GIFTS = [
   { id: 'acc3', label: '전용 악세사리 3종 패키지', desc: '케이스 + 강화유리 필름 + 어댑터', image: 'gifts/accessory3.webp', brand: 'all' },
@@ -91,8 +91,8 @@ export const CARDS = [
   ['KT 36 Plus 우리카드', 18000], ['KT Plus 우리카드', 20000], ['KT 신한 체크카드', 5000], ['olleh super DC IBK카드', 15000],
 ].map(([name, max], i) => ({ id: `card-${i}`, name, max }));
 export const CONSULTS = [
-  { id: 'internet', label: '인터넷/TV', desc: '휴대폰과 인터넷·TV를 결합하면 통신비를 더 아낄 수 있어요. 맞춤 결합 상품을 안내해 드려요.' },
-  { id: 'tradein', label: '중고폰보상', desc: '쓰던 휴대폰을 상태에 따라 보상해 드려요. 보상 금액과 반납 절차를 안내해 드려요.' },
-  { id: 'pointpark', label: '포인트파크 할인', desc: 'KT 포인트파크 제휴처에서 통신요금 결제 등에 포인트를 쓸 수 있어요.' },
-  { id: 'bundle', label: '가족 결합할인', desc: '가족·함께 사는 분과 회선을 결합하면 요금을 더 할인받을 수 있어요.' },
+  { id: 'internet', label: '인터넷/TV', short: '인터넷TV', desc: '휴대폰과 인터넷·TV를 결합하면 통신비를 더 아낄 수 있어요. 맞춤 결합 상품을 안내해 드려요.' },
+  { id: 'tradein', label: '중고폰보상', short: '중고폰', desc: '쓰던 휴대폰을 상태에 따라 보상해 드려요. 보상 금액과 반납 절차를 안내해 드려요.' },
+  { id: 'pointpark', label: '포인트파크 할인', short: '포인트', desc: 'KT 포인트파크 제휴처에서 통신요금 결제 등에 포인트를 쓸 수 있어요.' },
+  { id: 'bundle', label: '가족 결합할인', short: '가족결합', desc: '가족·함께 사는 분과 회선을 결합하면 요금을 더 할인받을 수 있어요.' },
 ];
